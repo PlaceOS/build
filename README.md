@@ -2,7 +2,6 @@
 
 A service/tool for reproducibly compiling and caching build artefacts.
 
-
 ## CLI
 
 The binary also exposes the build tool via a CLI, for use in CI pipelines
@@ -40,6 +39,12 @@ Returns…
 Returns...
 - 200 if compiled
 - 404 not compiled
+
+## Dependencies
+
+- [asdf](https://asdf-vm.com/)
+- [curl](https://curl.se/)
+- [git](https://git-scm.com/)
 
 ## Contributors
 

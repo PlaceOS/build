@@ -8,8 +8,14 @@ targets:
     main: src/build_app.cr
 
 dependencies:
+  action-controller:
+    github: spider-gazelle/action-controller
+    version: ~> 4.1
+  secrets-env:
+    github: place-labs/secrets-env
   shards:
     github: crystal-lang/shards
+
 
 development_dependencies:
   ameba:

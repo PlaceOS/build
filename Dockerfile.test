@@ -1,0 +1,33 @@
+FROM crystallang/crystal:0.36.1-alpine
+
+WORKDIR /app
+
+# Set the commit through a build arg
+ARG PLACE_COMMIT="DEV"
+
+# Install the latest version of LibSSH2, ping, curl, git
+RUN apk add --no-cache curl git iputils libssh2 libssh2-dev libssh2-static llvm llvm-dev
+
+# Add trusted CAs for communicating with external services
+RUN apk update && apk add --no-cache ca-certificates tzdata && update-ca-certificates
+
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing watchexec
+
+# Install asdf version manager
+RUN git clone https://github.com/asdf-vm/asdf.git /app/.asdf --branch v0.8.0
+
+RUN apk add --no-cache bash
+
+COPY shard.yml /app
+COPY shard.lock /app
+
+RUN shards install
+
+COPY scripts/* /app/scripts/
+
+RUN mkdir -p /app/bin/drivers
+
+# These provide certificate chain validation where communicating with external services over TLS
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+CMD /app/scripts/entrypoint.sh
