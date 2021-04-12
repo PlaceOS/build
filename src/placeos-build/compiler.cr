@@ -1,5 +1,5 @@
 require "shards"
-require "shards/moplnillo_solver"
+require "shards/molnillo_solver"
 
 require "./error"
 
@@ -33,6 +33,6 @@ module PlaceOS::Build::Compiler
         "< 1.0.0"
       end
 
-    VersionReq.new(crystal_pattern)
+    Shards::VersionReq.new(crystal_pattern)
   end
 end

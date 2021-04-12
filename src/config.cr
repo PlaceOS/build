@@ -5,6 +5,7 @@ require "placeos-log-backend"
 
 # Application code
 require "./placeos-build"
+require "./placeos-build/api/*"
 
 # Server required after application controllers
 require "action-controller/server"

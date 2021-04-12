@@ -6,16 +6,24 @@ license: MIT
 targets:
   build:
     main: src/build_app.cr
+  # digest:
+  #   main: src/digest.cr
 
 dependencies:
   action-controller:
     github: spider-gazelle/action-controller
     version: ~> 4.1
+
+  log_helper:
+    github: spider-gazelle/log_helper
+    version: ~> 1
+  placeos-log-backend:
+    github: place-labs/log-backend
   secrets-env:
     github: place-labs/secrets-env
   shards:
     github: crystal-lang/shards
-
+    version: ~> 0.14
 
 development_dependencies:
   ameba:

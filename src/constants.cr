@@ -23,5 +23,5 @@ module PlaceOS::Build
 
   # REDIS_URL = ENV["REDIS_URL"]? || "redis://localhost:6379"
 
-  class_getter? production { ENV["SG_ENV"]? == "production" }
+  class_getter? production : Bool { ENV["SG_ENV"]? == "production" }
 end
