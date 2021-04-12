@@ -1,14 +1,23 @@
-FROM crystallang/crystal:0.36.1-alpine as build
+ARG CRYSTAL_VERSION=1.0.0
+FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
 
 ARG PLACE_COMMIT=DEV
 
 WORKDIR /app
 
-# Install the latest version of LLVM, LibSSH2, ping, curl, git
-RUN apk add --no-cache curl git iputils libssh2 libssh2-dev libssh2-static llvm llvm-dev
+# Install the latest version of LLVM, LibSSH2, ping, curl, git, ca-certificates
+RUN apk add --no-cache \
+            ca-certificates \
+            curl \
+            git \
+            iputils \
+            libssh2 libssh2-dev libssh2-static \
+            llvm llvm-dev \
+            tzdata \
+            yaml-static
 
 # Add trusted CAs for communicating with external services
-RUN apk update && apk add --no-cache ca-certificates tzdata && update-ca-certificates
+RUN update-ca-certificates
 
 # Install asdf version manager
 RUN git clone https://github.com/asdf-vm/asdf.git /app/.asdf --branch v0.8.0
@@ -25,30 +34,36 @@ RUN adduser \
     --no-create-home \
     --uid "${UID}" \
     "${USER}"
-USER appuser:appuser
-
-# Install deps
-COPY shard.yml /app
-COPY shard.override.yml /app
-COPY shard.lock /app
-RUN shards install --production --release
 
 # These provide certificate chain validation where communicating with external services over TLS
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+# Create binary directories
+RUN mkdir -p repositories bin/drivers
+
+RUN mkdir /app/.shards
+
+# Install deps
+COPY shard.yml /app
+COPY shard.lock /app
+
+RUN shards install --production
 
 # Add source last for efficient caching
 COPY src /app/src
 
 # Build the required target
-RUN UNAME_AT_COMPILE_TIME=true \
+RUN CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
+    LLVM_CONFGI=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
     PLACE_COMMIT=${PLACE_COMMIT} \
-    shards build --production --release --static --error-trace
+    UNAME_AT_COMPILE_TIME=true \
+    shards build --error-trace --ignore-crystal-version --production
 
-# Create binary directories
-RUN mkdir -p repositories bin/drivers
 RUN chown appuser -R /app
 
 ###############################################################################
+
+USER appuser:appuser
 
 EXPOSE 3000
 HEALTHCHECK CMD wget -qO- http://localhost:3000/api/build/v1
