@@ -4,3 +4,4 @@ bin/
 .shards/
 *.dwarf
 .DS_*
+.tool-versions

@@ -21,11 +21,11 @@ RUN apk add --no-cache \
 RUN update-ca-certificates
 
 RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing watchexec
+RUN apk add --no-cache bash
 
 # Install asdf version manager
 RUN git clone https://github.com/asdf-vm/asdf.git /app/.asdf --branch v0.8.0
-
-RUN apk add --no-cache bash
+RUN /app/.asdf/bin/asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
 
 COPY shard.yml /app
 COPY shard.lock /app
@@ -39,4 +39,4 @@ RUN mkdir -p /app/bin/drivers
 # These provide certificate chain validation where communicating with external services over TLS
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-CMD /app/scripts/entrypoint.sh
+CMD /app/scripts/entrypoint-test.sh

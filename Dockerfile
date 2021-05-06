@@ -7,6 +7,7 @@ WORKDIR /app
 
 # Install the latest version of LLVM, LibSSH2, ping, curl, git, ca-certificates
 RUN apk add --no-cache \
+            bash \
             ca-certificates \
             curl \
             git \
@@ -20,7 +21,9 @@ RUN apk add --no-cache \
 RUN update-ca-certificates
 
 # Install asdf version manager
+
 RUN git clone https://github.com/asdf-vm/asdf.git /app/.asdf --branch v0.8.0
+RUN /app/.asdf/bin/asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
 
 # Create a non-privileged user
 ARG IMAGE_UID="10001"
@@ -67,4 +70,4 @@ USER appuser:appuser
 
 EXPOSE 3000
 HEALTHCHECK CMD wget -qO- http://localhost:3000/api/build/v1
-CMD ["/bin/build", "--server", "-b", "0.0.0.0", "-p", "3000"]
+CMD ["/app/scripts/entrypoint.sh", "--server", "-b", "0.0.0.0", "-p", "3000"]

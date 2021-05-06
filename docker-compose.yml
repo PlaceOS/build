@@ -1,38 +1,15 @@
 version: "3.7"
 
-# YAML Anchors
-
-x-deployment-env: &deployment-env
-  ENV: ${ENV:-development}
-  SG_ENV: ${SG_ENV:-development}
-  TZ: $TZ
-
-# x-redis-client-env: &redis-client-env
-#   REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-
 services:
   test:
     build:
       context: ./
       dockerfile: Dockerfile.test
-    entrypoint: crystal play -b "0.0.0.0" -p 6969
     volumes:
       - ./spec:/app/spec
       - ./src:/app/src
-      - ./lib:/app/lib
-    ports:
-      - 6969:6969
-    # depends_on:
-    #   - redis
     environment:
-      # Service Hosts
-      # << : *redis-client-env
-      # Environment
-      << : *deployment-env
-
-#  redis:
-#    image: eqalpha/keydb
-#    restart: always
-#    hostname: redis
-#    environment:
-#      TZ: $TZ
+      ENV: ${ENV:-development}
+      SG_ENV: ${SG_ENV:-development}
+      TZ: $TZ
+      GITHUB_ACTION: ${GITHUB_ACTION:-}
