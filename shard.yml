@@ -1,6 +1,6 @@
 name: placeos-build
 version: 0.1.0
-crystal: ~> 0.36
+crystal: ~> 1.0
 license: MIT
 
 targets:
@@ -13,7 +13,8 @@ dependencies:
   action-controller:
     github: spider-gazelle/action-controller
     version: ~> 4.1
-
+  exec_from:
+    github: place-labs/exec_from
   log_helper:
     github: spider-gazelle/log_helper
     version: ~> 1
