@@ -25,7 +25,7 @@ module PlaceOS::Build::Compiler
 
       parse_crystal_version(shard.crystal)
     rescue e : File::NotFoundError
-      raise Error.new("shard.yml does not exist at #{file}", cause: e)
+      raise Build::Error.new("shard.yml does not exist at #{file}", cause: e)
     end
 
     def self.install_latest
@@ -53,15 +53,14 @@ module PlaceOS::Build::Compiler
       Shards::VersionReq.new version
     end
 
-    # asdf methods
+    # asdf
     #################################################################################################
 
     def self.current(directory : String = ".")
-      io = IO::Memory.new
-      result = ExecFrom.exec_from(directory, "asdf", {"current", "crystal", version})
-      raise Error.new(result[:output].to_s) unless result[:exit_code].zero?
+      result = ExecFrom.exec_from(directory, "asdf", {"current", "crystal"})
+      raise Error.new(result.output) unless result.status.success?
 
-      parts = result[:output].to_s.split(/\s+/)
+      parts = result.output.to_s.chomp.split(/\s+/)
       raise Error.new("unexpected number of segments in `asdf current crystal` output") unless parts.size == 3
       Shards::Version.new(parts[1])
     end
@@ -71,38 +70,52 @@ module PlaceOS::Build::Compiler
     rescue e : Error
     end
 
+    protected def self.asdf(*args)
+      io = IO::Memory.new
+      status = Process.run("asdf", args, output: io, error: io)
+      {io, status}
+    end
+
+    def self.path?(version : Shards::Version | String) : String?
+      version = version.value if version.is_a?(Shards::Version)
+
+      output, status = asdf("where", "crystal", version)
+      if status.success?
+        root = output.to_s.chomp
+        File.join(root, "bin/crystal")
+      end
+    end
+
     def self.local(version : Shards::Version | String, directory : String = ".") : Nil
       version = version.value if version.is_a?(Shards::Version)
 
       result = ExecFrom.exec_from(directory, "asdf", {"local", "crystal", version})
-      raise Error.new(result[:output].to_s) unless result[:exit_code].zero?
+      raise Error.new(result.output) unless result.success?
     end
 
     def self.install(version : Shards::Version | String) : Nil
       version = version.value if version.is_a?(Shards::Version)
 
-      io = IO::Memory.new
-      result = Process.run("asdf", {"install", "crystal", version}, output: io, error: io)
-      raise Error.new(io.to_s) unless result.success?
+      output, status = asdf("install", "crystal", version)
+      raise Error.new(output) unless status.success?
     end
 
     def self.list_all_crystal
-      io = IO::Memory.new
-      result = Process.run("asdf", {"list", "all", "crystal"}, output: io, error: io)
-      raise Error.new(io.to_s) unless result.success?
-      extact_versions(io)
+      output, status = asdf("list", "all", "crystal")
+      raise Error.new(output) unless status.success?
+      extact_versions(output)
     end
 
     def self.list_crystal
-      io = IO::Memory.new
-      result = Process.run("asdf", {"list", "crystal"}, output: io, error: io)
-      raise Error.new(io.to_s) unless result.success?
-      extact_versions(io)
+      output, status = asdf("list", "crystal")
+      raise Error.new(output) unless status.success?
+      extact_versions(output)
     end
 
     private def self.extact_versions(io)
       io.to_s
-        .each_line
+        .each_line(chomp: true)
+        .reject(&.empty?)
         .map { |l| Shards::Version.new(l.strip) }
         .to_a
     end

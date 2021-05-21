@@ -6,18 +6,22 @@ license: MIT
 targets:
   build:
     main: src/build_app.cr
-  # digest:
-  #   main: src/digest.cr
+  digest:
+    main: src/digest.cr
 
 dependencies:
   action-controller:
     github: spider-gazelle/action-controller
-    version: ~> 4.1
+    version: ~> 4.4
   exec_from:
     github: place-labs/exec_from
+    version: ~> 2
   log_helper:
     github: spider-gazelle/log_helper
     version: ~> 1
+  placeos-compiler:
+    github: placeos/compiler
+    version: ~> 4
   placeos-log-backend:
     github: place-labs/log-backend
   secrets-env:
