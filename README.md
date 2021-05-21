@@ -1,5 +1,7 @@
 # PlaceOS Build Service
 
+[![CI](https://github.com/PlaceOS/build/actions/workflows/ci.yml/badge.svg)](https://github.com/PlaceOS/build/actions/workflows/ci.yml)
+
 A service/tool for reproducibly compiling and caching build artefacts.
 
 ## CLI

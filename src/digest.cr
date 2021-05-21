@@ -64,7 +64,7 @@ verbose = false
 # Command line options
 OptionParser.parse(ARGV.dup) do |parser|
   parser.banner = <<-DOC
-  Usage: source_digest [<crystal entrypoint>]
+  Usage: digest [<crystal entrypoint>]
 
   Outputs a CSV, formatted as FILE,HASH
   Expects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH in the environment
