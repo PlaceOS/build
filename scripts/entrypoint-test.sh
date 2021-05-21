@@ -13,7 +13,12 @@ then
   crystal tool format --check
 
   echo '### `ameba`' crystal lib/ameba/bin/ameba.cr
+  crystal lib/ameba/bin/ameba.cr
 fi
+
+CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
+LLVM_CONFIG=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
+shards build digest --ignore-crystal-version --error-trace
 
 watch="false"
 multithreaded="false"
@@ -31,7 +36,6 @@ do
     ;;
   esac
 done
-
 
 if [[ "$multithreaded" == "true" ]]; then
   args="-Dpreview_mt"
