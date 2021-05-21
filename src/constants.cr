@@ -21,7 +21,5 @@ module PlaceOS::Build
 
   REPOS = ENV["ENGINE_REPOS"]? || Path["./repositories"].expand.to_s
 
-  # REDIS_URL = ENV["REDIS_URL"]? || "redis://localhost:6379"
-
   class_getter? production : Bool { ENV["SG_ENV"]? == "production" }
 end
