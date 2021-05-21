@@ -2,7 +2,10 @@
 
 set -eu
 
-source /app/.asdf/asdf.sh
+source $HOME/.asdf/asdf.sh
+
+asdf install crystal 1.0.0
+asdf global crystal 1.0.0
 
 if [ -z ${GITHUB_ACTION+x} ]
 then

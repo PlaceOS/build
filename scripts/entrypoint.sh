@@ -2,6 +2,6 @@
 
 set -eu
 
-source /app/.asdf/asdf.sh
+source $HOME/.asdf/asdf.sh
 
 /app/bin/build "$@"
