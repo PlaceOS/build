@@ -4,6 +4,34 @@ require "compiler/crystal/**"
 module PlaceOS::Build
   Log = ::Log.for(self)
 
+  def self.digest(paths : Enumerable(Path), verbose : Bool)
+    digests = Channel({Path, String}).new(5)
+
+    paths.each do |path|
+      spawn do
+        begin
+          before = Time.utc
+          digest = PlaceOS::Build.source_hash(path)
+          after = Time.utc
+          puts "digesting #{path} took #{(after - before).seconds}s" if verbose && !digests.closed?
+          digests.send({path, digest}) rescue nil
+        rescue e
+          puts e.inspect_with_backtrace
+          digests.close
+        end
+      end
+    end
+
+    results = [] of {Path, String}
+    paths.size.times do
+      result = digests.receive?
+      raise "digesting failed!" if result.nil?
+      results << result
+    end
+
+    results
+  end
+
   def self.source_hash(path : String | Path)
     validate_compiler_env!
 
@@ -35,7 +63,12 @@ verbose = false
 
 # Command line options
 OptionParser.parse(ARGV.dup) do |parser|
-  parser.banner = "Usage: source_digest [<crystal entrypoint>]\nOutput format is a CSV, formatted as FILE,HASH\nExpects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH"
+  parser.banner = <<-DOC
+  Usage: source_digest [<crystal entrypoint>]
+
+  Outputs a CSV, formatted as FILE,HASH
+  Expects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH in the environment
+  DOC
 
   parser.on("-v", "--verbose", "Add some statistics") { verbose = true }
 
@@ -56,10 +89,4 @@ OptionParser.parse(ARGV.dup) do |parser|
   end
 end
 
-paths.each do |path|
-  before = Time.utc
-  digest = PlaceOS::Build.source_hash(path)
-  after = Time.utc
-  puts "digesting #{path} took #{(after - before).seconds}s" if verbose
-  puts "#{path},#{digest}"
-end
+PlaceOS::Build.digest(paths, verbose).each { |v| puts v.join(',') }

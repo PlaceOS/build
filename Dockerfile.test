@@ -1,36 +1,41 @@
 ARG CRYSTAL_VERSION=1.0.0
-FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine
+FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine-build
+
+ARG PLACE_COMMIT="DEV"
 
 WORKDIR /app
 
-# Set the commit through a build arg
-ARG PLACE_COMMIT="DEV"
-
 # Install the latest version of LibSSH2, ping, curl, git
 RUN apk add --no-cache \
-    ca-certificates \
-    curl \
-    git \
-    iputils \
-    libssh2 libssh2-dev libssh2-static \
-    llvm llvm-dev \
-    tzdata \
-    yaml-static
+        bash \
+        ca-certificates \
+        curl \
+        git \
+        iputils \
+        libssh2 libssh2-dev libssh2-static \
+        llvm llvm-dev \
+        tzdata \
+        yaml-static
 
 # Add trusted CAs for communicating with external services
 RUN update-ca-certificates
 
-RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing watchexec
-RUN apk add --no-cache bash
+SHELL ["/bin/bash", "-l", "-c"]
 
 # Install asdf version manager
-RUN git clone https://github.com/asdf-vm/asdf.git /app/.asdf --branch v0.8.0
-RUN /app/.asdf/bin/asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
+RUN git clone https://github.com/asdf-vm/asdf.git $HOME/.asdf --branch v0.8.0
+RUN $HOME/.asdf/bin/asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
+
+RUN echo -e '\n. $HOME/.asdf/asdf.sh' >> ~/.bashrc && \
+    echo -e '\n. $HOME/.asdf/asdf.sh' >> ~/.profile && \
+    source ~/.bashrc
+
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing watchexec
 
 COPY shard.yml /app
 COPY shard.lock /app
 
-RUN shards install
+RUN shards install --ignore-crystal-version
 
 COPY scripts/* /app/scripts/
 
