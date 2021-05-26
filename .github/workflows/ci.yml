@@ -25,11 +25,11 @@ jobs:
           - 1.0.0
     steps:
       - uses: actions/checkout@v2
-      - name: Test environment
+      - name: Test
         run: ./test
         env:
           CRYSTAL_VERSION: ${{ matrix.crystal }}
-      - name: Multithreading enabled test environment
+      - name: Test with multithreading
         run: ./test --multithreaded
         env:
           CRYSTAL_VERSION: ${{ matrix.crystal }}
