@@ -11,17 +11,10 @@ RUN apt install --no-install-recommends -y \
         ca-certificates \
         curl \
         git \
+        libssh2-1 libssh2-1-dev \
+        libgc-dev \
         llvm-10 llvm-10-dev \
         tzdata
-
-# Install the latest version of LibSSH2
-RUN curl -sLO https://launchpad.net/ubuntu/+source/libgpg-error/1.32-1/+build/15118612/+files/libgpg-error0_1.32-1_amd64.deb && dpkg -i libgpg-error0_1.32-1_amd64.deb
-RUN curl -sLO https://launchpad.net/ubuntu/+source/libgcrypt20/1.8.3-1ubuntu1/+build/15106861/+files/libgcrypt20_1.8.3-1ubuntu1_amd64.deb && dpkg -i libgcrypt20_1.8.3-1ubuntu1_amd64.deb
-RUN curl -sLO https://launchpad.net/ubuntu/+source/libssh2/1.8.0-2/+build/15151524/+files/libssh2-1_1.8.0-2_amd64.deb && dpkg -i libssh2-1_1.8.0-2_amd64.deb
-RUN curl -sLO https://launchpad.net/ubuntu/+source/libgpg-error/1.32-1/+build/15118612/+files/libgpg-error-dev_1.32-1_amd64.deb && dpkg -i libgpg-error-dev_1.32-1_amd64.deb
-RUN curl -sLO https://launchpad.net/ubuntu/+source/libgcrypt20/1.8.3-1ubuntu1/+build/15106861/+files/libgcrypt20-dev_1.8.3-1ubuntu1_amd64.deb && dpkg -i libgcrypt20-dev_1.8.3-1ubuntu1_amd64.deb
-RUN curl -sLO https://launchpad.net/ubuntu/+source/libssh2/1.8.0-2/+build/15151524/+files/libssh2-1-dev_1.8.0-2_amd64.deb && dpkg -i libssh2-1-dev_1.8.0-2_amd64.deb
-RUN rm -rf ./*.deb
 
 # Add trusted CAs for communicating with external services
 RUN update-ca-certificates
@@ -63,14 +56,22 @@ COPY shard.lock /app
 
 RUN shards install --production --ignore-crystal-version
 
-# Add source last for efficient caching
-COPY src /app/src
+# Copy source for the long building `digest_cli`
+RUN mkdir /app/src
+COPY src/digest_cli.cr /app/src/digest_cli.cr
 
 RUN CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
     LLVM_CONFIG=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
     PLACE_COMMIT=${PLACE_COMMIT} \
     UNAME_AT_COMPILE_TIME=true \
-    shards build --error-trace --ignore-crystal-version --production -Dpreview_mt --release
+    shards build --error-trace --ignore-crystal-version --production -Dpreview_mt digest_cli
+
+# Add the rest of the source last for efficient caching
+COPY src /app/src
+
+RUN PLACE_COMMIT=${PLACE_COMMIT} \
+    UNAME_AT_COMPILE_TIME=true \
+    shards build --error-trace --ignore-crystal-version --production -Dpreview_mt build
 
 RUN chown appuser -R /app
 

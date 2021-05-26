@@ -6,8 +6,8 @@ license: MIT
 targets:
   build:
     main: src/build_app.cr
-  digest:
-    main: src/digest.cr
+  digest_cli:
+    main: src/digest_cli.cr
 
 dependencies:
   action-controller:
@@ -16,6 +16,9 @@ dependencies:
   exec_from:
     github: place-labs/exec_from
     version: ~> 2
+  future:
+    github: crystal-community/future.cr
+    version: ~> 1.0
   log_helper:
     github: spider-gazelle/log_helper
     version: ~> 1

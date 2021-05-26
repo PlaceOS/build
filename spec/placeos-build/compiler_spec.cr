@@ -20,7 +20,6 @@ module PlaceOS::Build::Compiler
       it "lists the path for an installed crystal version" do
         Crystal.install("1.0.0")
         version = Crystal.current
-        pp! version
         path = Crystal.path?(version.value)
         path.should_not be_nil
         path.not_nil!.should end_with("#{version.value}/bin/crystal")

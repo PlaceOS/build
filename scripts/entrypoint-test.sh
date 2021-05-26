@@ -16,9 +16,8 @@ then
   crystal lib/ameba/bin/ameba.cr
 fi
 
-CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
-LLVM_CONFIG=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
-shards build digest --ignore-crystal-version --error-trace
+export CRYSTAL_PATH=lib:/usr/share/crystal/src
+export CRYSTAL_LIBRARY_PATH=/usr/local/lib
 
 watch="false"
 multithreaded="false"
