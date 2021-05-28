@@ -64,14 +64,14 @@ RUN CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
     LLVM_CONFIG=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
     PLACE_COMMIT=${PLACE_COMMIT} \
     UNAME_AT_COMPILE_TIME=true \
-    shards build --error-trace --ignore-crystal-version --production -Dpreview_mt digest_cli
+    shards build --error-trace --ignore-crystal-version --release --production -Dpreview_mt digest_cli
 
 # Add the rest of the source last for efficient caching
 COPY src /app/src
 
 RUN PLACE_COMMIT=${PLACE_COMMIT} \
     UNAME_AT_COMPILE_TIME=true \
-    shards build --error-trace --ignore-crystal-version --production -Dpreview_mt build
+    shards build --error-trace --ignore-crystal-version --release --production -Dpreview_mt build
 
 RUN chown appuser -R /app
 
