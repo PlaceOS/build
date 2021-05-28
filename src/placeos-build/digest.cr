@@ -1,5 +1,7 @@
 require "log"
 
+require "./error"
+
 module PlaceOS::Build::Digest
   Log = ::Log.for(self)
 
@@ -17,13 +19,14 @@ module PlaceOS::Build::Digest
 
   # Expects the presence of `digest` binary under `bin` directory
   #
-  def self.digest(entrypoints : Array(String)) : Array(Result)
+  def self.digest(entrypoints : Array(String), working_directory : String? = nil, shard_lock : String? = nil) : Array(Result)
     output = IO::Memory.new
     error = IO::Memory.new
 
     started = Time.utc
-    unless Process.run(EXECUTABLE_PATH, entrypoints, output: output, error: error).success?
-      raise "failed to digest: #{error}"
+    entrypoints.unshift("-s", shard_lock.as(String)) if shard_lock
+    unless Process.run(EXECUTABLE_PATH, entrypoints, chdir: working_directory, output: output, error: error).success?
+      raise Build::Error.new("failed to digest: #{error}")
     end
 
     Log.debug { "digesting #{entrypoints.join(", ")} took #{(Time.utc - started).seconds}s" }

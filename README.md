@@ -6,9 +6,22 @@ A service/tool for reproducibly compiling and caching build artefacts.
 
 ## CLI
 
+### Build
+
 The binary also exposes the build tool via a CLI, for use in CI pipelines
 
-**TODO:** Add CLI help here
+### Digest
+
+```
+Usage: digest_cli [<crystal entrypoint>]
+
+Outputs a CSV of digested crystal sourcegraphs, formatted as FILE,HASH
+Expects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH in the environment
+
+    -s PATH, --shard-lock=PATH       Specify a shard.lock
+    -v, --verbose                    Enable verbose logging
+    -h, --help                       Show this help
+```
 
 ## HTTP API
 

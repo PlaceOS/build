@@ -4,10 +4,77 @@ require "future"
 
 require "placeos-log-backend"
 
-class PlaceOS::Build::Digest
+class Crystal::TopLevelVisitor < Crystal::SemanticVisitor
+  # Overload to catch exceptions for missing files.
+  #
+  # This is overriding some very internal compiler code,
+  # thankfully tests will loudly catch errors in this.
+  def visit(node : Require)
+    super
+  rescue ex
+    raise ex unless ex.message.try &.starts_with? "can't find file"
+    nop = Nop.new
+    node.expanded = nop
+    node.bind_to(nop)
+    false
+  end
+end
+
+class PlaceOS::Build::Digest::Cli
   Log = ::Log.for(self)
 
-  def initialize
+  def self.run(args = ARGV.dup)
+    paths = [] of Path
+
+    shard_lock = nil
+
+    # Command line options
+    OptionParser.parse(args) do |parser|
+      parser.banner = <<-DOC
+      Usage: digest_cli [<crystal entrypoint>]
+
+      Outputs a CSV of digested crystal source graphs, formatted as FILE,HASH
+      Expects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH in the environment\n
+      DOC
+
+      parser.on("-s PATH", "--shard-lock=PATH", "Specify a shard.lock") do |path|
+        abort("no shard.lock at #{path}") unless File.exists? path
+        shard_lock = path
+      end
+
+      parser.on("-v", "--verbose", "Enable verbose logging") do
+        ::Log.setup("*", :debug, PlaceOS::LogBackend.log_backend)
+      end
+
+      parser.unknown_args do |pre_dash, post_dash|
+        pre_dash.each.chain(post_dash.each).each do |argument|
+          path = Path[argument]
+          if File.exists?(path)
+            paths << path
+          else
+            STDERR.puts "#{path} #{"does not exist.".colorize.red}"
+          end
+        end
+      end
+
+      parser.on("-h", "--help", "Show this help") do
+        puts parser
+        exit 0
+      end
+    end
+
+    new(shard_lock).digest(paths).each { |v| puts v.join(',') }
+  end
+
+  getter shard_digest : Bytes?
+
+  def initialize(shard_lock : String?)
+    # Include the shard.lock (if there is one)
+    if shard_lock
+      @shard_digest = File.open(shard_lock) do |io|
+        ::Digest::SHA1.digest &.update(io)
+      end
+    end
   end
 
   def digest(paths : Enumerable(Path))
@@ -61,14 +128,19 @@ class PlaceOS::Build::Digest
   end
 
   def program_hash(entrypoint : String | Path)
-    compiler = ::Crystal::Program.new.host_compiler.tap do |config|
-      config.release = false
+    compiler = ::Crystal::Compiler.new.tap do |config|
+      dev_null = File.open(File::NULL, "w")
+
+      config.color = false
       config.no_codegen = true
+      config.release = false
       config.wants_doc = false
+      config.stderr = dev_null
+      config.stdout = dev_null
     end
 
     # Compile and write output to /dev/null (or equivalent)
-    result = compiler.compile(source: ::Crystal::Compiler::Source.new(entrypoint.to_s, File.read(entrypoint)), output_filename: File::NULL)
+    result = compiler.top_level_semantic(source: ::Crystal::Compiler::Source.new(entrypoint.to_s, File.read(entrypoint)))
 
     # Calculate SHA-1 hash of entrypoint's requires
     Log.debug { "digesting #{entrypoint}" }
@@ -89,7 +161,8 @@ class PlaceOS::Build::Digest
     ::Digest::SHA1.hexdigest do |sha|
       shas.each { |digest| sha << digest }
       sha << entrypoint_sha
-    end
+      shard_digest.try { |digest| sha << digest }
+    end[0, 6]
   end
 
   CRYSTAL_PATH         = self.validate_env!("CRYSTAL_PATH")
@@ -100,36 +173,4 @@ class PlaceOS::Build::Digest
   end
 end
 
-paths = [] of Path
-
-# Command line options
-OptionParser.parse(ARGV.dup) do |parser|
-  parser.banner = <<-DOC
-  Usage: digest [<crystal entrypoint>]
-
-  Outputs a CSV, formatted as FILE,HASH
-  Expects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH in the environment
-  DOC
-
-  parser.on("-v", "--verbose", "Add some statistics") do
-    Log.setup("*", :debug, PlaceOS::LogBackend.log_backend)
-  end
-
-  parser.unknown_args do |pre_dash, post_dash|
-    pre_dash.each.chain(post_dash.each).each do |argument|
-      path = Path[argument]
-      if File.exists?(path)
-        paths << path
-      else
-        STDERR << path.to_s << " does not exist.\n"
-      end
-    end
-  end
-
-  parser.on("-h", "--help", "Show this help") do
-    puts parser
-    exit 0
-  end
-end
-
-PlaceOS::Build::Digest.new.digest(paths).each { |v| puts v.join(',') }
+PlaceOS::Build::Digest::Cli.run

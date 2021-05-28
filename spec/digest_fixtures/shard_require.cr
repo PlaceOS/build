@@ -1,0 +1,2 @@
+require "fake"
+puts "hello"
