@@ -5,3 +5,5 @@ bin/
 *.dwarf
 .DS_*
 .tool-versions
+repositories
+binaries
