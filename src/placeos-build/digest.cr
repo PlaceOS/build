@@ -29,7 +29,7 @@ module PlaceOS::Build::Digest
       raise Build::Error.new("failed to digest: #{error}")
     end
 
-    Log.debug { "digesting #{entrypoints.join(", ")} took #{(Time.utc - started).seconds}s" }
+    Log.debug { "digesting #{entrypoints.join(", ")} took #{(Time.utc - started).milliseconds}ms" }
 
     output
       .rewind

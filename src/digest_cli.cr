@@ -86,7 +86,7 @@ class PlaceOS::Build::Digest::Cli
           before = Time.utc
           digest = program_hash(path)
           after = Time.utc
-          Log.trace { "digesting #{path} took #{(after - before).seconds}s" } unless digests.closed?
+          Log.trace { "digesting #{path} took #{(after - before).milliseconds}ms" } unless digests.closed?
           digests.send({path, digest}) rescue nil
         rescue e
           Log.error(exception: e) { "failed to digest #{path}" }
