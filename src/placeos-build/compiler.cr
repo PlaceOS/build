@@ -28,14 +28,24 @@ module PlaceOS::Build::Compiler
       raise Build::Error.new("shard.yml does not exist at #{file}", cause: e)
     end
 
+    # Extract the latest crystal version specified by `shard.yml` under `project_root`
+    def self.extract_latest_crystal(project_root)
+      requirement = extract_crystal_requirement(File.join(project_root, "shard.yml"))
+      latest_version(requirement)
+    end
+
     def self.install_latest
       install("latest")
     end
 
-    def self.install_latest_matching(requirement : Shards::VersionReq)
+    def self.latest_version(requirement : Shards::VersionReq)
       latest = Shards::Version.resolve(list_all_crystal, requirement).last?
       raise Error.new("could not resolve an existing crystal version for #{requirement}") if latest.nil?
-      install(latest)
+      latest
+    end
+
+    def self.install_latest_matching(requirement : Shards::VersionReq)
+      install(latest_version(requirement))
     end
 
     def self.parse_crystal_version(crystal_version : String?) : Shards::VersionReq
