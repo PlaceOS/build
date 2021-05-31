@@ -39,7 +39,7 @@ module PlaceOS::Build::Compiler
     end
 
     def self.latest_version(requirement : Shards::VersionReq)
-      latest = Shards::Version.resolve(list_all_crystal, requirement).last?
+      latest = ::Shards::Versions.resolve(list_all_crystal, requirement).last?
       raise Error.new("could not resolve an existing crystal version for #{requirement}") if latest.nil?
       latest
     end
