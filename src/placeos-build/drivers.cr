@@ -12,8 +12,13 @@ module PlaceOS::Build
   class Drivers
     Log = ::Log.for(self)
 
-    getter repository_store_path : String = "./repositories"
-    getter binary_store_path : String = "./binaries"
+    getter repository_store_path : String do
+      Path["./repositories"].expand.to_s.tap &->Dir.mkdir_p(String)
+    end
+
+    getter binary_store_path : String do
+      Path["./binaries"].expand.to_s.tap &->Dir.mkdir_p(String)
+    end
 
     getter store : DriverStore
 
@@ -36,25 +41,25 @@ module PlaceOS::Build
       key = self.class.uri_to_directory(repository_uri)
 
       # Ensure repository exists
-      if cloned?(repository_uri)
-        PlaceOS::Compiler::Git.clone(
+      if Dir.exists?(File.join(repository_store_path, key))
+        PlaceOS::Compiler::Git.fetch(
           repository: key,
-          repository_uri: repository_uri,
           working_directory: repository_store_path,
         )
       else
-        PlaceOS::Compiler::Git.fetch(
+        PlaceOS::Compiler::Git.clone(
           repository: key,
+          repository_uri: repository_uri,
           working_directory: repository_store_path,
         )
       end
 
       # Copy repository to a temporary directory
       repository_path = File.join(repository_store_path, key)
-      random_directory = UUID.random.to_s
-      temporary_directory = File.join(Dir.tempdir, random_directory)
+      key = UUID.random.to_s
+      temporary_directory = File.join(Dir.tempdir, key)
       FileUtils.cp_r(repository_path, temporary_directory)
-      repository_path = File.join(temporary_directory, key)
+      repository_path = temporary_directory
 
       # Checkout temporary copy to desired commit.
       PlaceOS::Compiler::Git.checkout(entrypoint, key, Dir.tempdir, commit) do
@@ -128,12 +133,6 @@ module PlaceOS::Build
       repository_store_path.children.compact_map do |path|
         self.class.directory_to_uri(path) if Dir.exists? path
       end
-    end
-
-    # Yield the path
-    def cloned?(repository_uri : String)
-      git_dir = File.join(repository_store_path, self.class.uri_to_directory(repository_uri), ".git")
-      Dir.exists? git_dir
     end
 
     def self.uri_to_directory(uri)

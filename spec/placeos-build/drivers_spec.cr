@@ -1,6 +1,6 @@
 module PlaceOS::Build
   describe Drivers do
-    it "compiles a specific driver" do
+    it "compiles a crystal binary" do
       drivers = Drivers.new
       drivers.compile(
         repository_uri: "https://github.com/placeos/private-drivers",
