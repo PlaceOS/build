@@ -45,6 +45,13 @@ module PlaceOS::Build
       {name, commit, digest, crystal_version, encoded_directory}.join(SEPERATOR)
     end
 
+    def to_s(io)
+      io << "Driver(" << entrypoint << '@' << commit[0, 6]
+      io << ", digest=" << digest
+      io << ", crystal=" << crystal_version
+      io << ")"
+    end
+
     INFO_EXT = ".info"
 
     getter info_filename : String do

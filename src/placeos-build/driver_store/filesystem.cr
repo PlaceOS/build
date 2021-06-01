@@ -5,6 +5,7 @@ module PlaceOS::Build
     protected getter binary_store : String
 
     def initialize(@binary_store : String = Path["./entries"].expand.to_s)
+      Dir.mkdir_p binary_store
     end
 
     def info_path(executable : Executable) : String
@@ -56,7 +57,7 @@ module PlaceOS::Build
     end
 
     def write(filename : String, & : IO ->) : Nil
-      File.open(File.join(binary_store, filename), "w") do |file_io|
+      File.open(File.join(binary_store, filename), mode: "w+", perm: File::Permissions.new(0o744)) do |file_io|
         yield file_io
       end
     end

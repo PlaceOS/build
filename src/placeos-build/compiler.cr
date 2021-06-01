@@ -100,7 +100,7 @@ module PlaceOS::Build::Compiler
       version = version.value if version.is_a?(Shards::Version)
 
       result = ExecFrom.exec_from(directory, "asdf", {"local", "crystal", version})
-      raise Error.new(result.output) unless result.success?
+      raise Error.new(result.output) unless result.status.success?
     end
 
     def self.install(version : Shards::Version | String) : Nil

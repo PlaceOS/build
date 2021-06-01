@@ -129,7 +129,7 @@ class PlaceOS::Build::Digest::Cli
 
   def program_hash(entrypoint : String | Path)
     compiler = ::Crystal::Compiler.new.tap do |config|
-      dev_null = File.open(File::NULL, "w")
+      dev_null = File.open(File::NULL, mode: "w")
 
       config.color = false
       config.no_codegen = true

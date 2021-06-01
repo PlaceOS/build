@@ -20,12 +20,23 @@ module PlaceOS::Build
       Path["./binaries"].expand.to_s.tap &->Dir.mkdir_p(String)
     end
 
+    protected class_property shards_cache_path do
+      ENV["SHARDS_CACHE_PATH"]? || ENV["HOME"]?.try { |p| File.join(p, ".shards") } || File.join(Dir.current, ".shards")
+    end
+
+    # Whether to build via the entrypoint environment variable method or not
+    class_property? legacy_build_method = true
+
+    # Extract the driver metadata after compilation, rather than lazily
+    getter? strict_driver_info : Bool
+
     getter store : DriverStore
 
     def initialize(
       @store = Filesystem.new,
       binary_directory = nil,
-      repository_store_path = nil
+      repository_store_path = nil,
+      @strict_driver_info = ENV["STRICT_DRIVER_INFO"]?.try(&.downcase) == "true"
     )
       @repository_store_path = repository_store_path unless repository_store_path.nil?
       @binary_store_path = binary_store_path unless binary_store_path.nil?
@@ -63,11 +74,25 @@ module PlaceOS::Build
 
       # Checkout temporary copy to desired commit.
       PlaceOS::Compiler::Git.checkout(entrypoint, key, Dir.tempdir, commit) do
-        # Extract the hash to name the file
-        digest = PlaceOS::Build::Digest.digest([entrypoint], repository_path).first.hash
-
         # Compile with highest available compiler if no version specified
         crystal_version = Build::Compiler::Crystal.extract_latest_crystal(repository_path) if crystal_version.nil?
+
+        # Set the local crystal version
+        Build::Compiler::Crystal.install(crystal_version)
+        Build::Compiler::Crystal.local(crystal_version, repository_path)
+
+        # Check/Install shards
+        install_shards(repository_path)
+
+        # Extract the hash to name the file
+        digest = begin
+          PlaceOS::Build::Digest.digest([entrypoint], repository_path).first.hash
+        rescue e
+          Log.warn { "failed to digest #{entrypoint} using the driver's commit" }
+          # Use the commit if a digest could not be produced
+          commit[0, 6]
+        end
+
         crystal_version = crystal_version.value if crystal_version.is_a? ::Shards::Version
 
         executable = Executable.new(entrypoint, commit, digest, crystal_version)
@@ -83,14 +108,24 @@ module PlaceOS::Build
           build_driver(
             executable: executable,
             repository: key,
-            working_directory: temporary_directory,
+            working_directory: Dir.tempdir,
           )
         end
 
         store.path(executable)
       end
     ensure
-      temporary_directory.try(&->FileUtils.rm_r(String)) rescue nil
+      temporary_directory.try { |dir| FileUtils.rm_r(dir) } rescue nil
+    end
+
+    protected def install_shards(repository_path : String) : Nil
+      result = ExecFrom.exec_from(repository_path, "shards", {"--no-color", "check", "--ignore-crystal-version", "--production"})
+      output = result.output.to_s
+      return if result.status.success? || output.includes?("Dependencies are satisfied")
+
+      # Otherwise install shards
+      result = ExecFrom.exec_from(repository_path, "shards", {"--no-color", "install", "--ignore-crystal-version", "--production"}, environment: {"SHARDS_CACHE_PATH" => self.class.shards_cache_path})
+      raise Build::Error.new(result.output) unless result.status.success?
     end
 
     protected def build_driver(
@@ -98,23 +133,32 @@ module PlaceOS::Build
       repository : String,
       working_directory : String
     ) : Nil
-      PlaceOS::Build::Compiler::Crystal.install(executable.crystal_version.to_s)
+      repository_path = File.join(working_directory, repository)
 
-      # Install shards
-      # TODO: set the shards cache path
-      result = PlaceOS::Compiler.install_shards(repository, working_directory)
-      raise Build::Error.new(result.output) unless result.success?
+      start = Time.utc
 
-      result = PlaceOS::Compiler.build_driver(
-        source_file: executable.entrypoint,
-        repository: repository,
-        commit: executable.commit,
-        working_directory: working_directory,
-        binary_directory: working_directory,
-      )
-      raise Build::Error.new(result.output) unless result.success?
+      path = if self.class.legacy_build_method?
+               result = PlaceOS::Compiler.build_driver(
+                 source_file: executable.entrypoint,
+                 repository: repository,
+                 commit: executable.commit,
+                 working_directory: working_directory,
+                 binary_directory: repository_path,
+               )
+               raise Build::Error.new(result.output) unless result.success?
+               result.path
+             else
+               executable_name = UUID.random.to_s
+               result = ExecFrom.exec_from(
+                 repository_path,
+                 "crystal",
+                 {"build", "--static", "--error-trace", "--no-color", "-o", executable_name, executable.entrypoint}
+               )
+               raise Build::Error.new(result.output) unless result.status.success?
+               File.join(repository_path, executable_name)
+             end
 
-      path = result.path
+      Log.info { "compiling #{executable} took #{(Time.utc - start).total_seconds}s" }
 
       # Write the binary to the store
       File.open(path) do |file_io|
@@ -122,10 +166,11 @@ module PlaceOS::Build
           IO.copy(file_io, store_io)
         end
       end
+
       # Extract the metadata to the store
-      store.info(executable)
+      store.info(executable) if strict_driver_info?
     ensure
-      path.try &->File.delete(String)
+      path.try { |p| File.delete(p) } rescue nil
     end
 
     # Returns the URIs of repositories in the `repository_store_path`
