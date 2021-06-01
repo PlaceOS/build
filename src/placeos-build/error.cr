@@ -6,4 +6,7 @@ class PlaceOS::Build::Error < Exception
   def initialize(message : String?, **args)
     super
   end
+
+  class AlreadyCompiling < Error
+  end
 end

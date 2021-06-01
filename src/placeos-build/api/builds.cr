@@ -2,20 +2,21 @@ require "./application"
 
 module PlaceOS::Build::Api
   # Routes trigger builds and query the resulting artefacts.
-  class Builds < Application
-    base "/api/build/v1/build"
+  class Driver < Application
+    base "/api/build/v1/driver"
 
     # Triggers a build of an object with as the entrypoint
     # Returns…
-    #     200 if compiled
-    #     500 if the object failed to compile
-    #     404 if entrypoint was not found
+    #     200 if compiled, returning a stream of the binary
+    #     500 if the object failed to compile, and error or build output
+    #     404 if repository, entrypoint, or commit was not found
     # POST /build/<file>?url=<repository url>&commit=<commit hash>
     post("/:file", :trigger_build) do
       # TODO
     end
 
     # Returns the metadata extracted from the built artefact.
+    #
     # GET /build/<file>/metadata?url=<repository url>&commit=<commit hash>
     get("/:file/metadata", :metadata) do
       # TODO

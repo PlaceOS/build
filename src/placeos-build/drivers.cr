@@ -30,6 +30,9 @@ module PlaceOS::Build
     # Extract the driver metadata after compilation, rather than lazily
     getter? strict_driver_info : Bool
 
+    private getter compile_lock = Mutex.new
+    private getter compiling = Hash(Executable, Bool).new(false)
+
     getter store : DriverStore
 
     def initialize(
@@ -88,7 +91,7 @@ module PlaceOS::Build
         digest = begin
           PlaceOS::Build::Digest.digest([entrypoint], repository_path).first.hash
         rescue e
-          Log.warn { "failed to digest #{entrypoint} using the driver's commit" }
+          Log.warn { "failed to digest #{entrypoint}, using the driver's commit" }
           # Use the commit if a digest could not be produced
           commit[0, 6]
         end
