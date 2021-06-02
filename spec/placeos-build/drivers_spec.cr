@@ -10,7 +10,7 @@ module PlaceOS::Build
       )
     end
 
-    if ENV["TEST_LEGACY"]?.presence.try &.downcase == "true"
+    if ENV["TEST_LEGACY"]?.presence.try &.to_i? == 1
       it "compiles drivers via the legacy ENV method" do
         Drivers.legacy_build_method = true
         Drivers.new.compile(
