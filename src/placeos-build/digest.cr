@@ -15,7 +15,7 @@ module PlaceOS::Build::Digest
     end
   end
 
-  private EXECUTABLE_PATH = "./bin/digest_cli"
+  private EXECUTABLE_PATH = Path["./bin/digest_cli"].expand.to_s
 
   # Expects the presence of `digest` binary under `bin` directory
   #

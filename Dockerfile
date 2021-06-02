@@ -19,16 +19,6 @@ RUN apt install --no-install-recommends -y \
 # Add trusted CAs for communicating with external services
 RUN update-ca-certificates
 
-SHELL ["/bin/bash", "-l", "-c"]
-
-# Install asdf version manager
-RUN git clone https://github.com/asdf-vm/asdf.git $HOME/.asdf --branch v0.8.0
-RUN $HOME/.asdf/bin/asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
-
-RUN echo -e '\n. $HOME/.asdf/asdf.sh' >> ~/.bashrc && \
-    echo -e '\n. $HOME/.asdf/asdf.sh' >> ~/.profile && \
-    source ~/.bashrc
-
 # Create a non-privileged user
 ARG IMAGE_UID="10001"
 ENV UID=$IMAGE_UID
@@ -78,6 +68,14 @@ RUN chown appuser -R /app
 ###############################################################################
 
 USER appuser:appuser
+
+# Install asdf version manager
+SHELL ["/bin/bash", "-l", "-c"]
+RUN git clone https://github.com/asdf-vm/asdf.git $HOME/.asdf --branch v0.8.0
+RUN $HOME/.asdf/bin/asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
+RUN echo -e '\n. $HOME/.asdf/asdf.sh' >> ~/.bashrc && \
+    echo -e '\n. $HOME/.asdf/asdf.sh' >> ~/.profile && \
+    source ~/.bashrc
 
 EXPOSE 3000
 HEALTHCHECK CMD wget -qO- http://localhost:3000/api/build/v1
