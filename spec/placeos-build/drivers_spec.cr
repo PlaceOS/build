@@ -10,14 +10,18 @@ module PlaceOS::Build
       )
     end
 
-    it "compiles drivers via the legacy ENV method" do
-      Drivers.legacy_build_method = true
-      Drivers.new.compile(
-        repository_uri: "https://github.com/placeos/private-drivers",
-        entrypoint: "drivers/place/private_helper.cr",
-        commit: "c014d19225bb9aa2578494be797207c04745df39",
-        crystal_version: "1.0.0",
-      )
+    if ENV["TEST_LEGACY"]?.presence.try &.downcase == "true"
+      it "compiles drivers via the legacy ENV method" do
+        Drivers.legacy_build_method = true
+        Drivers.new.compile(
+          repository_uri: "https://github.com/placeos/private-drivers",
+          entrypoint: "drivers/place/private_helper.cr",
+          commit: "c014d19225bb9aa2578494be797207c04745df39",
+          crystal_version: "1.0.0",
+        )
+      end
+    else
+      pending "compiles drivers via the legacy ENV method"
     end
   end
 end
