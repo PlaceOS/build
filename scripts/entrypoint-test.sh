@@ -2,10 +2,10 @@
 
 set -eu
 
-source $HOME/.asdf/asdf.sh
+source ${HOME}/.asdf/asdf.sh
 
-asdf install crystal 1.0.0
-asdf global crystal 1.0.0
+asdf install crystal ${CRYSTAL_VERSION}
+asdf global crystal ${CRYSTAL_VERSION}
 
 if [ -z ${GITHUB_ACTION+x} ]
 then
@@ -15,9 +15,6 @@ then
   echo '### `ameba`' crystal lib/ameba/bin/ameba.cr
   crystal lib/ameba/bin/ameba.cr
 fi
-
-export CRYSTAL_PATH=lib:/usr/share/crystal/src
-export CRYSTAL_LIBRARY_PATH=/usr/local/lib
 
 watch="false"
 multithreaded="false"
@@ -36,13 +33,13 @@ do
   esac
 done
 
-if [[ "$multithreaded" == "true" ]]; then
+if [[ "${multithreaded}" == "true" ]]; then
   args="-Dpreview_mt"
 else
   args=""
 fi
 
-if [[ "$watch" == "true" ]]; then
+if [[ "${watch}" == "true" ]]; then
   CRYSTAL_WORKERS=$(nproc) watchexec -e cr -c -r -w src -w spec -- scripts/crystal-spec.sh -v ${args}
 else
   CRYSTAL_WORKERS=$(nproc) scripts/crystal-spec.sh -v ${args}
