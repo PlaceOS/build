@@ -19,21 +19,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test_legacy: [1, 0]
+        experimental: [false, true]
         crystal:
           - latest
           - nightly
           - 1.0.0
-    continue-on-error: ${{ matrix.test_legacy == 1 }}
+    continue-on-error: ${{ matrix.experimental }}
     steps:
       - uses: actions/checkout@v2
       - name: Test
         run: ./test
         env:
           CRYSTAL_VERSION: ${{ matrix.crystal }}
-          TEST_LEGACY: ${{ matrix.test_legacy }}
+          TEST_LEGACY: "${{ matrix.experimental }}"
       - name: Test with multithreading
         run: ./test --multithreaded
         env:
           CRYSTAL_VERSION: ${{ matrix.crystal }}
-          TEST_LEGACY: ${{ matrix.test_legacy }}
+          TEST_LEGACY: "${{ matrix.test_legacy }}"
