@@ -22,6 +22,9 @@ dependencies:
   log_helper:
     github: spider-gazelle/log_helper
     version: ~> 1
+  openapi-generator:
+    github: place-labs/openapi-generator
+    branch: perf/action-controller
   placeos-compiler:
     github: placeos/compiler
     version: ~> 4
