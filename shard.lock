@@ -48,6 +48,10 @@ shards:
     git: https://github.com/place-labs/hound-dog.git
     version: 2.9.0
 
+  http-params-serializable:
+    git: https://github.com/place-labs/http-params-serializable.git
+    version: 0.5.0
+
   ipaddress:
     git: https://github.com/sija/ipaddress.cr.git
     version: 0.2.1

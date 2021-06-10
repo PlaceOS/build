@@ -1,4 +1,5 @@
 require "./application"
+require "../drivers"
 
 module PlaceOS::Build::Api
   # Routes trigger builds and query the resulting artefacts.

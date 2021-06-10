@@ -43,18 +43,18 @@ module PlaceOS::Build
     ) : String
       repository_store.with_repository(repository_uri, entrypoint, commit) do |repository_path|
         # Compile with highest available compiler if no version specified
-        crystal_version = Build::Compiler::Crystal.extract_latest_crystal(repository_path) if crystal_version.nil?
+        crystal_version = Build::Compiler::Crystal.extract_latest_crystal(repository_path.to_s) if crystal_version.nil?
 
         # Set the local crystal version
         Build::Compiler::Crystal.install(crystal_version)
-        Build::Compiler::Crystal.local(crystal_version, repository_path)
+        Build::Compiler::Crystal.local(crystal_version, repository_path.to_s)
 
         # Check/Install shards
-        install_shards(repository_path)
+        install_shards(repository_path.to_s)
 
         # Extract the hash to name the file
         digest = begin
-          PlaceOS::Build::Digest.digest([entrypoint], repository_path).first.hash
+          PlaceOS::Build::Digest.digest([entrypoint], repository_path.to_s).first.hash
         rescue e
           Log.warn { "failed to digest #{entrypoint}, using the driver's commit" }
           # Use the commit if a digest could not be produced
@@ -75,7 +75,7 @@ module PlaceOS::Build
         else
           build_driver(
             executable: executable,
-            working_directory: repository_path,
+            working_directory: repository_path.to_s,
           )
         end
 

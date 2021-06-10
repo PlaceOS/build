@@ -1,9 +1,15 @@
-require "uuid"
 require "action-controller"
+require "openapi-generator"
+require "openapi-generator/providers/action-controller"
+require "openapi-generator/helpers/action-controller"
+require "uuid"
 
 module PlaceOS::Build::Api
   abstract class Application < ActionController::Base
     macro inherited
+      include ::OpenAPI::Generator::Controller
+      include ::OpenAPI::Generator::Helpers::ActionController
+
       Log = ::Log.for({{ @type }})
     end
 

@@ -18,22 +18,34 @@ module PlaceOS::Build
       Dir.mkdir_p @store_path
     end
 
+    def repository_commits?(uri : String, limit : Int32)
+      with_repository(uri, "shard.yml", "HEAD") do |repository_path|
+        Git.repository_commits(repository_path.basename, repository_path.parent, limit)
+      end
+    rescue e
+      Log.error(exception: e) { "failed to fetch commits for #{uri}" }
+      nil
+    end
+
+    def file_commits?(file : String, uri : String, limit : Int32)
+      with_repository(uri, file, "HEAD") do |repository_path|
+        Git.commits(file, repository_path.basename, repository_path.parent, limit)
+      end
+    rescue e
+      Log.error(exception: e) { "failed to fetch commits for #{file} iin #{uri}" }
+      nil
+    end
+
     def branches?(uri : String) : Array(String)
       with_repository(uri, "shard.yml", "HEAD") do |repository_path|
-        run_git(repository_path, {"branch", "-r"})
-          .output
-          .to_s
-          .lines
-          .compact_map { |l| l.strip.lchop("origin/") unless l =~ /HEAD/ }
-          .sort!
-          .uniq!
+        Git.branches(repository_path.basename, repository_path.parent)
       end
     rescue e
       Log.error(exception: e) { "failed to fetch branches for #{uri}" }
       nil
     end
 
-    def with_repository(uri : String, file : String, commit : String, & : String ->)
+    def with_repository(uri : String, file : String, commit : String, & : Path ->)
       key = clone(uri)
 
       # Copy repository to a temporary directory
@@ -45,7 +57,7 @@ module PlaceOS::Build
 
       # Checkout temporary copy to desired commit.
       Git.checkout_file(file, key, Dir.tempdir, commit) do
-        yield repository_path
+        yield Path[repository_path]
       end
     ensure
       temporary_path.try { |dir| FileUtils.rm_r(dir) } rescue nil

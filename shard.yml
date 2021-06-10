@@ -19,6 +19,9 @@ dependencies:
   future:
     github: crystal-community/future.cr
     version: ~> 1.0
+  http-params-serializable:
+    github: place-labs/http-params-serializable
+    version: ~> 0.5
   log_helper:
     github: spider-gazelle/log_helper
     version: ~> 1
