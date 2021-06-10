@@ -1,6 +1,6 @@
 module PlaceOS::Build
   describe Drivers do
-    it "compiles a crystal binary specificed by an entrypoint" do
+    it "compiles a crystal binary specified by an entrypoint" do
       Drivers.legacy_build_method = false
       Drivers.new.compile(
         repository_uri: "https://github.com/place-labs/exec_from",

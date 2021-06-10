@@ -1,3 +1,5 @@
+require "exec_from"
+
 class PlaceOS::Build::Error < Exception
   def initialize(io : IO, **args)
     super(io.to_s, **args)
