@@ -13,6 +13,9 @@ module PlaceOS::Build::Api
       Log = ::Log.for({{ @type }})
     end
 
+    getter username : String? { request.headers["X-Git-Username"]?.presence }
+    getter password : String? { request.headers["X-Git-Password"]?.presence }
+
     before_action :set_request_id
 
     # This makes it simple to match client requests with server side logs.
