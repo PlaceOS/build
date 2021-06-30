@@ -1,12 +1,26 @@
-require "./application"
+require "../api"
 require "../drivers"
+require "./application"
 
 module PlaceOS::Build::Api
   # Routes trigger builds and query the resulting artefacts.
   class Driver < Application
     base "/api/build/v1/driver"
 
-    getter builder : Build::Drivers { Api.builder }
+    delegate builder, to: Build::Api
+
+    # Parameters
+    ###########################################################################
+
+    getter repository_uri : String do
+      param url : String, "URL for a git repository"
+    end
+
+    getter commit : String do
+      param commit : String = "HEAD", "Commit to checkout"
+    end
+
+    ###########################################################################
 
     # TODO: Once crystal version varying is supported, we'll add that as an argument
     #
@@ -22,9 +36,7 @@ module PlaceOS::Build::Api
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
     )]) do
-      file = params["file"]
-      repository_uri = param url : String, "URL for a git repository"
-      commit = param branch : String = "HEAD", "Commit to checkout"
+      file = route_params["file"]
       result = builder.compile(
         repository_uri,
         file,
@@ -57,10 +69,7 @@ module PlaceOS::Build::Api
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
     )]) do
-      file = params["file"]
-      repository_uri = param url : String, "URL for a git repository"
-      commit = param branch : String = "HEAD", "Commit to checkout"
-
+      file = route_params["file"]
       metadata = builder.metadata?(repository_uri, file, commit, username: username, password: password)
       if metadata
         render json: metadata
@@ -78,9 +87,7 @@ module PlaceOS::Build::Api
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
     )]) do
-      file = params["file"]
-      repository_uri = param url : String, "URL for a git repository"
-      commit = param branch : String = "HEAD", "Commit to checkout"
+      file = route_params["file"]
       metadata = builder.metadata?(repository_uri, file, commit, username: username, password: password)
 
       if metadata
@@ -103,10 +110,12 @@ module PlaceOS::Build::Api
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
     )]) do
-      file = params["file"]
-      repository_uri = param url : String, "URL for a git repository"
-      commit = param branch : String = "HEAD", "Commit to checkout"
-      head builder.compiled?(repository_uri, file, commit, username: username, password: password) ? HTTP::Status::OK : HTTP::Status::NOT_FOUND
+      file = route_params["file"]
+      if builder.compiled?(repository_uri, file, commit, username: username, password: password)
+        head :ok
+      else
+        head :not_found
+      end
     end
   end
 end

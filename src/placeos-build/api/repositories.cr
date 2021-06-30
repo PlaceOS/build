@@ -7,6 +7,23 @@ module PlaceOS::Build::Api
 
     getter repository_store : RepositoryStore { Api.builder.repository_store }
 
+    # Parameters
+    ###########################################################################
+
+    getter repository_uri : String do
+      param url : String, "URL for a git repository"
+    end
+
+    getter branch : String do
+      param branch : String = "master", "Branch to return commits for"
+    end
+
+    getter count : Int32 do
+      param count : Int32 = 50, "Limit on commits returned"
+    end
+
+    ###########################################################################
+
     # Returns the commits for a repository.
     # GET /repository?url=[repository url]&count=[commit count: 50]&branch=[master]
     get("/", :repository_commits, annotations: @[OpenAPI(<<-YAML
@@ -16,10 +33,7 @@ module PlaceOS::Build::Api
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
     )]) do
-      repository_uri = param url : String, "URL for a git repository"
-      branch = param branch : String = "master", "Branch to return commits for"
-      count = param count : Int32 = 50, "Limit on commits returned"
-      query &.repository_commits?(repository_uri, count, branch, username: username, password: password)
+      query_store &.repository_commits?(repository_uri, count, branch, username: username, password: password)
     end
 
     # Returns the commits for a file.
@@ -32,10 +46,7 @@ module PlaceOS::Build::Api
       YAML
     )]) do
       file = params["file"]
-      repository_uri = param url : String, "URL for a git repository"
-      branch = param branch : String = "master", "Branch to return commits for"
-      count = param count : Int32 = 50, "Limit on commits returned"
-      query &.file_commits?(file, repository_uri, count, branch, username: username, password: password)
+      query_store &.file_commits?(file, repository_uri, count, branch, username: username, password: password)
     end
 
     # Returns the branches for a repository
@@ -47,11 +58,10 @@ module PlaceOS::Build::Api
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
     )]) do
-      repository_uri = param url : String, "URL for a git repository"
-      query &.branches?(repository_uri, username: username, password: password)
+      query_store &.branches?(repository_uri, username: username, password: password)
     end
 
-    protected def query
+    protected def query_store
       if (result = yield repository_store)
         render json: result
       else

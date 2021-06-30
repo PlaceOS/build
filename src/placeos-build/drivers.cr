@@ -4,8 +4,11 @@ require "uuid"
 
 require "placeos-compiler"
 
-require "./executable"
+require "./compiler"
+require "./digest"
 require "./driver_store"
+require "./executable"
+require "./repository_store"
 
 module PlaceOS::Build
   class Drivers
@@ -141,7 +144,7 @@ module PlaceOS::Build
       # Extract the hash to name the file
       digest = begin
         PlaceOS::Build::Digest.digest([entrypoint], repository_path.to_s).first.hash
-      rescue e
+      rescue
         Log.warn { "failed to digest #{entrypoint}, using the driver's commit" }
         # Use the commit if a digest could not be produced
         commit[0, 6]
