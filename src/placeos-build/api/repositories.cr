@@ -5,7 +5,7 @@ module PlaceOS::Build::Api
   class Repositories < Application
     base "/api/build/v1/repository"
 
-    getter repository_store : RepositoryStore { Api.builder.repository_store }
+    delegate repository_store, to: Build::Api.builder
 
     # Parameters
     ###########################################################################
