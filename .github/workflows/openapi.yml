@@ -21,7 +21,7 @@ jobs:
       run: |
         git config --local user.email "robot@place.tech"
         git config --local user.name "Mx. Placentina Robot"
-        git commit -am "docs(openapi/schema.yaml): update for ${{ github.sha }}"
+        git commit -am "docs(openapi.yaml): update for ${{ github.sha }}"
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
@@ -41,7 +41,7 @@ jobs:
       run: |
         git config --local user.email "robot@place.tech"
         git config --local user.name "Mx. Placentina Robot"
-        git commit -am "feat(openapi/schema.yaml): generate client for changes from ${{ github.sha }}"
+        git commit -am "feat(client): generate client for changes from ${{ github.sha }}"
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
