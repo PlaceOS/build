@@ -19,7 +19,7 @@ module PlaceOS::Build::Api
       repository_uri = param url : String, "URL for a git repository"
       branch = param branch : String = "master", "Branch to return commits for"
       count = param count : Int32 = 50, "Limit on commits returned"
-      query &.repository_commits?(repository_uri, branch, count, username: username, password: password)
+      query &.repository_commits?(repository_uri, count, branch, username: username, password: password)
     end
 
     # Returns the commits for a file.
@@ -35,7 +35,7 @@ module PlaceOS::Build::Api
       repository_uri = param url : String, "URL for a git repository"
       branch = param branch : String = "master", "Branch to return commits for"
       count = param count : Int32 = 50, "Limit on commits returned"
-      query &.file_commits?(file, repository_uri, branch, count, username: username, password: password)
+      query &.file_commits?(file, repository_uri, count, branch, username: username, password: password)
     end
 
     # Returns the branches for a repository

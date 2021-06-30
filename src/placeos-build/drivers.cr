@@ -34,8 +34,15 @@ module PlaceOS::Build
     )
     end
 
-    def compiled?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil)
-      repository_store.with_repository(repository_uri, entrypoint, commit) do |repository_path|
+    def compiled?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil)
+      repository_store.with_repository(
+        repository_uri,
+        entrypoint,
+        commit,
+        branch: nil,
+        username: username,
+        password: password,
+      ) do |repository_path|
         executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
         binary_store.exists?(executable)
       end
@@ -49,8 +56,15 @@ module PlaceOS::Build
       false
     end
 
-    def metadata?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil)
-      repository_store.with_repository(repository_uri, entrypoint, commit) do |repository_path|
+    def metadata?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil)
+      repository_store.with_repository(
+        repository_uri,
+        entrypoint,
+        commit,
+        branch: nil,
+        username: username,
+        password: password,
+      ) do |repository_path|
         executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
         binary_store.info(executable)
       end
@@ -64,12 +78,15 @@ module PlaceOS::Build
       nil
     end
 
-    record NotFound
-    record CompilationSuccess, path : String
-    record CompilationFailure, error : String do
-      include JSON::Serializable
+    module Compilation
+      alias Result = Success | Failure | NotFound
+
+      record NotFound
+      record Success, path : String
+      record Failure, error : String do
+        include JSON::Serializable
+      end
     end
-    alias CompilationResult = CompilationSuccess | CompilationFailure | NotFound
 
     def compile(
       repository_uri : String,
@@ -78,8 +95,8 @@ module PlaceOS::Build
       force_recompile : Bool = true,
       crystal_version : String? = nil,
       username : String? = nil,
-      password : String? = nil,
-    ) : CompilationResult
+      password : String? = nil
+    ) : Compilation::Result
       repository_store.with_repository(
         repository_uri,
         entrypoint,
@@ -91,14 +108,14 @@ module PlaceOS::Build
         executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
         # Look for an exact match
         if !force_recompile && binary_store.exists?(executable)
-          return CompilationSuccess.new(binary_store.path(executable))
+          return Compilation::Success.new(binary_store.path(executable))
         end
 
         # Look for drivers with matching hash, but different commit
         if !force_recompile && (unchanged_executable = binary_store.query(entrypoint, digest: executable.digest, crystal_version: executable.crystal_version).first?)
           # If it exists, copy with the current commit for the binary
           binary_store.link(unchanged_executable, executable)
-          CompilationSuccess.new(binary_store.path(executable))
+          Compilation::Success.new(binary_store.path(executable))
         else
           build_driver(
             executable: executable,
@@ -107,7 +124,7 @@ module PlaceOS::Build
         end
       end
     rescue e : PlaceOS::Compiler::Error::Git
-      NotFound.new
+      Compilation::NotFound.new
     end
 
     private def extract_executable(repository_path : Path, entrypoint : String, commit : String, crystal_version : String?)
@@ -148,7 +165,7 @@ module PlaceOS::Build
     protected def build_driver(
       executable : Executable,
       working_directory : String
-    ) : CompilationSuccess | CompilationFailure
+    ) : Compilation::Success | Compilation::Failure
       start = Time.utc
       path = if self.class.legacy_build_method?
                result = PlaceOS::Compiler.build_driver(
@@ -158,7 +175,7 @@ module PlaceOS::Build
                  working_directory: working_directory,
                  binary_directory: working_directory,
                )
-               return CompilationFailure.new(result.output) unless result.success?
+               return Compilation::Failure.new(result.output) unless result.success?
 
                result.path
              else
@@ -168,7 +185,7 @@ module PlaceOS::Build
                  "crystal",
                  {"build", "--static", "--error-trace", "--no-color", "-o", executable_name, executable.entrypoint}
                )
-               return CompilationFailure.new(result.output.to_s) unless result.status.success?
+               return Compilation::Failure.new(result.output.to_s) unless result.status.success?
 
                File.join(working_directory, executable_name)
              end
@@ -185,7 +202,7 @@ module PlaceOS::Build
       # Extract the metadata to the store
       binary_store.info(executable) if strict_driver_info?
 
-      CompilationSuccess.new(executable.filename)
+      Compilation::Success.new(executable.filename)
     ensure
       path.try { |p| File.delete(p) } rescue nil
     end

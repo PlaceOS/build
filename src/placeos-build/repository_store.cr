@@ -2,9 +2,9 @@ require "placeos-compiler/git"
 
 module PlaceOS::Build
   class RepositoryStore
-    getter store_path : String
+    alias Git = ::PlaceOS::Compiler::Git
 
-    alias Git = PlaceOS::Compiler::Git
+    getter store_path : String
 
     def self.uri_to_directory(uri)
       Base64.urlsafe_encode(uri)
@@ -88,17 +88,16 @@ module PlaceOS::Build
       uri : String,
       branch : String?,
       username : String?,
-      password : String?,
+      password : String?
     ) : String
       key = self.class.uri_to_directory(uri)
       path = File.join(store_path, key)
 
       args = {
-          repository: key,
-          repository_uri: uri,
-          working_directory: store_path,
-          branch: branch.presence || "master",
-          raises: true,
+        repository:        key,
+        working_directory: store_path,
+        branch:            branch.presence || "master",
+        raises:            true,
       }
 
       if Dir.exists?(path)
@@ -108,6 +107,7 @@ module PlaceOS::Build
         Git.clone(**args.merge(
           username: username,
           password: password,
+          repository_uri: uri,
         ))
       end
 

@@ -35,16 +35,16 @@ module PlaceOS::Build::Api
       )
 
       case result
-      in NotFound
+      in Drivers::Compilation::NotFound
         head :not_found
-      in CompilationSuccess
+      in Drivers::Compilation::Success
         response.content_type = "application/octet-stream"
         response.content_length = File.size(result.path)
         File.open(result.path) do |file_io|
           IO.copy(file_io, response)
         end
         head :ok
-      in CompilationFailure
+      in Drivers::Compilation::Failure
         render :internal_server_error, json: result
       end
     end
