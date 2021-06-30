@@ -7,9 +7,6 @@ require "uuid"
 module PlaceOS::Build::Api
   abstract class Application < ActionController::Base
     macro inherited
-      include ::OpenAPI::Generator::Controller
-      include ::OpenAPI::Generator::Helpers::ActionController
-
       Log = ::Log.for({{ @type }})
     end
 

@@ -5,6 +5,9 @@ require "./application"
 module PlaceOS::Build::Api
   # Routes trigger builds and query the resulting artefacts.
   class Driver < Application
+    include ::OpenAPI::Generator::Controller
+    include ::OpenAPI::Generator::Helpers::ActionController
+
     base "/api/build/v1/driver"
 
     delegate builder, to: Build::Api
@@ -48,16 +51,16 @@ module PlaceOS::Build::Api
 
       case result
       in Drivers::Compilation::NotFound
-        head :not_found
+        head code: :not_found
       in Drivers::Compilation::Success
         response.content_type = "application/octet-stream"
         response.content_length = File.size(result.path)
         File.open(result.path) do |file_io|
           IO.copy(file_io, response)
         end
-        head :ok
+        head code: :ok
       in Drivers::Compilation::Failure
-        render :internal_server_error, json: result
+        render status_code: :internal_server_error, json: result
       end
     end
 
@@ -72,9 +75,9 @@ module PlaceOS::Build::Api
       file = route_params["file"]
       metadata = builder.metadata?(repository_uri, file, commit, username: username, password: password)
       if metadata
-        render json: metadata
+        render status_code: :ok, json: metadata
       else
-        head :not_found
+        head code: :not_found
       end
     end
 
@@ -91,9 +94,9 @@ module PlaceOS::Build::Api
       metadata = builder.metadata?(repository_uri, file, commit, username: username, password: password)
 
       if metadata
-        render json: metadata.documentation
+        render status_code: :ok, json: metadata.documentation
       else
-        head :not_found
+        head code: :not_found
       end
     end
 
@@ -112,9 +115,9 @@ module PlaceOS::Build::Api
     )]) do
       file = route_params["file"]
       if builder.compiled?(repository_uri, file, commit, username: username, password: password)
-        head :ok
+        head code: :ok
       else
-        head :not_found
+        head code: :not_found
       end
     end
   end

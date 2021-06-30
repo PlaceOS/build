@@ -3,6 +3,9 @@ require "./application"
 module PlaceOS::Build::Api
   # Routes to query git metadata.
   class Repositories < Application
+    include ::OpenAPI::Generator::Controller
+    include ::OpenAPI::Generator::Helpers::ActionController
+
     base "/api/build/v1/repository"
 
     delegate repository_store, to: Build::Api.builder
@@ -63,9 +66,9 @@ module PlaceOS::Build::Api
 
     protected def query_store
       if (result = yield repository_store)
-        render json: result
+        render status_code: :ok, json: result
       else
-        head :not_found
+        head code: :not_found
       end
     end
   end
