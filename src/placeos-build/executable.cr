@@ -11,6 +11,8 @@ module PlaceOS::Build
 
     getter crystal_version : SemanticVersion
 
+    def_equals_and_hash entrypoint, commit, digest, crystal_version
+
     private SEPERATOR = '-'
 
     def initialize(@entrypoint, @commit, @digest, crystal_version)
