@@ -18,6 +18,9 @@ fi
 
 export CRYSTAL_PATH=lib:/usr/share/crystal/src
 export CRYSTAL_LIBRARY_PATH=/usr/local/lib
+export PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig
+export CPPFlAGS=-L/usr/local/opt/openssl/include
+export LDFLAGS=-L/usr/local/opt/openssl/lib
 
 watch="false"
 multithreaded="false"

@@ -79,7 +79,9 @@ module PlaceOS::Build
       end
     end
 
-    record Info, defaults : String, metadata : String { include JSON::Serializable }
+    record Info, defaults : String, metadata : String, documentation : String = "" do
+      include JSON::Serializable
+    end
 
     private record Defaults, output : String
     private record Metadata, output : String
