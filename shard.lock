@@ -8,6 +8,14 @@ shards:
     git: https://github.com/crystal-ameba/ameba.git
     version: 0.14.3
 
+  awscr-s3:
+    git: https://github.com/taylorfinnell/awscr-s3.git
+    version: 0.8.2
+
+  awscr-signer:
+    git: https://github.com/taylorfinnell/awscr-signer.git
+    version: 0.8.2
+
   connect-proxy:
     git: https://github.com/spider-gazelle/connect-proxy.git
     version: 1.4.0

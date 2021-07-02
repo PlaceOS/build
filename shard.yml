@@ -13,6 +13,9 @@ dependencies:
   action-controller:
     github: spider-gazelle/action-controller
     version: ~> 4.4
+  awscr-s3:
+    github: taylorfinnell/awscr-s3
+    version: ~> 0.8
   exec_from:
     github: place-labs/exec_from
     version: ~> 2

@@ -56,9 +56,9 @@ module PlaceOS::Build
       end
     end
 
-    def write(filename : String, & : IO ->) : Nil
+    def write(filename : String, io : IO) : Nil
       File.open(File.join(binary_store, filename), mode: "w+", perm: File::Permissions.new(0o744)) do |file_io|
-        yield file_io
+        IO.copy io, file_io
       end
     end
   end

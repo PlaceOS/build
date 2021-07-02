@@ -16,7 +16,7 @@ module PlaceOS::Build
     # If the driver already exists
     abstract def link(source : Executable, destination : Executable) : Nil
 
-    abstract def write(filename : String, & : IO ->) : Nil
+    abstract def write(filename : String, io : IO) : Nil
 
     abstract def read(filename : String, & : IO ->)
 
@@ -43,9 +43,10 @@ module PlaceOS::Build
 
     # Write the `Executable::Info` to the cache
     def cache_info(driver : Executable, info : Executable::Info)
-      write(driver.info_filename) do |io|
-        info.to_json(io)
-      end
+      io = IO::Memory.new
+      info.to_json(io)
+      io.rewind
+      write(driver.info_filename, io)
     end
   end
 end

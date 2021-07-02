@@ -197,9 +197,7 @@ module PlaceOS::Build
 
       # Write the binary to the store
       File.open(path) do |file_io|
-        binary_store.write(executable.filename) do |store_io|
-          IO.copy(file_io, store_io)
-        end
+        binary_store.write(executable.filename, file_io)
       end
 
       # Extract the metadata to the store
