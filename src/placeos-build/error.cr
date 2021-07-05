@@ -11,4 +11,10 @@ class PlaceOS::Build::Error < Exception
 
   class AlreadyCompiling < Error
   end
+
+  class UnsignedWrite < Error
+    def initialize(**args)
+      @message = "Attempting to write a file to s3 via an unsigned client.\nEnsure the following environment variables are set... AWS_REGION, AWS_KEY, AWS_SECRET, AWS_BUCKET"
+    end
+  end
 end
