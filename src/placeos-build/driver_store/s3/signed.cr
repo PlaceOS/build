@@ -32,11 +32,10 @@ module PlaceOS::Build
       def copy(source : String, destination : String) : Nil
         log_failure = ->(e : Exception, _a : Int32, _t : Time::Span, _n : Time::Span) {
           Log.error(exception: e) { {source: source, destination: destination, message: "failed to copy in to S3"} }
-          io.rewind
         }
 
         Retriable.retry times: 10, max_interval: 1.minute, on_retry: log_failure do
-          s3.copy(bucket, source, destination)
+          s3.copy_object(bucket, source, destination)
         end
       end
 

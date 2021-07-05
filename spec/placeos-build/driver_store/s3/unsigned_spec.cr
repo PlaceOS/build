@@ -9,8 +9,9 @@ module PlaceOS::Build
     describe "#read" do
       it "returns an object" do
         WebMock.allow_net_connect = false
-        WebMock.stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com/test.html")
-               .to_return(body_io: IO::Memory.new)
+        WebMock
+          .stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com/test.html")
+          .to_return(body_io: IO::Memory.new)
 
         client.read("test.html") do |io|
           io.gets_to_end.should be_empty
