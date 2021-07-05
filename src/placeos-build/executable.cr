@@ -1,3 +1,6 @@
+require "json"
+require "semantic_version"
+
 module PlaceOS::Build
   # Information pertaining to a driver binary
   #

@@ -1,5 +1,7 @@
 require "./filesystem"
-require "./s3/*"
+require "./s3/client"
+require "./s3/signed"
+require "./s3/unsigned"
 
 module PlaceOS::Build
   class S3 < DriverStore

@@ -2,12 +2,12 @@ require "./client"
 
 module PlaceOS::Build
   class S3 < DriverStore
-    class Signed < Client
+    class Signed < PlaceOS::Build::S3::Client
       private getter region, key, secret, bucket
       private getter s3 : Awscr::S3::Client { Awscr::S3::Client.new(region, key, secret) }
       private getter headers : Hash(String, String) = {} of String => String
 
-      def initialize(@region : String, @key : String, @secret : String, @bucket : String)
+      def initialize(@bucket : String, @region : String, @key : String, @secret : String)
       end
 
       def read(object : String, & : IO ->)
