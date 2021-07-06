@@ -5,6 +5,39 @@ require "./s3/unsigned"
 
 module PlaceOS::Build
   class S3 < DriverStore
+    alias Credentials = Read | ReadWrite
+    record Read, aws_s3_bucket : String, aws_region : String
+    record ReadWrite, aws_s3_bucket : String, aws_region : String, aws_key : String, aws_secret : String
+
+    # Generate credentials for s3 clients
+    #
+    def self.credentials(
+      aws_s3_bucket : String?,
+      aws_region : String?,
+      aws_key : String?,
+      aws_secret : String?
+    ) : Credentials?
+      case {aws_s3_bucket, aws_region, aws_key, aws_secret}
+      when {String, String, String, String}
+        ReadWrite.new(aws_s3_bucket, aws_region, aws_key, aws_secret)
+      when {String, String, _, _}
+        Read.new(aws_s3_bucket, aws_region)
+      else
+        nil
+      end
+    end
+
+    # Generate a new s3 client
+    #
+    def self.from_credentials(credentials : Credentials) : Client
+      case credentials
+      in Read
+        Unsigned.new(credentials.aws_s3_bucket, credentials.aws_region)
+      in ReadWrite
+        Signed.new(credentials.aws_s3_bucket, credentials.aws_region, credentials.aws_key, credentials.aws_secret)
+      end
+    end
+
     private getter filesystem : Filesystem
     private getter client : Client
 
