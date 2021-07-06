@@ -39,6 +39,7 @@ FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine
 
 WORKDIR /app
 
+ARG CRYSTAL_VERSION=1.0.0
 ENV CRYSTAL_VERSION=$CRYSTAL_VERSION
 
 # Install the latest version of LibSSH2, ping, curl, git

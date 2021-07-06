@@ -66,13 +66,19 @@ module PlaceOS::Build::Compiler
     # asdf
     #################################################################################################
 
-    def self.current(directory : String = ".")
-      result = ExecFrom.exec_from(directory, "asdf", {"current", "crystal"})
-      raise Error.new(result.output) unless result.status.success?
+    getter? asdf_enabled : Bool = false
 
-      parts = result.output.to_s.chomp.split(/\s+/)
-      raise Error.new("unexpected number of segments in `asdf current crystal` output") unless parts.size == 3
-      Shards::Version.new(parts[1])
+    def self.current(directory : String = ".")
+      if asdf_enabled?
+        result = ExecFrom.exec_from(directory, "asdf", {"current", "crystal"})
+        raise Error.new(result.output) unless result.status.success?
+
+        parts = result.output.to_s.chomp.split(/\s+/)
+        raise Error.new("unexpected number of segments in `asdf current crystal` output") unless parts.size == 3
+        Shards::Version.new(parts[1])
+      else
+        crystal
+      end
     end
 
     def self.current?
@@ -87,39 +93,56 @@ module PlaceOS::Build::Compiler
     end
 
     def self.path?(version : Shards::Version | String) : String?
-      version = version.value if version.is_a?(Shards::Version)
-
-      output, status = asdf("where", "crystal", version)
-      if status.success?
-        root = output.to_s.chomp
-        File.join(root, "bin/crystal")
+      if asdf_enabled?
+        version = version.value if version.is_a?(Shards::Version)
+        output, status = asdf("where", "crystal", version)
+        if status.success?
+          root = output.to_s.chomp
+          File.join(root, "bin/crystal")
+        end
+      else
+        "crystal"
       end
     end
 
     def self.local(version : Shards::Version | String, directory : String = ".") : Nil
-      version = version.value if version.is_a?(Shards::Version)
+      if asdf_enabled?
+        version = version.value if version.is_a?(Shards::Version)
 
-      result = ExecFrom.exec_from(directory, "asdf", {"local", "crystal", version})
-      raise Error.new(result.output) unless result.status.success?
+        result = ExecFrom.exec_from(directory, "asdf", {"local", "crystal", version})
+        raise Error.new(result.output) unless result.status.success?
+      end
     end
 
     def self.install(version : Shards::Version | String) : Nil
-      version = version.value if version.is_a?(Shards::Version)
+      if asdf_enabled?
+        version = version.value if version.is_a?(Shards::Version)
 
-      output, status = asdf("install", "crystal", version)
-      raise Error.new(output) unless status.success?
+        output, status = asdf("install", "crystal", version)
+        raise Error.new(output) unless status.success?
+      end
     end
 
+    class_getter crystal = Shards::Version.new(CRYSTAL_VERSION)
+
     def self.list_all_crystal
-      output, status = asdf("list", "all", "crystal")
-      raise Error.new(output) unless status.success?
-      extact_versions(output)
+      if asdf_enabled?
+        output, status = asdf("list", "all", "crystal")
+        raise Error.new(output) unless status.success?
+        extact_versions(output)
+      else
+        [crystal]
+      end
     end
 
     def self.list_crystal
-      output, status = asdf("list", "crystal")
-      raise Error.new(output) unless status.success?
-      extact_versions(output)
+      if asdf_enabled?
+        output, status = asdf("list", "crystal")
+        raise Error.new(output) unless status.success?
+        extact_versions(output)
+      else
+        [crystal]
+      end
     end
 
     private def self.extact_versions(io)
