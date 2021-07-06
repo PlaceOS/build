@@ -13,7 +13,7 @@ RUN apk add --update --no-cache \
         git \
         iputils \
         libssh2-static \
-        llvm llvm-dev \
+        # llvm llvm-dev \
         yaml-static
 
 RUN apk add --update --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing watchexec
@@ -33,14 +33,27 @@ RUN update-ca-certificates
 #     echo -e '\n. $HOME/.asdf/asdf.sh' >> ~/.profile && \
 #     source ~/.bashrc
 
+RUN mkdir -p /app/bin/drivers
+
+# Build a missing llvm artefact.
+COPY scripts/build_llvm_ext.sh build_llvm_ext.sh
+RUN ./build_llvm_ext.sh
+
 COPY shard.yml /app
 COPY shard.lock /app
 
 RUN shards install --ignore-crystal-version
 
-COPY scripts/* /app/scripts/
+COPY src/digest_cli.cr src/digest_cli.cr
 
-RUN mkdir -p /app/bin/drivers
+RUN CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
+    LLVM_CONFIG=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
+    PLACE_COMMIT=${PLACE_COMMIT} \
+    UNAME_AT_COMPILE_TIME=true \
+    shards build --error-trace --ignore-crystal-version digest_cli && \
+    rm /usr/share/crystal/src/llvm/ext/llvm_ext.o
+
+COPY scripts/* /app/scripts/
 
 # These provide certificate chain validation where communicating with external services over TLS
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt

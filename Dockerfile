@@ -1,27 +1,47 @@
 ARG CRYSTAL_VERSION=1.0.0
-FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine-build as build
+FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine-build as build-digest
+
+WORKDIR /app
+
+# Install the latest version of LLVM, LibSSH2, ping, git, ca-certificates
+RUN apk add --update --no-cache \
+            bash \
+            yaml-static
+
+# Build a missing llvm artefact.
+COPY scripts/build_llvm_ext.sh build_llvm_ext.sh
+RUN ./build_llvm_ext.sh
+
+COPY shard.* .
+RUN shards install --production --ignore-crystal-version
+
+COPY src/digest_cli.cr src/digest_cli.cr
+
+# Build the required target
+RUN CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
+    LLVM_CONFIG=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
+    shards build --error-trace --ignore-crystal-version --production digest_cli && \
+    rm /usr/share/crystal/src/llvm/ext/llvm_ext.o
+
+FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
 
 ARG PLACE_COMMIT=DEV
 ARG PLACE_VERSION=DEV
 
 WORKDIR /app
 
-# Install the latest version of LLVM, LibSSH2, ping, curl, git, ca-certificates
+# Install the latest version of LLVM, LibSSH2, ping, git, ca-certificates
 RUN apk add --update --no-cache \
             bash \
             ca-certificates \
-            curl \
-            git \
             iputils \
             libssh2-static \
-            llvm llvm-dev \
             yaml-static
 
 # Add trusted CAs for communicating with external services
 RUN update-ca-certificates
 
 # TODO: Awaiting asdf static crystal patch
-#
 # Install asdf version manager
 # RUN git clone https://github.com/asdf-vm/asdf.git /app/.asdf --branch v0.8.0
 # RUN /app/.asdf/bin/asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
@@ -57,11 +77,12 @@ RUN shards install --production --ignore-crystal-version
 COPY src /app/src
 
 # Build the required target
-RUN CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
-    LLVM_CONFGI=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
-    PLACE_COMMIT=${PLACE_COMMIT} \
+RUN PLACE_COMMIT=${PLACE_COMMIT} \
+    PLACE_VERSION=${PLACE_VERSION} \
     UNAME_AT_COMPILE_TIME=true \
-    shards build --error-trace --ignore-crystal-version --production
+    shards build --error-trace --ignore-crystal-version --production build
+
+COPY --from=build-digest /app/bin/digest_cli /app/bin
 
 RUN chown appuser -R /app
 
@@ -70,5 +91,5 @@ RUN chown appuser -R /app
 USER appuser:appuser
 
 EXPOSE 3000
-HEALTHCHECK CMD wget -qO- http://localhost:3000/api/build/v1
-CMD ["/app/scripts/entrypoint.sh", "--server", "-b", "0.0.0.0", "-p", "3000"]
+HEALTHCHECK CMD /app/bin/build server --curl http://localhost:3000/api/build/v1
+CMD ["/app/scripts/entrypoint.sh", server, "-b", "0.0.0.0", "-p", "3000"]
