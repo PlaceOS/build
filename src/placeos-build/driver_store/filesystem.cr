@@ -4,7 +4,7 @@ module PlaceOS::Build
   class Filesystem < DriverStore
     protected getter binary_store : String
 
-    def initialize(@binary_store : String = Path["./entries"].expand.to_s)
+    def initialize(@binary_store : String = Path["./bin/drivers"].expand.to_s)
       Dir.mkdir_p binary_store
     end
 
