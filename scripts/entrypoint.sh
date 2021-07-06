@@ -2,6 +2,7 @@
 
 set -eu
 
-source $HOME/.asdf/asdf.sh
+# TODO: After asdf support added
+# source $HOME/.asdf/asdf.sh
 
 /app/bin/build "$@"

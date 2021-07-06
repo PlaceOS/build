@@ -2,10 +2,11 @@
 
 set -eu
 
-source $HOME/.asdf/asdf.sh
-
-asdf install crystal 1.0.0
-asdf global crystal 1.0.0
+# TODO: add once asdf patched for glibc crystal
+# source $HOME/.asdf/asdf.sh
+#
+# asdf install crystal 1.0.0
+# asdf global crystal 1.0.0
 
 if [ -z ${GITHUB_ACTION+x} ]
 then
@@ -39,13 +40,13 @@ do
   esac
 done
 
-if [[ "$multithreaded" == "true" ]]; then
+if [[ "${multithreaded}" == "true" ]]; then
   args="-Dpreview_mt"
 else
   args=""
 fi
 
-if [[ "$watch" == "true" ]]; then
+if [[ "${watch}" == "true" ]]; then
   CRYSTAL_WORKERS=$(nproc) watchexec -e cr -c -r -w src -w spec -- scripts/crystal-spec.sh -v ${args}
 else
   CRYSTAL_WORKERS=$(nproc) scripts/crystal-spec.sh -v ${args}
