@@ -7,6 +7,8 @@ module PlaceOS::Build
   BUILD_TIME   = {{ system("date -u").chomp.stringify }}
   BUILD_COMMIT = {{ env("PLACE_COMMIT") || "DEV" }}
 
+  CRYSTAL_VERSION = {{ env("CRYSTAL_VERSION") || "latest" }}
+
   # S3 caching
   #############################################################################
 
