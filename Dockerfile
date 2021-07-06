@@ -20,7 +20,7 @@ COPY src/digest_cli.cr src/digest_cli.cr
 # Build the required target
 RUN CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
     LLVM_CONFIG=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
-    shards build --error-trace --ignore-crystal-version --production digest_cli && \
+    shards build --release --no-debug --error-trace --ignore-crystal-version --production digest_cli && \
     rm /usr/share/crystal/src/llvm/ext/llvm_ext.o
 
 FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
@@ -76,11 +76,13 @@ RUN shards install --production --ignore-crystal-version
 # Add source last for efficient caching
 COPY src /app/src
 
+ENV CRYSTAL_VERSION=$CRYSTAL_VERSION
+
 # Build the required target
 RUN PLACE_COMMIT=${PLACE_COMMIT} \
     PLACE_VERSION=${PLACE_VERSION} \
     UNAME_AT_COMPILE_TIME=true \
-    shards build --error-trace --ignore-crystal-version --production build
+    shards build --no-debug --release --error-trace --ignore-crystal-version --production build
 
 COPY --from=build-digest /app/bin/digest_cli /app/bin
 
