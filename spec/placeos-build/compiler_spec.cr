@@ -22,7 +22,10 @@ module PlaceOS::Build::Compiler
         version = Crystal.current
         path = Crystal.path?(version.value)
         path.should_not be_nil
-        path.not_nil!.should end_with("#{version.value}/bin/crystal")
+        path = path.as(String)
+
+        path.should end_with("/bin/crystal")
+        path.should end_with("#{version.value}/bin/crystal") if Crystal.asdf_enabled?
       end
 
       it "returns null for non-installed crystal versions" do

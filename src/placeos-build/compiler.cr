@@ -66,7 +66,8 @@ module PlaceOS::Build::Compiler
     # asdf
     #################################################################################################
 
-    getter? asdf_enabled : Bool = false
+    class_getter? asdf_enabled : Bool = false
+    class_getter crystal = Shards::Version.new(CRYSTAL_VERSION)
 
     def self.current(directory : String = ".")
       if asdf_enabled?
@@ -93,15 +94,15 @@ module PlaceOS::Build::Compiler
     end
 
     def self.path?(version : Shards::Version | String) : String?
+      version = version.value if version.is_a?(Shards::Version)
       if asdf_enabled?
-        version = version.value if version.is_a?(Shards::Version)
         output, status = asdf("where", "crystal", version)
         if status.success?
           root = output.to_s.chomp
           File.join(root, "bin/crystal")
         end
       else
-        "crystal"
+        Process.find_executable "crystal" if version == CRYSTAL_VERSION
       end
     end
 
@@ -122,8 +123,6 @@ module PlaceOS::Build::Compiler
         raise Error.new(output) unless status.success?
       end
     end
-
-    class_getter crystal = Shards::Version.new(CRYSTAL_VERSION)
 
     def self.list_all_crystal
       if asdf_enabled?
