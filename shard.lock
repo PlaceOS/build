@@ -16,6 +16,10 @@ shards:
     git: https://github.com/taylorfinnell/awscr-signer.git
     version: 0.8.2
 
+  clip:
+    git: https://github.com/erdnaxeli/clip.git
+    version: 0.2.4
+
   connect-proxy:
     git: https://github.com/spider-gazelle/connect-proxy.git
     version: 1.4.1

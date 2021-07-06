@@ -16,6 +16,8 @@ dependencies:
   awscr-s3:
     github: taylorfinnell/awscr-s3
     version: ~> 0.8
+  clip:
+    github: erdnaxeli/clip
   exec_from:
     github: place-labs/exec_from
     version: ~> 2
@@ -25,6 +27,8 @@ dependencies:
   http-params-serializable:
     github: place-labs/http-params-serializable
     version: ~> 0.5
+  habitat:
+    github: luckyframework/habitat
   log_helper:
     github: spider-gazelle/log_helper
     version: ~> 1
