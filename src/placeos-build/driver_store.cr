@@ -2,6 +2,17 @@ require "./executable"
 
 module PlaceOS::Build
   abstract class DriverStore
+    def self.from_credentials(credentials : S3::Credentials?)
+      # All driverstores are backed by filesystem.
+      filesystem = Filesystem.new
+      if credentials
+        client = S3.client_from_credentials(credentials)
+        S3.new(filesystem, client)
+      else
+        filesystem
+      end
+    end
+
     abstract def query(
       entrypoint : String? = nil,
       digest : String? = nil,

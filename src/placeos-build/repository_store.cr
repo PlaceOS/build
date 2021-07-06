@@ -14,7 +14,8 @@ module PlaceOS::Build
       Base64.decode_string(key)
     end
 
-    def initialize(@store_path : String = Path["./repositories"].expand.to_s)
+    def initialize(store_path : String = "./repositories")
+      @store_path = Path[store_path].expand.to_s
       Dir.mkdir_p @store_path
     end
 

@@ -29,7 +29,7 @@ module PlaceOS::Build
 
     # Generate a new s3 client
     #
-    def self.from_credentials(credentials : Credentials) : Client
+    def self.client_from_credentials(credentials : Credentials) : Client
       case credentials
       in Read
         Unsigned.new(credentials.aws_s3_bucket, credentials.aws_region)

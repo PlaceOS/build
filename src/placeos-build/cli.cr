@@ -1,9 +1,9 @@
 require "clip"
 require "log"
 
-require "./constants"
-
+require "../constants"
 require "./cli/*"
+require "./driver_store/s3"
 
 module PlaceOS::Build
   def self.run
@@ -41,8 +41,13 @@ module PlaceOS::Build
     getter aws_secret : String? = AWS_SECRET
     getter aws_s3_bucket : String? = AWS_S3_BUCKET
 
-    def self.aws_configuration
-      {aws_region: aws_region, aws_key: aws_key, aws_secret: aws_secret, aws_s3_bucket: aws_s3_bucket}
+    def aws_credentials : S3::Credentials?
+      S3.credentials(
+        aws_region: aws_region,
+        aws_key: aws_key,
+        aws_secret: aws_secret,
+        aws_s3_bucket: aws_s3_bucket
+      )
     end
 
     Clip.add_commands({
