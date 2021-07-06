@@ -13,6 +13,7 @@ module PlaceOS::Build
     command.run
   rescue e : Clip::Error
     puts e
+    exit 1
   end
 
   @[Clip::Doc("A program to build PlaceOS Drivers")]
