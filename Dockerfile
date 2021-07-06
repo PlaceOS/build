@@ -12,7 +12,8 @@ RUN apk add --update --no-cache \
 
 # Build a missing llvm artefact, `llvm_ext.o`
 COPY scripts/build_llvm_ext.sh build_llvm_ext.sh
-RUN ./build_llvm_ext.sh
+RUN CRYSTAL_PATH=/usr/share/crystal/src \
+    ./build_llvm_ext.sh
 
 COPY shard.* .
 RUN shards install --production --ignore-crystal-version
