@@ -232,32 +232,6 @@ module PlaceOS::Build
     ###########################################################################
 
     {% for method in %w(get post) %}
-      # Executes a {{method.id.upcase}} request on the build client connection with a JSON body
-      # formed from the passed `NamedTuple`.
-      private def {{method.id}}(path, body : NamedTuple)
-        {{method.id}}(path, base_headers, body.to_json)
-      end
-
-      # :ditto:
-      private def {{method.id}}(path, headers : HTTP::Headers, body : NamedTuple)
-        {{method.id}}(path, base_headers(headers), body.to_json)
-      end
-
-      # Executes a {{method.id.upcase}} request on the build client connection with a JSON body
-      # formed from the passed `NamedTuple` and yields streamed response entries to the block.
-      private def {{method.id}}(path, body : NamedTuple)
-        {{method.id}}(path, base_headers, body.to_json) do |response|
-          yield response
-        end
-      end
-
-      # :ditto:
-      private def {{method.id}}(path, headers : HTTP::Headers, body : NamedTuple)
-        {{method.id}}(path, base_headers(headers), body.to_json) do |response|
-          yield response
-        end
-      end
-
       # Executes a {{method.id.upcase}} request on build connection.
       #
       # The response status will be automatically checked and a `PlaceOS::Build::ClientError` raised if
