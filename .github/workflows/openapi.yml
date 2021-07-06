@@ -1,0 +1,49 @@
+name: OpenAPI
+on:
+  workflow_dispatch:
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    container: crystal-lang/crystal:latest
+    outputs:
+      changed: ${{ steps.check.conclusion == 'failure' }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Create OpenAPI Schema
+      run: crystal run ./src/openapi_generator.cr --error-trace
+    - id: check
+      name: Check for schema changes
+      run: git diff --exit-code
+    - name: Commit files
+      run: |
+        git config --local user.email "robot@place.tech"
+        git config --local user.name "Mx. Placentina Robot"
+        git commit -am "docs(openapi.yaml): update for ${{ github.sha }}"
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+  client:
+    needs: schema
+    if: ${{ needs.schema.outputs.changed }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }} # Checkout the latest for the branch
+    - name: Build the client
+      run: ./scripts/generate-openapi-client.sh
+    - name: Commit files
+      run: |
+        git config --local user.email "robot@place.tech"
+        git config --local user.name "Mx. Placentina Robot"
+        git commit -am "feat(client): generate client for changes from ${{ github.sha }}"
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}

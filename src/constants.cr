@@ -7,15 +7,15 @@ module PlaceOS::Build
   BUILD_TIME   = {{ system("date -u").chomp.stringify }}
   BUILD_COMMIT = {{ env("PLACE_COMMIT") || "DEV" }}
 
+  CRYSTAL_VERSION = {{ env("CRYSTAL_VERSION") || "latest" }}
+
   # S3 caching
   #############################################################################
 
-  AWS_REGION     = ENV["AWS_REGION"]?
-  AWS_KEY        = ENV["AWS_KEY"]?
-  AWS_SECRET     = ENV["AWS_SECRET"]?
-  AWS_S3_OBJECT  = ENV["AWS_S3_OBJECT"]?
-  AWS_S3_BUCKET  = ENV["AWS_S3_BUCKET"]?
-  AWS_KMS_KEY_ID = ENV["AWS_KMS_KEY_ID"]?
+  AWS_REGION    = ENV["AWS_REGION"]?.presence
+  AWS_KEY       = ENV["AWS_KEY"]?.presence
+  AWS_SECRET    = ENV["AWS_SECRET"]?.presence
+  AWS_S3_BUCKET = ENV["AWS_S3_BUCKET"]?.presence
 
   #############################################################################
 

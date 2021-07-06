@@ -4,7 +4,7 @@ module PlaceOS::Build
   class Filesystem < DriverStore
     protected getter binary_store : String
 
-    def initialize(@binary_store : String = Path["./entries"].expand.to_s)
+    def initialize(@binary_store : String = Path["./bin/drivers"].expand.to_s)
       Dir.mkdir_p binary_store
     end
 
@@ -56,9 +56,9 @@ module PlaceOS::Build
       end
     end
 
-    def write(filename : String, & : IO ->) : Nil
+    def write(filename : String, io : IO) : Nil
       File.open(File.join(binary_store, filename), mode: "w+", perm: File::Permissions.new(0o744)) do |file_io|
-        yield file_io
+        IO.copy io, file_io
       end
     end
   end

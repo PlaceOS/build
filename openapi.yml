@@ -1,0 +1,16 @@
+---
+openapi: 3.0.1
+info:
+  title: PlaceOS Build
+  version: 0.1.0
+paths: {}
+components:
+  schemas: {}
+  responses: {}
+  parameters: {}
+  examples: {}
+  requestBodies: {}
+  headers: {}
+  securitySchemes: {}
+  links: {}
+  callbacks: {}

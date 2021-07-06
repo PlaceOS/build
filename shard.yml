@@ -13,20 +13,36 @@ dependencies:
   action-controller:
     github: spider-gazelle/action-controller
     version: ~> 4.4
+  awscr-s3:
+    github: taylorfinnell/awscr-s3
+    version: ~> 0.8
+  clip:
+    github: erdnaxeli/clip
   exec_from:
     github: place-labs/exec_from
     version: ~> 2
   future:
     github: crystal-community/future.cr
     version: ~> 1.0
+  http-params-serializable:
+    github: place-labs/http-params-serializable
+    version: ~> 0.5
+  habitat:
+    github: luckyframework/habitat
   log_helper:
     github: spider-gazelle/log_helper
     version: ~> 1
+  openapi-generator:
+    github: place-labs/openapi-generator
+    branch: perf/action-controller
   placeos-compiler:
     github: placeos/compiler
     version: ~> 4
   placeos-log-backend:
     github: place-labs/log-backend
+  placeos-models:
+    github: placeos/models
+    version: ~> 5.6
   secrets-env:
     github: place-labs/secrets-env
   shards:
@@ -36,3 +52,5 @@ dependencies:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
+  webmock:
+    github: manastech/webmock.cr

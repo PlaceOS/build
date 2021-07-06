@@ -3,22 +3,16 @@ require "file_utils"
 require "uuid"
 
 require "placeos-compiler"
-require "placeos-compiler/git"
 
-require "./executable"
+require "./compiler"
+require "./digest"
 require "./driver_store"
+require "./executable"
+require "./repository_store"
 
 module PlaceOS::Build
   class Drivers
     Log = ::Log.for(self)
-
-    getter repository_store_path : String do
-      Path["./repositories"].expand.to_s.tap &->Dir.mkdir_p(String)
-    end
-
-    getter binary_store_path : String do
-      Path["./binaries"].expand.to_s.tap &->Dir.mkdir_p(String)
-    end
 
     protected class_property shards_cache_path do
       ENV["SHARDS_CACHE_PATH"]? || ENV["HOME"]?.try { |p| File.join(p, ".shards") } || File.join(Dir.current, ".shards")
@@ -30,16 +24,71 @@ module PlaceOS::Build
     # Extract the driver metadata after compilation, rather than lazily
     getter? strict_driver_info : Bool
 
-    getter store : DriverStore
+    private getter compile_lock = Mutex.new
+    private getter compiling = Hash(Executable, Bool).new(false)
+
+    getter binary_store : DriverStore
+    getter repository_store : RepositoryStore
 
     def initialize(
-      @store = Filesystem.new,
-      binary_directory = nil,
-      repository_store_path = nil,
+      @binary_store = Filesystem.new,
+      @repository_store = RepositoryStore.new,
       @strict_driver_info = ENV["STRICT_DRIVER_INFO"]?.try(&.downcase) == "true"
     )
-      @repository_store_path = repository_store_path unless repository_store_path.nil?
-      @binary_store_path = binary_store_path unless binary_store_path.nil?
+    end
+
+    def compiled?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil)
+      repository_store.with_repository(
+        repository_uri,
+        entrypoint,
+        commit,
+        branch: nil,
+        username: username,
+        password: password,
+      ) do |repository_path|
+        executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+        binary_store.exists?(executable)
+      end
+    rescue e
+      Log.debug(exception: e) { {
+        message:        "failed to determine if driver was compiled",
+        repository_uri: repository_uri,
+        entrypoint:     entrypoint,
+        commit:         commit,
+      } }
+      false
+    end
+
+    def metadata?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil)
+      repository_store.with_repository(
+        repository_uri,
+        entrypoint,
+        commit,
+        branch: nil,
+        username: username,
+        password: password,
+      ) do |repository_path|
+        executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+        binary_store.info(executable)
+      end
+    rescue e
+      Log.debug(exception: e) { {
+        message:        "failed to extract metadata",
+        repository_uri: repository_uri,
+        entrypoint:     entrypoint,
+        commit:         commit,
+      } }
+      nil
+    end
+
+    module Compilation
+      alias Result = Success | Failure | NotFound
+
+      record NotFound
+      record Success, path : String
+      record Failure, error : String do
+        include JSON::Serializable
+      end
     end
 
     def compile(
@@ -47,75 +96,63 @@ module PlaceOS::Build
       entrypoint : String,
       commit : String,
       force_recompile : Bool = true,
-      crystal_version : String? = nil
-    ) : String
-      key = self.class.uri_to_directory(repository_uri)
-
-      # Ensure repository exists
-      if Dir.exists?(File.join(repository_store_path, key))
-        PlaceOS::Compiler::Git.fetch(
-          repository: key,
-          working_directory: repository_store_path,
-        )
-      else
-        PlaceOS::Compiler::Git.clone(
-          repository: key,
-          repository_uri: repository_uri,
-          working_directory: repository_store_path,
-        )
-      end
-
-      # Copy repository to a temporary directory
-      repository_path = File.join(repository_store_path, key)
-      key = UUID.random.to_s
-      temporary_directory = File.join(Dir.tempdir, key)
-      FileUtils.cp_r(repository_path, temporary_directory)
-      repository_path = temporary_directory
-
-      # Checkout temporary copy to desired commit.
-      PlaceOS::Compiler::Git.checkout(entrypoint, key, Dir.tempdir, commit) do
-        # Compile with highest available compiler if no version specified
-        crystal_version = Build::Compiler::Crystal.extract_latest_crystal(repository_path) if crystal_version.nil?
-
-        # Set the local crystal version
-        Build::Compiler::Crystal.install(crystal_version)
-        Build::Compiler::Crystal.local(crystal_version, repository_path)
-
-        # Check/Install shards
-        install_shards(repository_path)
-
-        # Extract the hash to name the file
-        digest = begin
-          PlaceOS::Build::Digest.digest([entrypoint], repository_path).first.hash
-        rescue e
-          Log.warn { "failed to digest #{entrypoint} using the driver's commit" }
-          # Use the commit if a digest could not be produced
-          commit[0, 6]
+      crystal_version : String? = nil,
+      username : String? = nil,
+      password : String? = nil
+    ) : Compilation::Result
+      repository_store.with_repository(
+        repository_uri,
+        entrypoint,
+        commit,
+        branch: nil,
+        username: username,
+        password: password,
+      ) do |repository_path|
+        executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+        # Look for an exact match
+        if !force_recompile && binary_store.exists?(executable)
+          return Compilation::Success.new(binary_store.path(executable))
         end
 
-        crystal_version = crystal_version.value if crystal_version.is_a? ::Shards::Version
-
-        executable = Executable.new(entrypoint, commit, digest, crystal_version)
-
-        # Look for an exact match
-        return store.path(executable) if !force_recompile && store.exists?(executable)
-
         # Look for drivers with matching hash, but different commit
-        if !force_recompile && (unchanged_executable = store.query(entrypoint, digest: digest, crystal_version: crystal_version).first?)
+        if !force_recompile && (unchanged_executable = binary_store.query(entrypoint, digest: executable.digest, crystal_version: executable.crystal_version).first?)
           # If it exists, copy with the current commit for the binary
-          store.link(unchanged_executable, executable)
+          binary_store.link(unchanged_executable, executable)
+          Compilation::Success.new(binary_store.path(executable))
         else
           build_driver(
             executable: executable,
-            repository: key,
-            working_directory: Dir.tempdir,
+            working_directory: repository_path.to_s,
           )
         end
-
-        store.path(executable)
       end
-    ensure
-      temporary_directory.try { |dir| FileUtils.rm_r(dir) } rescue nil
+    rescue e : PlaceOS::Compiler::Error::Git
+      Compilation::NotFound.new
+    end
+
+    private def extract_executable(repository_path : Path, entrypoint : String, commit : String, crystal_version : String?)
+      # Compile with highest available compiler if no version specified
+      crystal_version = Build::Compiler::Crystal.extract_latest_crystal(repository_path.to_s) if crystal_version.nil?
+
+      # Set the local crystal version
+      Build::Compiler::Crystal.install(crystal_version)
+      Build::Compiler::Crystal.local(crystal_version, repository_path.to_s)
+
+      # Check/Install shards
+      install_shards(repository_path.to_s)
+
+      # Extract the hash to name the file
+      digest = begin
+        PlaceOS::Build::Digest.digest([entrypoint], repository_path.to_s).first.hash
+      rescue
+        Log.warn { "failed to digest #{entrypoint}, using the driver's commit" }
+        # Use the commit if a digest could not be produced
+        commit[0, 6]
+      end
+
+      crystal_version = crystal_version.value if crystal_version.is_a? ::Shards::Version
+
+      Executable.new(entrypoint, commit, digest, crystal_version)
     end
 
     protected def install_shards(repository_path : String) : Nil
@@ -130,45 +167,43 @@ module PlaceOS::Build
 
     protected def build_driver(
       executable : Executable,
-      repository : String,
       working_directory : String
-    ) : Nil
-      repository_path = File.join(working_directory, repository)
-
+    ) : Compilation::Success | Compilation::Failure
       start = Time.utc
-
       path = if self.class.legacy_build_method?
                result = PlaceOS::Compiler.build_driver(
                  source_file: executable.entrypoint,
-                 repository: repository,
+                 repository: ".",
                  commit: executable.commit,
                  working_directory: working_directory,
-                 binary_directory: repository_path,
+                 binary_directory: working_directory,
                )
-               raise Build::Error.new(result.output) unless result.success?
+               return Compilation::Failure.new(result.output) unless result.success?
+
                result.path
              else
                executable_name = UUID.random.to_s
                result = ExecFrom.exec_from(
-                 repository_path,
+                 working_directory,
                  "crystal",
                  {"build", "--static", "--error-trace", "--no-color", "-o", executable_name, executable.entrypoint}
                )
-               raise Build::Error.new(result.output) unless result.status.success?
-               File.join(repository_path, executable_name)
+               return Compilation::Failure.new(result.output.to_s) unless result.status.success?
+
+               File.join(working_directory, executable_name)
              end
 
       Log.info { "compiling #{executable} took #{(Time.utc - start).total_seconds}s" }
 
       # Write the binary to the store
       File.open(path) do |file_io|
-        store.write(executable.filename) do |store_io|
-          IO.copy(file_io, store_io)
-        end
+        binary_store.write(executable.filename, file_io)
       end
 
       # Extract the metadata to the store
-      store.info(executable) if strict_driver_info?
+      binary_store.info(executable) if strict_driver_info?
+
+      Compilation::Success.new(executable.filename)
     ensure
       path.try { |p| File.delete(p) } rescue nil
     end
@@ -178,14 +213,6 @@ module PlaceOS::Build
       repository_store_path.children.compact_map do |path|
         self.class.directory_to_uri(path) if Dir.exists? path
       end
-    end
-
-    def self.uri_to_directory(uri)
-      Base64.urlsafe_encode(uri)
-    end
-
-    def self.directory_to_uri(key)
-      Base64.decode_string(key)
     end
   end
 end

@@ -2,10 +2,11 @@
 
 set -eu
 
-source ${HOME}/.asdf/asdf.sh
-
-asdf install crystal ${CRYSTAL_VERSION}
-asdf global crystal ${CRYSTAL_VERSION}
+# TODO: add once asdf patched for glibc crystal
+# source $HOME/.asdf/asdf.sh
+#
+# asdf install crystal 1.0.0
+# asdf global crystal 1.0.0
 
 if [ -z ${GITHUB_ACTION+x} ]
 then
@@ -15,6 +16,12 @@ then
   echo '### `ameba`' crystal lib/ameba/bin/ameba.cr
   crystal lib/ameba/bin/ameba.cr
 fi
+
+export CRYSTAL_PATH=lib:/usr/share/crystal/src
+export CRYSTAL_LIBRARY_PATH=/usr/local/lib
+export PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig
+export CPPFlAGS=-L/usr/local/opt/openssl/include
+export LDFLAGS=-L/usr/local/opt/openssl/lib
 
 watch="false"
 multithreaded="false"

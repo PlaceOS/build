@@ -1,9 +1,9 @@
-docs/
-lib/
-bin/
-.shards/
 *.dwarf
 .DS_*
+.shards/
 .tool-versions
-repositories
-binaries
+bin/
+build_app
+docs/
+lib/
+repositories/

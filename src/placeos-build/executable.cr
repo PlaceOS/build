@@ -1,3 +1,6 @@
+require "json"
+require "semantic_version"
+
 module PlaceOS::Build
   # Information pertaining to a driver binary
   #
@@ -10,6 +13,8 @@ module PlaceOS::Build
     getter digest : String
 
     getter crystal_version : SemanticVersion
+
+    def_equals_and_hash entrypoint, commit, digest, crystal_version
 
     private SEPERATOR = '-'
 
@@ -79,7 +84,9 @@ module PlaceOS::Build
       end
     end
 
-    record Info, defaults : String, metadata : String { include JSON::Serializable }
+    record Info, defaults : String, metadata : String, documentation : String = "" do
+      include JSON::Serializable
+    end
 
     private record Defaults, output : String
     private record Metadata, output : String

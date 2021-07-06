@@ -1,11 +1,17 @@
-require "uuid"
 require "action-controller"
+require "openapi-generator"
+require "openapi-generator/providers/action-controller"
+require "openapi-generator/helpers/action-controller"
+require "uuid"
 
 module PlaceOS::Build::Api
   abstract class Application < ActionController::Base
     macro inherited
       Log = ::Log.for({{ @type }})
     end
+
+    getter username : String? { request.headers["X-Git-Username"]?.presence }
+    getter password : String? { request.headers["X-Git-Password"]?.presence }
 
     before_action :set_request_id
 
