@@ -26,7 +26,7 @@ module PlaceOS::Build
       def run
         super
         repository_store = RepositoryStore.new(repository_store_path)
-        valid_driver_entrypoints = drivers(repository_store_path)
+        valid_driver_entrypoints = drivers(repository_store)
 
         if valid_driver_entrypoints.empty?
           Log.info { "no valid driver entrypoints passed" }
