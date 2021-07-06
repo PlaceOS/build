@@ -32,7 +32,7 @@ module PlaceOS::Build
     abstract def read(filename : String, & : IO ->)
 
     # Allow looser guarantees for metadata lookups
-    def info?(entrypoint : String, commit : String) : String?
+    def info?(entrypoint : String, commit : String) : Executable::Info?
       query(entrypoint: entrypoint, commit: commit).first?.try do |executable|
         info(executable)
       end

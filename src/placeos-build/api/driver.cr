@@ -44,7 +44,7 @@ module PlaceOS::Build::Api
         repository_uri,
         file,
         commit,
-        crystal_version: nil,
+        crystal_version: CRYSTAL_VERSION,
         username: username,
         password: password
       )
