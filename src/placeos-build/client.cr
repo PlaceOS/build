@@ -16,75 +16,48 @@ module PlaceOS::Build
 
     BASE_PATH     = "/api/build"
     BUILD_VERSION = "v1"
-
-    getter build_version : String = BUILD_VERSION
+    getter build_version : String
 
     getter host : String = ENV["PLACEOS_BUILD_HOST"]? || "localhost"
     getter port : Int32 = (ENV["PLACEOS_BUILD_PORT"]? || 3000).to_i
 
-    # Base struct for `PlaceOS::Build` responses
-    private abstract struct BaseResponse
-      include JSON::Serializable
-    end
-
     # A one-shot `PlaceOS::Build::Client`
-    def self.client(
-      uri : URI,
-      build_version : String = BUILD_VERSION
-    )
+    def self.client(uri : URI, build_version : String = BUILD_VERSION)
       client = new(uri, build_version)
       begin
-        response = yield client
+        yield client
       ensure
         client.connection.close
       end
-
-      response
     end
 
-    def initialize(
-      uri : URI,
-      @build_version : String = BUILD_VERSION
-    )
-      uri_host = uri.host
+    def initialize(uri : URI, @build_version : String = BUILD_VERSION)
+      uri_host = uri.host.presence
       @host = uri_host if uri_host
       @port = uri.port || 3000
       @connection = HTTP::Client.new(uri)
       @connection.read_timeout = 6.minutes
     end
 
-    def initialize(
-      host : String? = nil,
-      port : Int32? = nil,
-      @build_version : String = BUILD_VERSION
-    )
-      @host = host if host
+    def initialize(host : String? = nil, port : Int32? = nil, @build_version : String = BUILD_VERSION)
+      @host = host if host && host.presence
       @port = port if port
       @connection = HTTP::Client.new(host: @host, port: @port)
       @connection.read_timeout = 6.minutes
-    end
-
-    protected getter connection : HTTP::Client
-    protected getter connection_lock : Mutex = Mutex.new
-
-    def close
-      connection_lock.synchronize do
-        connection.close
-      end
     end
 
     # Root
     ###########################################################################
 
     # Healthcheck the service
-    def healthcheck : Bool
-      get("/", raises: false).success?
+    def healthcheck(request_id : String? = nil) : Bool
+      get("/", raises: false, request_id: request_id).success?
     end
 
     # Returns the service's `PlaceOS::Model::Version`
-    def version : Model::Version
+    def version(request_id : String? = nil) : Model::Version
       parse_to_return_type do
-        get("/version")
+        get("/version", request_id: request_id)
       end
     end
 
@@ -97,7 +70,8 @@ module PlaceOS::Build
       branch : String = "master",
       count : Int32 = 50,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
+      request_id : String? = nil
     ) : Array(String)
       params = HTTP::Params{
         "url"    => url,
@@ -105,7 +79,7 @@ module PlaceOS::Build
         "count"  => count.to_s,
       }
       parse_to_return_type do
-        get("/repository?#{params}", authorization_header(username, password))
+        get("/repository?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -116,7 +90,8 @@ module PlaceOS::Build
       branch : String = "master",
       count : Int32 = 50,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
+      request_id : String? = nil
     ) : Array(String)
       params = HTTP::Params{
         "url"    => url,
@@ -124,7 +99,7 @@ module PlaceOS::Build
         "count"  => count.to_s,
       }
       parse_to_return_type do
-        get("/repository/#{file}?#{params}", authorization_header(username, password))
+        get("/repository/#{file}?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -138,7 +113,7 @@ module PlaceOS::Build
         "url" => url,
       }
       parse_to_return_type do
-        get("/repository/branches?#{params}", authorization_header(username, password))
+        get("/repository/branches?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -151,13 +126,14 @@ module PlaceOS::Build
       url : String,
       commit : String,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
+      request_id : String? = nil
     )
       params = HTTP::Params{
         "url"    => url,
         "commit" => commit,
       }
-      post("/driver/#{file}?#{params}", authorization_header(username, password)) do |response|
+      post("/driver/#{file}?#{params}", authorization_header(username, password), request_id: request_id) do |response|
         yield reponse.body_io
       end
     end
@@ -168,14 +144,15 @@ module PlaceOS::Build
       url : String,
       commit : String,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
+      request_id : String? = nil
     ) : Executable::Info
       params = HTTP::Params{
         "url"    => url,
         "commit" => commit,
       }
       parse_to_return_type do
-        get("/driver/#{file}/metadata?#{params}", authorization_header(username, password))
+        get("/driver/#{file}/metadata?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -185,14 +162,15 @@ module PlaceOS::Build
       url : String,
       commit : String,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
+      request_id : String? = nil
     ) : String
       params = HTTP::Params{
         "url"    => url,
         "commit" => commit,
       }
       parse_to_return_type do
-        get("/driver/#{file}/docs?#{params}", authorization_header(username, password))
+        get("/driver/#{file}/docs?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -202,9 +180,10 @@ module PlaceOS::Build
       url : String,
       commit : String,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
+      request_id : String? = nil
     )
-      get("/driver/#{file}/compiled", raises: false).success?
+      get("/driver/#{file}/compiled", request_id: request_id, raises: false).success?
     end
 
     # Helpers
@@ -217,15 +196,16 @@ module PlaceOS::Build
       end
     end
 
-    protected def request_id
-      UUID.random.to_s
-    end
+    # Connection
+    ###########################################################################
 
-    protected def base_headers(existing : HTTP::Headers? = nil)
-      existing ||= HTTP::Headers.new
-      existing["Content-Type"] = "application/json"
-      existing["X-Request-ID"] = request_id unless existing.has_key? "X-Request-ID"
-      existing
+    protected getter connection : HTTP::Client
+    protected getter connection_lock : Mutex = Mutex.new
+
+    def close
+      connection_lock.synchronize do
+        connection.close
+      end
     end
 
     # API modem
@@ -235,26 +215,9 @@ module PlaceOS::Build
       # Executes a {{method.id.upcase}} request on build connection.
       #
       # The response status will be automatically checked and a `PlaceOS::Build::ClientError` raised if
-      # unsuccessful.
-      # ```
-      private def {{method.id}}(path, headers : HTTP::Headers? = nil, body : HTTP::Client::BodyType? = nil, raises : Bool = true)
-        path = File.join(BASE_PATH, BUILD_VERSION, path)
-        rewind_io = ->(e : Exception, _a : Int32, _t : Time::Span, _n : Time::Span) {
-          Log.error(exception: e) { {method: {{ method.stringify }}, path: path, message: "failed to request build"} }
-          body.rewind if body.responds_to? :rewind
-        }
-
-        Retriable.retry times: 10, max_interval: 1.minute, on_retry: rewind_io do
-          response = connection_lock.synchronize do
-            connection.{{method.id}}(path, base_headers(headers), body)
-          end
-
-          if response.success? || !raises
-            response
-          else
-            raise Build::ClientError.from_response("#{@host}:#{@port}#{path}", response)
-          end
-        end
+      # unsuccessful and `raises` is `true`.
+      private def {{method.id}}(path : String, headers : HTTP::Headers? = nil, body : HTTP::Client::BodyType? = nil, request_id : String? = nil, raises : Bool = true) : HTTP::Client::Response
+        {{method.id}}(path, headers, body, request_id, raises) { |response| response }
       end
 
       # Executes a {{method.id.upcase}} request and yields a `HTTP::Client::Response`.
@@ -262,21 +225,25 @@ module PlaceOS::Build
       # When working with endpoint that provide stream responses these may be accessed as available
       # by calling `#body_io` on the yielded response object.
       #
-      # The response status will be automatically checked and a `PlaceOS::Build::ClientErrror` raised if
-      # unsuccessful.
-      private def {{method.id}}(path, headers : HTTP::Headers? = nil, body : HTTP::Client::BodyType = nil, raises : Bool = false)
-        path = File.join(BASE_PATH, BUILD_VERSION, path)
+      # The response status will be automatically checked and a `PlaceOS::Build::ClientError` raised if
+      # unsuccessful and `raises` is `true`.
+      private def {{method.id}}(path, headers : HTTP::Headers? = nil, body : HTTP::Client::BodyType = nil, request_id : String? = nil, raises : Bool = false)
+        headers ||= HTTP::Headers.new
+        headers["Content-Type"] = "application/json"
+        headers["X-Request-ID"] = request_id || UUID.random.to_s unless headers.has_key? "X-Request-ID"
+
+        path = File.join(BASE_PATH, build_version, path)
         rewind_io = ->(e : Exception, _a : Int32, _t : Time::Span, _n : Time::Span) {
           Log.error(exception: e) { {method: {{ method.stringify }}, path: path, message: "failed to request build"} }
           body.rewind if body.responds_to? :rewind
         }
         Retriable.retry times: 10, max_interval: 1.minute, on_retry: rewind_io do
           connection_lock.synchronize do
-            connection.{{method.id}}(path, base_headers(headers), body) do |response|
+            connection.{{method.id}}(path, headers, body) do |response|
               if response.success? || !raises
                 yield response
               else
-                raise Build::ClientError.from_response("#{@host}:#{@port}#{path}", response) unless response.success?
+                raise Build::ClientError.from_response("#{@host}:#{@port}#{path}", response)
               end
             end
           end
