@@ -98,8 +98,9 @@ module PlaceOS::Build
         "branch" => branch,
         "count"  => count.to_s,
       }
+
       parse_to_return_type do
-        get("/repository/#{file}?#{params}", authorization_header(username, password), request_id: request_id)
+        get("/repository/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -133,7 +134,7 @@ module PlaceOS::Build
         "url"    => url,
         "commit" => commit,
       }
-      post("/driver/#{file}?#{params}", authorization_header(username, password), request_id: request_id) do |response|
+      post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id) do |response|
         yield reponse.body_io
       end
     end
@@ -152,7 +153,7 @@ module PlaceOS::Build
         "commit" => commit,
       }
       parse_to_return_type do
-        get("/driver/#{file}/metadata?#{params}", authorization_header(username, password), request_id: request_id)
+        get("/driver/#{URI.encode_www_form(file)}/metadata?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -170,7 +171,7 @@ module PlaceOS::Build
         "commit" => commit,
       }
       parse_to_return_type do
-        get("/driver/#{file}/docs?#{params}", authorization_header(username, password), request_id: request_id)
+        get("/driver/#{URI.encode_www_form(file)}/docs?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -183,7 +184,7 @@ module PlaceOS::Build
       password : String? = nil,
       request_id : String? = nil
     )
-      get("/driver/#{file}/compiled", request_id: request_id, raises: false).success?
+      get("/driver/#{URI.encode_www_form(file)}/compiled", request_id: request_id, raises: false).success?
     end
 
     # Helpers
@@ -234,7 +235,7 @@ module PlaceOS::Build
 
         path = File.join(BASE_PATH, build_version, path)
         rewind_io = ->(e : Exception, _a : Int32, _t : Time::Span, _n : Time::Span) {
-          Log.error(exception: e) { {method: {{ method.stringify }}, path: path, message: "failed to request build"} }
+          Log.error(exception: e) { {method: {{ method }}, path: path, message: "failed to request build"} }
           body.rewind if body.responds_to? :rewind
         }
         Retriable.retry times: 10, max_interval: 1.minute, on_retry: rewind_io do
