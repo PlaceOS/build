@@ -19,22 +19,19 @@ module PlaceOS::Build
   end
 
   class ClientError < Error
-    getter status_code
+    getter response : HTTP::Client::Response
+    delegate status_code, to: response
 
-    def initialize(@status_code : Int32, message = "")
+    def initialize(@response : HTTP::Client::Response, message = "")
       super(message)
     end
 
-    def initialize(path : String, @status_code : Int32, message : String)
-      super("request to #{path} failed with #{message}")
-    end
-
-    def initialize(path : String, @status_code : Int32)
-      super("request to #{path} failed")
+    def initialize(path : String, @response)
+      super("request to #{path} failed with\n#{response.body}")
     end
 
     def self.from_response(path : String, response : HTTP::Client::Response)
-      new(path, response.status_code, response.body)
+      new(path, response)
     end
   end
 end

@@ -4,6 +4,7 @@ require "uuid"
 
 require "placeos-compiler"
 
+require "./compilation"
 require "./compiler"
 require "./digest"
 require "./driver_store"
@@ -37,7 +38,7 @@ module PlaceOS::Build
     )
     end
 
-    def compiled?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil)
+    def compiled(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil) : String?
       repository_store.with_repository(
         repository_uri,
         entrypoint,
@@ -47,7 +48,7 @@ module PlaceOS::Build
         password: password,
       ) do |repository_path|
         executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
-        binary_store.exists?(executable)
+        executable.filename if binary_store.exists?(executable)
       end
     rescue e
       Log.debug(exception: e) { {
@@ -79,16 +80,6 @@ module PlaceOS::Build
         commit:         commit,
       } }
       nil
-    end
-
-    module Compilation
-      alias Result = Success | Failure | NotFound
-
-      record NotFound
-      record Success, path : String
-      record Failure, error : String do
-        include JSON::Serializable
-      end
     end
 
     def compile(

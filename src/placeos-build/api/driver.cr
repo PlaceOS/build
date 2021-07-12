@@ -25,6 +25,8 @@ module PlaceOS::Build::Api
 
     ###########################################################################
 
+    DRIVER_HEADER_KEY = "x-placeos-driver-key"
+
     # TODO: Once crystal version varying is supported, we'll add that as an argument
     #
     # Returns…
@@ -54,6 +56,7 @@ module PlaceOS::Build::Api
         head code: :not_found
       in Drivers::Compilation::Success
         response.content_type = "application/octet-stream"
+        response.headers[DRIVER_HEADER_KEY] = Path[result.path].basename
         response.content_length = File.size(result.path)
         File.open(result.path) do |file_io|
           IO.copy(file_io, response)
@@ -114,8 +117,8 @@ module PlaceOS::Build::Api
       YAML
     )]) do
       file = route_params["file"]
-      if builder.compiled?(repository_uri, file, commit, username: username, password: password)
-        head code: :ok
+      if filename = builder.compiled(repository_uri, file, commit, username: username, password: password)
+        render status_code: :ok, json: filename
       else
         head code: :not_found
       end
