@@ -43,10 +43,11 @@ module PlaceOS::Build
       password : String? = nil
     )
       with_repository(uri, file, "HEAD", branch, username, password) do |repository_path|
-        Git.commits(file, repository_path.basename, repository_path.parent.to_s, limit)
+        requires = Digest.requires([file], repository_path.to_s)
+        Git.commits(requires.unshift("shard.lock"), repository_path.basename, repository_path.parent.to_s, limit)
       end
     rescue e
-      Log.error(exception: e) { "failed to fetch commits for #{file} iin #{uri}" }
+      Log.error(exception: e) { "failed to fetch commits for #{file} in #{uri}" }
       nil
     end
 
