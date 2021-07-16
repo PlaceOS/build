@@ -67,10 +67,7 @@ module PlaceOS::Build::Digest
     end
 
     def lock_file
-      shard_lock.try do |f|
-        abort("no shard.lock at #{f}") unless File.exists? f
-        f
-      end
+      shard_lock.tap { |f| abort("no shard.lock at #{f}") if f && !File.exists?(f) }
     end
 
     def paths
@@ -85,18 +82,17 @@ module PlaceOS::Build::Digest
       end
     end
 
-    def requires(entrypoint) : Enumerable(String)
-      compiler = ::Crystal::Compiler.new.tap do |config|
-        dev_null = File.open(File::NULL, mode: "w")
-        config.color = false
-        config.no_codegen = true
-        config.release = false
-        config.wants_doc = false
-        config.stderr = dev_null
-        config.stdout = dev_null
-      end
-
-      compiler
+    def requires(entrypoint) : Set(String)
+      ::Crystal::Compiler.new
+        .tap { |config|
+          dev_null = File.open(File::NULL, mode: "w")
+          config.color = false
+          config.no_codegen = true
+          config.release = false
+          config.wants_doc = false
+          config.stderr = dev_null
+          config.stdout = dev_null
+        }
         .top_level_semantic(source: ::Crystal::Compiler::Source.new(entrypoint.to_s, File.read(entrypoint)))
         .program
         .requires
@@ -106,7 +102,7 @@ module PlaceOS::Build::Digest
   @[Clip::Doc("Outputs a list of crystal files in a source graphs, one file per line\nExpects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH in the environment\n")]
   struct Requires < Cli
     def run
-      require_channel = Channel(Enumerable(String)).new
+      require_channel = Channel(Set(String)).new
 
       all_paths = paths
       all_paths.each do |entrypoint|
