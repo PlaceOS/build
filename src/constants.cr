@@ -9,6 +9,7 @@ module PlaceOS::Build
 
   CRYSTAL_VERSION   = {{ env("CRYSTAL_VERSION") || "latest" }}
   DRIVER_HEADER_KEY = "X-PLACEOS-DRIVER-KEY"
+
   # S3 caching
   #############################################################################
 
