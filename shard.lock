@@ -1,8 +1,8 @@
 version: 2.0
 shards:
   CrystalEmail:
-    git: https://github.com/nephos/crystalemail.git
-    version: 0.2.4
+    git: https://github.com/place-labs/crystalemail.git
+    version: 0.2.6
 
   action-controller:
     git: https://github.com/spider-gazelle/action-controller.git
@@ -18,7 +18,7 @@ shards:
 
   awscr-s3:
     git: https://github.com/taylorfinnell/awscr-s3.git
-    version: 0.8.2
+    version: 0.8.3+git.commit.559518424669934ee6390541a6d88262ef75a370
 
   awscr-signer:
     git: https://github.com/taylorfinnell/awscr-signer.git
@@ -110,7 +110,7 @@ shards:
 
   neuroplastic:
     git: https://github.com/spider-gazelle/neuroplastic.git
-    version: 1.7.1
+    version: 1.8.0
 
   open_api:
     git: https://github.com/elbywan/open_api.cr.git
@@ -126,11 +126,11 @@ shards:
 
   placeos-compiler:
     git: https://github.com/placeos/compiler.git
-    version: 4.3.1
+    version: 4.3.4
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 5.3.15
+    version: 5.4.7
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git
@@ -138,7 +138,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 5.7.0
+    version: 5.7.4
 
   pool:
     git: https://github.com/ysbaddaden/pool.git
@@ -150,7 +150,7 @@ shards:
 
   redis:
     git: https://github.com/stefanwille/crystal-redis.git
-    version: 2.7.0
+    version: 2.8.0
 
   redis-cluster:
     git: https://github.com/caspiano/redis-cluster.cr.git
@@ -170,7 +170,7 @@ shards:
 
   rethinkdb-orm:
     git: https://github.com/spider-gazelle/rethinkdb-orm.git
-    version: 4.1.0
+    version: 5.0.0
 
   retriable:
     git: https://github.com/sija/retriable.cr.git

@@ -15,7 +15,7 @@ dependencies:
     version: ~> 4.4
   awscr-s3:
     github: taylorfinnell/awscr-s3
-    version: ~> 0.8
+    branch: master
   clip:
     github: erdnaxeli/clip
   exec_from:
