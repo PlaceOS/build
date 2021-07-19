@@ -137,13 +137,12 @@ module PlaceOS::Build
         "url"    => url,
         "commit" => commit,
       }
-      driver_key = post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, raises: false, retries: 2) do |response|
+      post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, raises: false, retries: 2) do |response|
         key = response.headers[DRIVER_HEADER_KEY]
+        time = response.headers[DRIVER_HEADER_TIME]
         yield key, response.body_io
-        key
+        Compilation::Success.new(key, time)
       end
-
-      Compilation::Success.new(driver_key)
     rescue e : Build::ClientError
       case e.response.status_code
       when 404 then Compilation::NotFound.new
