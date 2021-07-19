@@ -56,7 +56,7 @@ module PlaceOS::Build::Api
         head code: :not_found
       in Drivers::Compilation::Success
         response.content_type = "application/octet-stream"
-        response.headers[DRIVER_HEADER_KEY] = Path[result.path].basename
+        response.headers.merge(result.to_http_headers)
         response.content_length = File.size(result.path)
         File.open(result.path) do |file_io|
           IO.copy(file_io, response)

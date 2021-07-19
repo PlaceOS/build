@@ -7,8 +7,13 @@ module PlaceOS::Build
   BUILD_TIME   = {{ system("date -u").chomp.stringify }}
   BUILD_COMMIT = {{ env("PLACE_COMMIT") || "DEV" }}
 
-  CRYSTAL_VERSION   = {{ env("CRYSTAL_VERSION") || "latest" }}
-  DRIVER_HEADER_KEY = "X-PLACEOS-DRIVER-KEY"
+  CRYSTAL_VERSION = {{ env("CRYSTAL_VERSION") || "latest" }}
+
+  # Keys in API responses
+  #############################################################################
+
+  DRIVER_HEADER_KEY  = "X-PLACEOS-DRIVER-KEY"
+  DRIVER_HEADER_TIME = "X-PLACEOS-DRIVER-TIME"
 
   # S3 caching
   #############################################################################
