@@ -126,11 +126,11 @@ shards:
 
   placeos-compiler:
     git: https://github.com/placeos/compiler.git
-    version: 4.3.4
+    version: 4.3.7
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 5.4.7
+    version: 5.4.9
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git

@@ -24,6 +24,16 @@ module PlaceOS::Build
     getter port : Int32 = (ENV["PLACEOS_BUILD_PORT"]? || 3000).to_i
 
     # A one-shot `PlaceOS::Build::Client`
+    def self.client
+      client = new
+      begin
+        yield client
+      ensure
+        client.connection.close
+      end
+    end
+
+    # :ditto:
     def self.client(uri : URI, build_version : String = BUILD_VERSION)
       client = new(uri, build_version)
       begin
@@ -110,7 +120,8 @@ module PlaceOS::Build
     def branches(
       url : String,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
+      request_id : String? = nil
     ) : Array(String)
       params = HTTP::Params{
         "url" => url,
