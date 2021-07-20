@@ -245,7 +245,7 @@ module PlaceOS::Build
       # The response status will be automatically checked and a `PlaceOS::Build::ClientError` raised if
       # unsuccessful and `raises` is `true`.
       private def {{method.id}}(path : String, headers : HTTP::Headers? = nil, body : HTTP::Client::BodyType? = nil, request_id : String? = nil, raises : Bool = true, retries : Int32 = 10) : HTTP::Client::Response
-        {{method.id}}(path, headers, body, request_id, raises, reties) { |response| response }
+        {{method.id}}(path, headers, body, request_id, raises, retries) { |response| response }
       end
 
       # Executes a {{method.id.upcase}} request and yields a `HTTP::Client::Response`.
