@@ -56,7 +56,7 @@ module PlaceOS::Build::Api
         head code: :not_found
       in Build::Compilation::Success
         response.content_type = "application/octet-stream"
-        response.headers.merge(result.to_http_headers)
+        result.to_http_headers.each { |k, v| response.headers[k] = v }
         response.content_length = File.size(result.path)
         File.open(result.path) do |file_io|
           IO.copy(file_io, response)

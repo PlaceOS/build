@@ -2,9 +2,9 @@ require "clip"
 require "log"
 
 require "../constants"
+require "../logging"
 require "./cli/*"
 require "./driver_store/s3"
-require "./logging"
 
 module PlaceOS::Build
   def self.run

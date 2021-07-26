@@ -16,10 +16,10 @@ module PlaceOS::Build
         @compiled = compiled.is_a?(Time) ? compiled : Time.unix_ms(compiled)
       end
 
-      def to_http_headers
-        {
+      def to_http_headers : HTTP::Headers
+        HTTP::Headers{
           DRIVER_HEADER_KEY  => Path[path].basename,
-          DRIVER_HEADER_TIME => compiled.total_milliseconds,
+          DRIVER_HEADER_TIME => compiled.to_unix_ms.to_s,
         }
       end
     end
