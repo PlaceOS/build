@@ -27,7 +27,6 @@ module PlaceOS::Build::Digest
     include Clip::Mapper
 
     macro inherited
-      include Clip::Mapper
       Log = ::Log.for({{ @type }})
     end
 

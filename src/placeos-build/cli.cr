@@ -4,6 +4,7 @@ require "log"
 require "../constants"
 require "./cli/*"
 require "./driver_store/s3"
+require "./logging"
 
 module PlaceOS::Build
   def self.run
@@ -55,10 +56,7 @@ module PlaceOS::Build
       "server" => Server,
     })
 
-    def run
-      run_version
-      run_environment
-    end
+    abstract def run
 
     protected def run_version
       return unless version

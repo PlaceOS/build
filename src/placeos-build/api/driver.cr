@@ -52,9 +52,9 @@ module PlaceOS::Build::Api
       )
 
       case result
-      in Drivers::Compilation::NotFound
+      in Build::Compilation::NotFound
         head code: :not_found
-      in Drivers::Compilation::Success
+      in Build::Compilation::Success
         response.content_type = "application/octet-stream"
         response.headers.merge(result.to_http_headers)
         response.content_length = File.size(result.path)
@@ -62,7 +62,7 @@ module PlaceOS::Build::Api
           IO.copy(file_io, response)
         end
         head code: :ok
-      in Drivers::Compilation::Failure
+      in Build::Compilation::Failure
         render status_code: :internal_server_error, json: result
       end
     end

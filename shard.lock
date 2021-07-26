@@ -6,7 +6,7 @@ shards:
 
   action-controller:
     git: https://github.com/spider-gazelle/action-controller.git
-    version: 4.5.0
+    version: 4.5.1
 
   active-model:
     git: https://github.com/spider-gazelle/active-model.git
@@ -98,7 +98,7 @@ shards:
 
   lucky_router:
     git: https://github.com/luckyframework/lucky_router.git
-    version: 0.4.2
+    version: 0.5.0
 
   molinillo:
     git: https://github.com/crystal-lang/crystal-molinillo.git
@@ -126,11 +126,11 @@ shards:
 
   placeos-compiler:
     git: https://github.com/placeos/compiler.git
-    version: 4.3.7
+    version: 4.3.9
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 5.4.9
+    version: 5.4.12
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git
@@ -138,7 +138,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 5.7.4
+    version: 5.8.0
 
   pool:
     git: https://github.com/ysbaddaden/pool.git

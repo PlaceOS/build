@@ -2,6 +2,8 @@ module PlaceOS::Build
   abstract struct Cli
     @[Clip::Doc("Run as a REST API, see <TODO: link to openapi.yml>")]
     struct Server < Cli
+      include Clip::Mapper
+
       @[Clip::Doc("Specifies the server host")]
       getter host : String = "127.0.0.1"
       @[Clip::Doc("Specifies the server port")]
@@ -20,7 +22,6 @@ module PlaceOS::Build
       getter curl : String? = nil
 
       def run
-        super
         run_routes
         run_curl
 

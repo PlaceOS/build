@@ -1,4 +1,5 @@
 require "placeos-compiler/git"
+require "file_utils"
 
 module PlaceOS::Build
   class RepositoryStore
@@ -58,6 +59,12 @@ module PlaceOS::Build
     rescue e
       Log.error(exception: e) { "failed to fetch branches for #{uri}" }
       nil
+    end
+
+    def link_existing(uri, path)
+      key = self.class.uri_to_directory(uri)
+      link_path = File.join(store_path, key)
+      FileUtils.cp_r(path, link_path)
     end
 
     def with_repository(

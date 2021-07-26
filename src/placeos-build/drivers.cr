@@ -57,7 +57,7 @@ module PlaceOS::Build
         entrypoint:     entrypoint,
         commit:         commit,
       } }
-      false
+      nil
     end
 
     def metadata?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil)
@@ -82,6 +82,30 @@ module PlaceOS::Build
       nil
     end
 
+    def local_compile(
+      repository_path : Path,
+      entrypoint : String,
+      commit : String,
+      force_recompile : Bool = true,
+      crystal_version : String? = nil
+    )
+      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+      # Look for an exact match
+      return Compilation::Success.new(binary_store.path(executable)) if !force_recompile && binary_store.exists?(executable)
+
+      # Look for drivers with matching hash, but different commit
+      if !force_recompile && (unchanged_executable = binary_store.query(entrypoint, digest: executable.digest, crystal_version: executable.crystal_version).first?)
+        # If it exists, copy with the current commit for the binary
+        binary_store.link(unchanged_executable, executable)
+        Compilation::Success.new(binary_store.path(executable))
+      else
+        build_driver(
+          executable: executable,
+          working_directory: repository_path.to_s,
+        )
+      end
+    end
+
     def compile(
       repository_uri : String,
       entrypoint : String,
@@ -99,23 +123,13 @@ module PlaceOS::Build
         username: username,
         password: password,
       ) do |repository_path|
-        executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
-        # Look for an exact match
-        if !force_recompile && binary_store.exists?(executable)
-          return Compilation::Success.new(binary_store.path(executable), modification_time(executable))
-        end
-
-        # Look for drivers with matching hash, but different commit
-        if !force_recompile && (unchanged_executable = binary_store.query(entrypoint, digest: executable.digest, crystal_version: executable.crystal_version).first?)
-          # If it exists, copy with the current commit for the binary
-          binary_store.link(unchanged_executable, executable)
-          Compilation::Success.new(binary_store.path(executable), modification_time(unchanged_executable))
-        else
-          build_driver(
-            executable: executable,
-            working_directory: repository_path.to_s,
-          )
-        end
+        local_compile(
+          repository_path: repository_path,
+          entrypoint: entrypoint,
+          commit: commit,
+          force_recompile: force_recompile,
+          crystal_version: crystal_version,
+        )
       end
     rescue e : PlaceOS::Compiler::Error::Git
       Compilation::NotFound.new

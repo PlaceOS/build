@@ -29,9 +29,7 @@ module PlaceOS::Build::Digest
     end
     Log.debug { "extracting requires from #{entrypoints.join(", ")} took #{(Time.utc - started).milliseconds}ms" }
 
-    output
-      .rewind
-      .read_lines(chomp: true)
+    output.rewind.to_s.lines(chomp: true)
   end
 
   # Expects the presence of `digest` binary under `bin` directory
@@ -50,9 +48,7 @@ module PlaceOS::Build::Digest
 
     Log.debug { "digesting #{entrypoints.join(", ")} took #{(Time.utc - started).milliseconds}ms" }
 
-    output
-      .rewind
-      .each_line(chomp: true)
+    output.rewind.to_s.lines(chomp: true)
       .compact_map(&->Result.from_line?(String))
       .to_a
   end
