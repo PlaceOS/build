@@ -1,4 +1,4 @@
-ARG CRYSTAL_VERSION=1.0.0
+ARG CRYSTAL_VERSION=1.1.0
 
 # Build `digest_cli`
 ###############################################################################
@@ -18,6 +18,7 @@ RUN CRYSTAL_PATH=/usr/share/crystal/src \
 COPY shard.* .
 RUN shards install --production --ignore-crystal-version
 
+COPY src/dependency_graph.cr src/dependency_graph.cr
 COPY src/digest_cli.cr src/digest_cli.cr
 
 # Build the required target
