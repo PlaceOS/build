@@ -24,9 +24,8 @@ jobs:
         stable: [true]
         legacy: [true, false]
         crystal:
-          - latest
-          - 1.1.0
           - 1.0.0
+          - 1.1.0
         MT: [false]
         include:
           - stable: false
