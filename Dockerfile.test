@@ -25,6 +25,7 @@ COPY shard.yml .
 
 RUN shards install --ignore-crystal-version
 
+COPY src/dependency_graph.cr src/dependency_graph.cr
 COPY src/digest_cli.cr src/digest_cli.cr
 
 ENV CRYSTAL_VERSION=$CRYSTAL_VERSION

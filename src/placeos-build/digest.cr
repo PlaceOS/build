@@ -40,12 +40,12 @@ module PlaceOS::Build::Digest
     output = IO::Memory.new
     error = IO::Memory.new
 
-    entrypoints = entrypoints.dup
-    entrypoints.unshift("-s", shard_lock.as(String)) if shard_lock
-    entrypoints.unshift("digest")
+    arguments = entrypoints.dup
+    arguments.unshift("--shard-lock=#{shard_lock.as(String)}") if shard_lock
+    arguments.unshift("digest")
     started = Time.utc
-    unless Process.run(EXECUTABLE_PATH, entrypoints, chdir: working_directory, output: output, error: error).success?
-      raise Build::Error.new("failed to digest: #{error}")
+    unless Process.run(EXECUTABLE_PATH, arguments, chdir: working_directory, output: output, error: error).success?
+      raise Build::Error.new("failed to digest: #{error} #{output}")
     end
 
     Log.debug { "digesting #{entrypoints.join(", ")} took #{(Time.utc - started).milliseconds}ms" }

@@ -1,26 +1,11 @@
 require "clip"
-require "compiler/crystal/**"
+require "colorize"
 require "digest/sha1"
 require "future"
 require "log"
-
 require "placeos-log-backend"
 
-class Crystal::TopLevelVisitor < Crystal::SemanticVisitor
-  # Overload to catch exceptions for missing files.
-  #
-  # This is overriding some very internal compiler code,
-  # thankfully tests will loudly catch errors in this.
-  def visit(node : Require)
-    super
-  rescue ex
-    raise ex unless ex.message.try &.starts_with? "can't find file"
-    nop = Nop.new
-    node.expanded = nop
-    node.bind_to(nop)
-    false
-  end
-end
+require "./dependency_graph"
 
 module PlaceOS::Build::Digest
   Log = ::Log.for(self)
@@ -53,14 +38,14 @@ module PlaceOS::Build::Digest
 
     @[Clip::Doc("Specify a shard.lock")]
     @[Clip::Option("-s", "--shard-lock")]
-    getter shard_lock : String?
+    getter shard_lock : String? = nil
 
     getter entrypoints : Array(String)
 
     abstract def run
 
-    CRYSTAL_PATH         = self.validate_env!("CRYSTAL_PATH")
-    CRYSTAL_LIBRARY_PATH = self.validate_env!("CRYSTAL_LIBRARY_PATH")
+    # CRYSTAL_PATH         = self.validate_env!("CRYSTAL_PATH")
+    # CRYSTAL_LIBRARY_PATH = self.validate_env!("CRYSTAL_LIBRARY_PATH")
 
     protected def self.validate_env!(key)
       ENV[key]?.presence || abort("#{key} not present in environment")
@@ -70,7 +55,7 @@ module PlaceOS::Build::Digest
       shard_lock.tap { |f| abort("no shard.lock at #{f}") if f && !File.exists?(f) }
     end
 
-    def paths
+    def self.paths(entrypoints)
       entrypoints.compact_map do |f|
         path = Path[f]
         if File.exists?(path)
@@ -81,33 +66,17 @@ module PlaceOS::Build::Digest
         end
       end
     end
-
-    def requires(entrypoint) : Set(String)
-      ::Crystal::Compiler.new
-        .tap { |config|
-          dev_null = File.open(File::NULL, mode: "w")
-          config.color = false
-          config.no_codegen = true
-          config.release = false
-          config.wants_doc = false
-          config.stderr = dev_null
-          config.stdout = dev_null
-        }
-        .top_level_semantic(source: ::Crystal::Compiler::Source.new(entrypoint.to_s, File.read(entrypoint)))
-        .program
-        .requires
-    end
   end
 
-  @[Clip::Doc("Outputs a list of crystal files in a source graphs, one file per line\nExpects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH in the environment\n")]
+  @[Clip::Doc("Outputs a list of crystal files in a source graphs, one file per line")]
   struct Requires < Cli
     def run
       require_channel = Channel(Set(String)).new
 
-      all_paths = paths
+      all_paths = Cli.paths(entrypoints)
       all_paths.each do |entrypoint|
         spawn do
-          require_channel.send requires(entrypoint)
+          require_channel.send DependencyGraph.requires(entrypoint)
         end
       end
 
@@ -119,7 +88,7 @@ module PlaceOS::Build::Digest
     end
   end
 
-  @[Clip::Doc("Outputs a CSV of digested crystal source graphs, formatted as FILE,HASH\nExpects CRYSTAL_PATH and CRYSTAL_LIBRARY_PATH in the environment\n")]
+  @[Clip::Doc("Outputs a CSV of digested crystal source graphs, formatted as FILE,HASH")]
   struct Digest < Cli
     @[Clip::Doc("Enable verbose logging")]
     @[Clip::Option("-v", "--verbose")]
@@ -128,10 +97,15 @@ module PlaceOS::Build::Digest
     def run
       ::Log.setup("*", :debug, PlaceOS::LogBackend.log_backend) if verbose
 
-      lock_hash = lock_file.try &->file_hash(String)
+      self.class.digest(entrypoints, lock_file).each do |result|
+        puts result.join(',')
+      end
+    end
 
+    def self.digest(entrypoints : Array(String), lock_file : String? = nil)
+      lock_hash = lock_file.try &->file_hash(String)
       digests = Channel({Path, String}).new
-      all_paths = paths
+      all_paths = Cli.paths(entrypoints)
       all_paths.each do |path|
         spawn do
           begin
@@ -147,42 +121,22 @@ module PlaceOS::Build::Digest
         end
       end
 
-      all_paths.size.times do
-        result = digests.receive?
-        raise "digesting failed!" if result.nil?
-        puts result.join(',')
+      Array({Path, String}).new(all_paths.size).tap do |results|
+        all_paths.size.times do
+          result = digests.receive?
+          raise "digesting failed!" if result.nil?
+          results << result
+        end
       end
     end
 
-    # Ignore the file if it is from the crystal lib
-    # as `digest_cli` is using the compiler purely to compute requires.
-    protected def crystal_file_hash?(path : String)
-      "c".to_slice if path.starts_with? CRYSTAL_PATH
-    end
-
-    # TODO:
-    # Look up the SHA1 for a path in the git object store
-    protected def object_store_hash?(path)
-      nil
-    end
-
-    protected def digest_hash(path)
-      File.open(path) do |io|
-        ::Digest::SHA1.digest &.update(io)
-      end
-    end
-
-    def file_hash(path)
-      object_store_hash?(path) || crystal_file_hash?(path) || digest_hash(path)
-    end
-
-    def program_hash(entrypoint : String | Path, shard_digest)
+    def self.program_hash(entrypoint : String | Path, shard_digest)
       # Calculate SHA-1 hash of entrypoint's requires
       Log.debug { "digesting #{entrypoint}" }
-      futures = requires(entrypoint).map do |file|
+      futures = DependencyGraph.requires(entrypoint).map do |file|
         future {
           Log.debug { file }
-          file_hash(file)
+          file_hash(file) if File.exists?(file)
         }
       end
 
@@ -191,13 +145,31 @@ module PlaceOS::Build::Digest
         ::Digest::SHA1.digest &.update(io)
       end
 
-      shas = futures.map &.get
+      shas = futures.compact_map &.get
 
       ::Digest::SHA1.hexdigest do |sha|
         shas.each { |digest| sha << digest }
         sha << entrypoint_sha
         shard_digest.try { |digest| sha << digest }
       end[0, 6]
+    end
+
+    def self.file_hash(path)
+      self.object_store_hash?(path) || self.crystal_file_hash?(path) || self.digest_hash(path)
+    end
+
+    protected def self.object_store_hash?(path)
+      nil
+    end
+
+    protected def self.crystal_file_hash?(path : String)
+      "c".to_slice if path.starts_with? DependencyGraph.default_crystal_path
+    end
+
+    protected def self.digest_hash(path)
+      File.open(path) do |io|
+        ::Digest::SHA1.digest &.update(io)
+      end
     end
   end
 end
