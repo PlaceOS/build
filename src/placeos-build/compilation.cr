@@ -2,10 +2,18 @@ module PlaceOS::Build
   module Compilation
     alias Result = Success | Failure | NotFound
 
-    record NotFound
+    record NotFound do
+      def success?
+        false
+      end
+    end
 
     struct Success
       include JSON::Serializable
+
+      def success?
+        true
+      end
 
       getter path : String
 
@@ -26,6 +34,10 @@ module PlaceOS::Build
 
     record Failure, error : String do
       include JSON::Serializable
+
+      def success?
+        false
+      end
     end
   end
 end
