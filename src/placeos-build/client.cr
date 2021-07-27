@@ -23,6 +23,9 @@ module PlaceOS::Build
     getter host : String = ENV["PLACEOS_BUILD_HOST"]? || "localhost"
     getter port : Int32 = (ENV["PLACEOS_BUILD_PORT"]? || 3000).to_i
 
+    # Primary use is for local use of build
+    property repository_path : String? = nil
+
     # A one-shot `PlaceOS::Build::Client`
     def self.client
       client = new
@@ -90,6 +93,11 @@ module PlaceOS::Build
         "branch" => branch,
         "count"  => count.to_s,
       }
+
+      if path = repository_path.presence
+        params["repository_path"] = path
+      end
+
       parse_to_return_type do
         get("/repository?#{params}", authorization_header(username, password), request_id: request_id)
       end
@@ -111,6 +119,10 @@ module PlaceOS::Build
         "count"  => count.to_s,
       }
 
+      if path = repository_path.presence
+        params["repository_path"] = path
+      end
+
       parse_to_return_type do
         get("/repository/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id)
       end
@@ -126,6 +138,11 @@ module PlaceOS::Build
       params = HTTP::Params{
         "url" => url,
       }
+
+      if path = repository_path.presence
+        params["repository_path"] = path
+      end
+
       parse_to_return_type do
         get("/repository/branches?#{params}", authorization_header(username, password), request_id: request_id)
       end
@@ -148,6 +165,11 @@ module PlaceOS::Build
         "url"    => url,
         "commit" => commit,
       }
+
+      if path = repository_path.presence
+        params["repository_path"] = path
+      end
+
       post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, raises: false, retries: 2) do |response|
         key = response.headers[DRIVER_HEADER_KEY]
         time = response.headers[DRIVER_HEADER_TIME]
@@ -176,6 +198,9 @@ module PlaceOS::Build
         "url"    => url,
         "commit" => commit,
       }
+      if path = repository_path.presence
+        params["repository_path"] = path
+      end
       parse_to_return_type do
         get("/driver/#{URI.encode_www_form(file)}/metadata?#{params}", authorization_header(username, password), request_id: request_id)
       end
@@ -194,6 +219,11 @@ module PlaceOS::Build
         "url"    => url,
         "commit" => commit,
       }
+
+      if path = repository_path.presence
+        params["repository_path"] = path
+      end
+
       parse_to_return_type do
         get("/driver/#{URI.encode_www_form(file)}/docs?#{params}", authorization_header(username, password), request_id: request_id)
       end

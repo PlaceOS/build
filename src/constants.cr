@@ -9,6 +9,13 @@ module PlaceOS::Build
 
   CRYSTAL_VERSION = {{ env("CRYSTAL_VERSION") || "latest" }}
 
+  #############################################################################
+
+  SUPPORT_LOCAL_BUILDS = !!ENV["PLACEOS_BUILD_LOCAL_BUILDS"]?.presence.try(&.downcase.in?("1", "true"))
+
+  # Whether the API supports path referencing in builds. Defaults to `false`
+  class_getter? support_local_builds = SUPPORT_LOCAL_BUILDS
+
   # Keys in API responses
   #############################################################################
 

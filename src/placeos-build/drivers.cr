@@ -38,18 +38,14 @@ module PlaceOS::Build
     )
     end
 
-    def compiled(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil) : String?
-      repository_store.with_repository(
-        repository_uri,
-        entrypoint,
-        commit,
-        branch: nil,
-        username: username,
-        password: password,
-      ) do |repository_path|
-        executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
-        executable.filename if binary_store.exists?(executable)
-      end
+    def local_compiled(
+      repository_path : Path,
+      entrypoint : String,
+      commit : String,
+      crystal_version : String? = nil
+    )
+      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+      executable.filename if binary_store.exists?(executable)
     rescue e
       Log.debug(exception: e) { {
         message:        "failed to determine if driver was compiled",
@@ -60,7 +56,14 @@ module PlaceOS::Build
       nil
     end
 
-    def metadata?(repository_uri : String, entrypoint : String, commit : String, crystal_version : String? = nil, username : String? = nil, password : String? = nil)
+    def compiled(
+      repository_uri : String,
+      entrypoint : String,
+      commit : String,
+      crystal_version : String? = nil,
+      username : String? = nil,
+      password : String? = nil
+    ) : String?
       repository_store.with_repository(
         repository_uri,
         entrypoint,
@@ -69,9 +72,18 @@ module PlaceOS::Build
         username: username,
         password: password,
       ) do |repository_path|
-        executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
-        binary_store.info(executable)
+        local_compiled(repository_path, entrypoint, commit, crystal_version)
       end
+    end
+
+    def local_metadata?(
+      repository_path : Path,
+      entrypoint : String,
+      commit : String,
+      crystal_version : String? = nil
+    )
+      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+      binary_store.info(executable)
     rescue e
       Log.debug(exception: e) { {
         message:        "failed to extract metadata",
@@ -82,6 +94,26 @@ module PlaceOS::Build
       nil
     end
 
+    def metadata?(
+      repository_uri : String,
+      entrypoint : String,
+      commit : String,
+      crystal_version : String? = nil,
+      username : String? = nil,
+      password : String? = nil
+    )
+      repository_store.with_repository(
+        repository_uri,
+        entrypoint,
+        commit,
+        branch: nil,
+        username: username,
+        password: password,
+      ) do |repository_path|
+        local_metadata?(repository_path, entrypoint, commit, crystal_version)
+      end
+    end
+
     def local_compile(
       repository_path : Path,
       entrypoint : String,
@@ -90,6 +122,7 @@ module PlaceOS::Build
       crystal_version : String? = nil
     )
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+
       # Look for an exact match
       return Compilation::Success.new(binary_store.path(executable)) if !force_recompile && binary_store.exists?(executable)
 
