@@ -48,10 +48,10 @@ module PlaceOS::Build
       executable.filename if binary_store.exists?(executable)
     rescue e
       Log.debug(exception: e) { {
-        message:        "failed to determine if driver was compiled",
-        repository_uri: repository_uri,
-        entrypoint:     entrypoint,
-        commit:         commit,
+        message:         "failed to determine if driver was compiled",
+        repository_path: repository_path.to_s,
+        entrypoint:      entrypoint,
+        commit:          commit,
       } }
       nil
     end
@@ -86,10 +86,10 @@ module PlaceOS::Build
       binary_store.info(executable)
     rescue e
       Log.debug(exception: e) { {
-        message:        "failed to extract metadata",
-        repository_uri: repository_uri,
-        entrypoint:     entrypoint,
-        commit:         commit,
+        message:         "failed to extract metadata",
+        repository_path: repository_path.to_s,
+        entrypoint:      entrypoint,
+        commit:          commit,
       } }
       nil
     end
