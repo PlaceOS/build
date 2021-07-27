@@ -151,19 +151,39 @@ module PlaceOS::Build
     # Drivers
     ###########################################################################
 
+    def query(
+      file : String? = nil,
+      digest : String? = nil,
+      commit : String? = nil,
+      crystal_version : String? = nil,
+      request_id : String? = nil
+    ) : Array(Executable)
+      params = HTTP::Params{
+        "file"            => file,
+        "digest"          => digest,
+        "commit"          => commit,
+        "crystal_version" => crystal_version,
+      }
+      parse_to_return_type do
+        get("/driver?#{params}", request_id: request_id)
+      end
+    end
+
     # Triggers a build of an object with as the entrypoint, yielding the build object
     def compile(
       file : String,
       url : String,
       commit : String,
+      force_recompile : Bool = false,
       username : String? = nil,
       password : String? = nil,
       request_id : String? = nil,
       & : String, IO ->
     ) : Compilation::Result
       params = HTTP::Params{
-        "url"    => url,
-        "commit" => commit,
+        "url"             => url,
+        "commit"          => commit,
+        "force_recompile" => force_recompile,
       }
 
       if path = repository_path.presence
