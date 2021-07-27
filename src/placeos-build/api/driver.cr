@@ -23,7 +23,7 @@ module PlaceOS::Build::Api
       param commit : String = "HEAD", "Commit to checkout"
     end
 
-    getter repository_path : String do
+    getter repository_path : String? do
       param repository_path : String? = nil, "Local path to a repository if `build` is configured to support builds referencing a path"
     end
 
@@ -35,10 +35,10 @@ module PlaceOS::Build::Api
         summary: Query the driver store for driver binaries.
       YAML
     )]) do
-      param file : String? = nil, "Entrypoint of the driver"
-      param digest : String? = nil, "Digest of the driver"
-      param commit : String? = nil, "Commit of the driver"
-      param crystal_version : String? = nil, "Crystal version of the binary"
+      file = param file : String? = nil, "Entrypoint of the driver"
+      digest = param digest : String? = nil, "Digest of the driver"
+      commit = param commit : String? = nil, "Commit of the driver"
+      crystal_version = param crystal_version : String? = nil, "Crystal version of the binary"
 
       render status_code: :ok, json: builder.binary_store.query(file, digest, commit, crystal_version)
     end
@@ -131,9 +131,9 @@ module PlaceOS::Build::Api
       args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
 
       if (path = repository_path.presence) && Build.support_local_builds?
-        builder.local_metadata(Path[path].expand, **args)
+        Api.builder.local_metadata?(Path[path].expand, **args)
       else
-        builder.metadata?(
+        Api.builder.metadata?(
           repository_uri,
           **args,
           username: username,
@@ -168,9 +168,9 @@ module PlaceOS::Build::Api
       args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
 
       if (path = repository_path.presence) && Build.support_local_builds?
-        builder.local_compiled(Path[path].expand, **args)
+        Api.builder.local_compiled(Path[path].expand, **args)
       else
-        builder.compiled(
+        Api.builder.compiled(
           repository_uri,
           **args,
           username: username,
