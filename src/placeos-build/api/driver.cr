@@ -58,8 +58,9 @@ module PlaceOS::Build::Api
       YAML
     )]) do
       file = route_params["file"]
+      force_recompile = param force_recompile : Bool = false, "Whether to force a build in case of existing binary"
 
-      args = {entrypoint: file, commit: commit, crystal_version: CRYSTAL_VERSION}
+      args = {entrypoint: file, commit: commit, crystal_version: CRYSTAL_VERSION, force_recompile: force_recompile}
 
       result = if (path = repository_path.presence) && Build.support_local_builds?
                  builder.local_compile(Path[path].expand, **args)
