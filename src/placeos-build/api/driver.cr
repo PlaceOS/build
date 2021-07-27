@@ -31,6 +31,18 @@ module PlaceOS::Build::Api
 
     DRIVER_HEADER_KEY = "x-placeos-driver-key"
 
+    get("/", :query_drivers, annotations: @[OpenAPI(<<-YAML
+        summary: Query the driver store for driver binaries.
+      YAML
+    )]) do
+      param file : String? = nil, "Entrypoint of the driver"
+      param digest : String? = nil, "Digest of the driver"
+      param commit : String? = nil, "Commit of the driver"
+      param crystal_version : String? = nil, "Crystal version of the binary"
+
+      render status_code: :ok, json: builder.binary_store.query(file, digest, commit, crystal_version)
+    end
+
     # TODO: Once crystal version varying is supported, we'll add that as an argument
     #
     # Returns…

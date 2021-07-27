@@ -5,6 +5,8 @@ module PlaceOS::Build
   # Information pertaining to a driver binary
   #
   class Executable
+    include JSON::Serializable
+
     # `entrypoint` is the entrypoint to the file relative to its `shard.yml`
     getter entrypoint : String
 
@@ -38,14 +40,17 @@ module PlaceOS::Build
       @crystal_version = crystal_version
     end
 
+    @[JSON::Field(ignore: true)]
     getter name : String do
       self.class.name(entrypoint)
     end
 
+    @[JSON::Field(ignore: true)]
     getter encoded_directory : String do
       self.class.encoded_directory(entrypoint)
     end
 
+    @[JSON::Field(ignore: true)]
     getter filename : String do
       {name, commit, digest, crystal_version, encoded_directory}.join(SEPERATOR)
     end
@@ -59,6 +64,7 @@ module PlaceOS::Build
 
     INFO_EXT = ".info"
 
+    @[JSON::Field(ignore: true)]
     getter info_filename : String do
       "#{filename}#{INFO_EXT}"
     end
