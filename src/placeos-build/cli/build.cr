@@ -7,7 +7,7 @@ module PlaceOS::Build
       include Clip::Mapper
 
       @[Clip::Doc("Path to existing repository")]
-      getter local_path : String? = nil
+      getter repository_path : String? = nil
 
       @[Clip::Doc("Varying this is currently unsupported")]
       getter crystal_version : String = "1.0.0"
@@ -46,7 +46,7 @@ module PlaceOS::Build
       def run
         repository_store = RepositoryStore.new(repository_store_path)
 
-        local_path.try { |path| repository_store.link_existing(repository_uri, path) }
+        repository_path.try { |path| repository_store.link_existing(repository_uri, path) }
 
         valid_driver_entrypoints = drivers(repository_store)
 
@@ -60,9 +60,8 @@ module PlaceOS::Build
 
         valid_driver_entrypoints.each do |entrypoint|
           args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
-
           begin
-            if (path = local_path)
+            if (path = repository_path)
               builder.local_compile(Path[path].expand, **args)
             else
               builder.compile(repository_uri,

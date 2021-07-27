@@ -23,6 +23,10 @@ module PlaceOS::Build::Api
       param commit : String = "HEAD", "Commit to checkout"
     end
 
+    getter repository_path : String do
+      param repository_path : String? = nil, "Local path to a repository if `build` is configured to support builds referencing a path"
+    end
+
     ###########################################################################
 
     DRIVER_HEADER_KEY = "x-placeos-driver-key"
@@ -42,14 +46,18 @@ module PlaceOS::Build::Api
       YAML
     )]) do
       file = route_params["file"]
-      result = builder.compile(
-        repository_uri,
-        file,
-        commit,
-        crystal_version: CRYSTAL_VERSION,
-        username: username,
-        password: password
-      )
+
+      args = {entrypoint: file, commit: commit, crystal_version: CRYSTAL_VERSION}
+
+      result = if (path = repository_path.presence) && Build.support_local_builds?
+                 builder.local_compile(Path[path].expand, **args)
+               else
+                 builder.compile(repository_uri,
+                   **args,
+                   username: username,
+                   password: password,
+                 )
+               end
 
       case result
       in Build::Compilation::NotFound
@@ -76,7 +84,9 @@ module PlaceOS::Build::Api
       YAML
     )]) do
       file = route_params["file"]
-      metadata = builder.metadata?(repository_uri, file, commit, username: username, password: password)
+
+      metadata = Api::Driver.metadata(repository_uri, file, commit, repository_path, username, password)
+
       if metadata
         render status_code: :ok, json: metadata
       else
@@ -94,12 +104,28 @@ module PlaceOS::Build::Api
       YAML
     )]) do
       file = route_params["file"]
-      metadata = builder.metadata?(repository_uri, file, commit, username: username, password: password)
+
+      metadata = Api::Driver.metadata(repository_uri, file, commit, repository_path, username, password)
 
       if metadata
         render status_code: :ok, json: metadata.documentation
       else
         head code: :not_found
+      end
+    end
+
+    def self.metadata(repository_uri, entrypoint, commit, username, password, repository_path, crystal_version = CRYSTAL_VERSION)
+      args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
+
+      if (path = repository_path.presence) && Build.support_local_builds?
+        builder.local_metadata(Path[path].expand, **args)
+      else
+        builder.metadata?(
+          repository_uri,
+          **args,
+          username: username,
+          password: password,
+        )
       end
     end
 
@@ -117,10 +143,26 @@ module PlaceOS::Build::Api
       YAML
     )]) do
       file = route_params["file"]
-      if filename = builder.compiled(repository_uri, file, commit, username: username, password: password)
+
+      if filename = Api::Driver.compiled(repository_uri, file, commit, repository_path, username, password)
         render status_code: :ok, json: filename
       else
         head code: :not_found
+      end
+    end
+
+    def self.compiled(repository_uri, entrypoint, commit, repository_path, username, password, crystal_version = CRYSTAL_VERSION)
+      args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
+
+      if (path = repository_path.presence) && Build.support_local_builds?
+        builder.local_compiled(Path[path].expand, **args)
+      else
+        builder.compiled(
+          repository_uri,
+          **args,
+          username: username,
+          password: password,
+        )
       end
     end
   end
