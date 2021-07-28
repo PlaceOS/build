@@ -184,7 +184,7 @@ module PlaceOS::Build
       params = HTTP::Params{
         "url"             => url,
         "commit"          => commit,
-        "force_recompile" => force_recompile,
+        "force_recompile" => force_recompile.to_s,
       }
 
       if path = repository_path.presence
@@ -193,7 +193,7 @@ module PlaceOS::Build
 
       post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, raises: false, retries: 2) do |response|
         key = response.headers[DRIVER_HEADER_KEY]
-        time = response.headers[DRIVER_HEADER_TIME]
+        time = response.headers[DRIVER_HEADER_TIME].to_i64
         yield key, response.body_io
         Compilation::Success.new(key, time)
       end

@@ -20,7 +20,7 @@ module PlaceOS::Build
       @[JSON::Field(converter: Time::EpochMillisConverter)]
       getter compiled : Time
 
-      def initialize(@path, compiled = Time.utc)
+      def initialize(@path, compiled : Int | Time = Time.utc)
         @compiled = compiled.is_a?(Time) ? compiled : Time.unix_ms(compiled)
       end
 
