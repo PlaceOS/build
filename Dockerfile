@@ -1,40 +1,19 @@
 ARG CRYSTAL_VERSION=1.1.0
-
-# Build `digest_cli`
-###############################################################################
-FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine-build as build-digest
-
-WORKDIR /app
-
-RUN apk add --update --no-cache \
-            bash \
-            yaml-static
-
-# Build a missing llvm artefact, `llvm_ext.o`
-COPY scripts/build_llvm_ext.sh build_llvm_ext.sh
-RUN CRYSTAL_PATH=/usr/share/crystal/src \
-    ./build_llvm_ext.sh
-
-COPY shard.* .
-RUN shards install --production --ignore-crystal-version
-
-COPY src/dependency_graph.cr src/dependency_graph.cr
-COPY src/digest_cli.cr src/digest_cli.cr
-
-# Build the required target
-RUN CRYSTAL_PATH=lib:/usr/share/crystal/src/ \
-    LLVM_CONFIG=$(/usr/share/crystal/src/llvm/ext/find-llvm-config) \
-    shards build --static --no-debug --error-trace --ignore-crystal-version --production digest_cli && \
-    rm /usr/share/crystal/src/llvm/ext/llvm_ext.o
-
-# Build `build`
-###############################################################################
-FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
-
-ARG CRYSTAL_VERSION=1.0.0
 ARG PLACE_COMMIT="DEV"
+ARG PLACE_VERSION="DEV"
 
+FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
 WORKDIR /app
+
+RUN apk upgrade && \
+    apk add --update --no-cache \
+      bash \
+      ca-certificates \
+      libssh2-static \
+      yaml-static
+
+# Add trusted CAs for communicating with external services
+RUN  update-ca-certificates
 
 COPY shard.* .
 RUN shards install --production --ignore-crystal-version
@@ -47,9 +26,7 @@ RUN PLACE_COMMIT=${PLACE_COMMIT} \
     PLACE_VERSION=${PLACE_VERSION} \
     UNAME_AT_COMPILE_TIME=true \
     CRYSTAL_VERSION=${CRYSTAL_VERSION}} \
-    shards build --no-debug --release --error-trace --ignore-crystal-version --production build
-
-COPY --from=build-digest /app/bin/digest_cli /app/bin
+    shards build --release --error-trace --ignore-crystal-version --production
 
 ###############################################################################
 
