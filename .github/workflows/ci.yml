@@ -29,21 +29,29 @@ jobs:
         MT: [false]
         include:
           - stable: false
-            MT: true
+            MT: false
             legacy: true
             crystal: nightly
           - stable: false
-            MT: true
+            MT: false
             legacy: false
             crystal: nightly
-          - stable: false
-            MT: true
-            legacy: true
-            crystal: latest
-          - stable: false
-            MT: true
-            legacy: false
-            crystal: latest
+        #   - stable: false
+        #     MT: true
+        #     legacy: true
+        #     crystal: nightly
+        #   - stable: false
+        #     MT: true
+        #     legacy: false
+        #     crystal: nightly
+        #   - stable: false
+        #     MT: true
+        #     legacy: true
+        #     crystal: latest
+        #   - stable: false
+        #     MT: true
+        #     legacy: false
+        #     crystal: latest
     steps:
       - uses: actions/checkout@v2
       - name: Test
