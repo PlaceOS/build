@@ -27,6 +27,7 @@ module PlaceOS::Build::Digest
     include Clip::Mapper
 
     macro inherited
+      include Clip::Mapper
       Log = ::Log.for({{ @type }})
     end
 
@@ -42,13 +43,6 @@ module PlaceOS::Build::Digest
     getter entrypoints : Array(String)
 
     abstract def run
-
-    # CRYSTAL_PATH         = self.validate_env!("CRYSTAL_PATH")
-    # CRYSTAL_LIBRARY_PATH = self.validate_env!("CRYSTAL_LIBRARY_PATH")
-
-    protected def self.validate_env!(key)
-      ENV[key]?.presence || abort("#{key} not present in environment")
-    end
 
     def lock_file
       shard_lock.tap { |f| abort("no shard.lock at #{f}") if f && !File.exists?(f) }

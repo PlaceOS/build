@@ -21,10 +21,10 @@ module PlaceOS::Build::Digest
     output = IO::Memory.new
     error = IO::Memory.new
 
-    entrypoints = entrypoints.dup
-    entrypoints.unshift("requires")
+    arguments = entrypoints.dup
+    arguments.unshift("requires")
     started = Time.utc
-    unless Process.run(EXECUTABLE_PATH, entrypoints, chdir: working_directory, output: output, error: error).success?
+    unless Process.run(EXECUTABLE_PATH, arguments, chdir: working_directory, output: output, error: error).success?
       raise Build::Error.new("failed to extract requires: #{error}")
     end
     Log.debug { "extracting requires from #{entrypoints.join(", ")} took #{(Time.utc - started).milliseconds}ms" }
@@ -41,6 +41,7 @@ module PlaceOS::Build::Digest
     arguments = entrypoints.dup
     arguments.unshift("--shard-lock=#{shard_lock.as(String)}") if shard_lock
     arguments.unshift("digest")
+
     started = Time.utc
     unless Process.run(EXECUTABLE_PATH, arguments, chdir: working_directory, output: output, error: error).success?
       raise Build::Error.new("failed to digest: #{error} #{output}")
