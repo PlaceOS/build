@@ -158,14 +158,15 @@ module PlaceOS::Build
       crystal_version : String? = nil,
       request_id : String? = nil
     ) : Array(Executable)
-      params = HTTP::Params{
+      params = Hash(String, String?){
         "file"            => file,
         "digest"          => digest,
         "commit"          => commit,
         "crystal_version" => crystal_version,
-      }
+      }.compact
+
       parse_to_return_type do
-        get("/driver?#{params}", request_id: request_id)
+        get("/driver?#{HTTP::Params.encode params}", request_id: request_id)
       end
     end
 

@@ -6,8 +6,8 @@ struct SemanticVersion
     json.string self.to_s
   end
 
-  def self.from_json(pull)
-    parse pull.string
+  def self.new(pull : JSON::PullParser)
+    parse pull.read_string
   end
 end
 
