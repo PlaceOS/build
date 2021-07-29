@@ -29,8 +29,6 @@ module PlaceOS::Build::Api
 
     ###########################################################################
 
-    DRIVER_HEADER_KEY = "x-placeos-driver-key"
-
     get("/", :query_drivers, annotations: @[OpenAPI(<<-YAML
         summary: Query the driver store for driver binaries.
       YAML
@@ -77,11 +75,13 @@ module PlaceOS::Build::Api
         head code: :not_found
       in Build::Compilation::Success
         response.content_type = "application/octet-stream"
+
         result.to_http_headers.each { |k, v| response.headers[k] = v }
         response.content_length = File.size(result.path)
         File.open(result.path) do |file_io|
           IO.copy(file_io, response)
         end
+
         head code: :ok
       in Build::Compilation::Failure
         render status_code: :internal_server_error, json: result
