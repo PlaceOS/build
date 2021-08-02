@@ -5,6 +5,12 @@ ARG PLACE_VERSION="DEV"
 FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
 WORKDIR /app
 
+ARG CRYSTAL_VERSION=1.1.0
+ARG PLACE_COMMIT="DEV"
+ARG PLACE_VERSION="DEV"
+
+ENV CRYSTAL_VERSION=${CRYSTAL_VERSION}
+
 RUN apk upgrade && \
     apk add --update --no-cache \
       bash \
