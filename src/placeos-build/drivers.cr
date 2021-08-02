@@ -20,7 +20,7 @@ module PlaceOS::Build
     end
 
     # Whether to build via the entrypoint environment variable method or not
-    class_property? legacy_build_method = true
+    class_property? legacy_build_method = false
 
     # Extract the driver metadata after compilation, rather than lazily
     getter? strict_driver_info : Bool
@@ -169,6 +169,8 @@ module PlaceOS::Build
     end
 
     private def extract_executable(repository_path : Path, entrypoint : String, commit : String, crystal_version : String?)
+      crystal_version = crystal_version.presence
+
       # Compile with highest available compiler if no version specified
       crystal_version = Build::Compiler::Crystal.extract_latest_crystal(repository_path.to_s) if crystal_version.nil?
 
