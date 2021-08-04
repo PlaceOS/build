@@ -6,8 +6,8 @@ license: MIT
 targets:
   build:
     main: src/build_app.cr
-  digest_cli:
-    main: src/digest_cli.cr
+  digest:
+    main: src/placeos-build/digest.cr
 
 dependencies:
   action-controller:

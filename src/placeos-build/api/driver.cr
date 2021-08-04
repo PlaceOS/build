@@ -60,6 +60,8 @@ module PlaceOS::Build::Api
 
       args = {entrypoint: file, commit: commit, crystal_version: CRYSTAL_VERSION, force_recompile: force_recompile}
 
+      Log.context.set **args
+
       result = if (path = repository_path.presence) && Build.support_local_builds?
                  builder.local_compile(Path[path].expand, **args)
                else

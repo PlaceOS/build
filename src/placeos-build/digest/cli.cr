@@ -10,6 +10,9 @@ require "./dependency_graph"
 module PlaceOS::Build::Digest
   Log = ::Log.for(self)
 
+  delegate digest, to: ::PlaceOS::Build::Digest::Digest
+  delegate requires, to: ::PlaceOS::Build::Digest::Requires
+
   def self.run
     if (command = Cli.parse).is_a? Clip::Mapper::Help
       puts command.help
@@ -63,7 +66,7 @@ module PlaceOS::Build::Digest
 
   @[Clip::Doc("Outputs a list of crystal files in a source graphs, one file per line")]
   struct Requires < Cli
-    def run
+    def self.requires(entrypoints : Array, & : String ->)
       require_channel = Channel(Set(String)).new
 
       all_paths = Cli.paths(entrypoints)
@@ -75,9 +78,13 @@ module PlaceOS::Build::Digest
 
       all_paths.size.times do
         require_channel.receive.each do |f|
-          puts f
+          yield f
         end
       end
+    end
+
+    def run
+      self.class.requires(entrypoints) & ->puts(String)
     end
   end
 
@@ -87,17 +94,21 @@ module PlaceOS::Build::Digest
     @[Clip::Option("-v", "--verbose")]
     getter verbose : Bool = false
 
+    record Result, path : Path, hash : String do
+      include JSON::Serializable
+    end
+
     def run
       ::Log.setup("*", :debug, PlaceOS::LogBackend.log_backend) if verbose
 
       self.class.digest(entrypoints, lock_file).each do |result|
-        puts result.join(',')
+        puts "#{result.path},#{result.hash}"
       end
     end
 
     def self.digest(entrypoints : Array(String), lock_file : String? = nil)
       lock_hash = lock_file.try &->file_hash(String)
-      digests = Channel({Path, String}).new
+      digests = Channel(Result).new
       all_paths = Cli.paths(entrypoints)
       all_paths.each do |path|
         spawn do
@@ -106,7 +117,7 @@ module PlaceOS::Build::Digest
             digest = program_hash(path, lock_hash)
             after = Time.utc
             Log.trace { "digesting #{path} took #{(after - before).milliseconds}ms" } unless digests.closed?
-            digests.send({path, digest}) rescue nil
+            digests.send(Result.new(path, digest)) rescue nil
           rescue e
             Log.error(exception: e) { "failed to digest #{path}" }
             digests.close
@@ -114,12 +125,8 @@ module PlaceOS::Build::Digest
         end
       end
 
-      Array({Path, String}).new(all_paths.size).tap do |results|
-        all_paths.size.times do
-          result = digests.receive?
-          raise "digesting failed!" if result.nil?
-          results << result
-        end
+      all_paths.compact_map do
+        digests.receive?.tap { |d| raise "digesting failed!" if d.nil? }
       end
     end
 
@@ -166,5 +173,3 @@ module PlaceOS::Build::Digest
     end
   end
 end
-
-PlaceOS::Build::Digest.run

@@ -6,7 +6,7 @@ require "placeos-compiler"
 
 require "./compilation"
 require "./compiler"
-require "./digest"
+require "./digest/cli"
 require "./driver_store"
 require "./executable"
 require "./repository_store"
@@ -181,11 +181,15 @@ module PlaceOS::Build
       # Check/Install shards
       install_shards(repository_path.to_s)
 
+      path = repository_path.to_s
+      shards_path = File.join(path, "shard.lock")
+      entrypoint_path = File.join(path, entrypoint)
+
       # Extract the hash to name the file
       digest = begin
-        PlaceOS::Build::Digest.digest([entrypoint], repository_path.to_s).first.hash
-      rescue
-        Log.warn { "failed to digest #{entrypoint}, using the driver's commit" }
+        PlaceOS::Build::Digest.digest([entrypoint_path], shards_path).first.hash
+      rescue e
+        Log.warn(exception: e) { "failed to digest #{entrypoint}, using the driver's commit" }
         # Use the commit if a digest could not be produced
         commit[0, 6]
       end
