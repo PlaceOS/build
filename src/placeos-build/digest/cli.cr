@@ -95,7 +95,7 @@ module PlaceOS::Build::Digest
     end
 
     def run
-      self.class.requires(entrypoints) & ->puts(String)
+      self.class.requires(entrypoints, &->puts(String))
     end
   end
 
