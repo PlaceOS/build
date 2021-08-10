@@ -11,7 +11,7 @@ module PlaceOS::Build::Digest
       digests.should_not be_empty
 
       digest = digests.first
-      digest.path.should eq path
+      digest.path.should eq Path[path]
       digest.hash.should eq "69fc24"
     end
 
@@ -26,7 +26,7 @@ module PlaceOS::Build::Digest
     it "allows specification of a shard.lock" do
       entrypoint = File.join(FIXTURE_DIR, "shard_require.cr")
       shard_lock = File.join(FIXTURE_DIR, "shard.lock")
-      digest_with_lock = Digest.digest([entrypoint], shard_lock: shard_lock).first
+      digest_with_lock = Digest.digest([entrypoint], lock_file: shard_lock).first
       digest_without_lock = Digest.digest([entrypoint]).first
       digest_with_lock.hash.should eq "f764db"
       digest_with_lock.hash.should_not eq digest_without_lock.hash
