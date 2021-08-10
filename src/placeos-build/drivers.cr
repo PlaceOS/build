@@ -38,20 +38,22 @@ module PlaceOS::Build
     )
     end
 
-    def local_compiled(
-      repository_path : Path,
-      entrypoint : String,
+    def discover_drivers?(
+      repository_uri : String,
+      branch : String,
       commit : String,
-      crystal_version : String? = nil
-    )
-      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
-      executable.filename if binary_store.exists?(executable)
+      username : String? = nil,
+      password : String? = nil
+    ) : Array(String)?
+      repository_store.with_repository(repository_uri, "shard.yml", commit, branch, username, password) do |path|
+        local_discover_drivers?(path)
+      end
     rescue e
-      Log.debug(exception: e) { {
-        message:         "failed to determine if driver was compiled",
-        repository_path: repository_path.to_s,
-        entrypoint:      entrypoint,
-        commit:          commit,
+      Log.warn(exception: e) { {
+        message:        "failed to discover drivers",
+        repository_uri: repository_uri,
+        branch:         branch,
+        commit:         commit,
       } }
       nil
     end
@@ -76,24 +78,6 @@ module PlaceOS::Build
       end
     end
 
-    def local_metadata?(
-      repository_path : Path,
-      entrypoint : String,
-      commit : String,
-      crystal_version : String? = nil
-    )
-      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
-      binary_store.info(executable)
-    rescue e
-      Log.debug(exception: e) { {
-        message:         "failed to extract metadata",
-        repository_path: repository_path.to_s,
-        entrypoint:      entrypoint,
-        commit:          commit,
-      } }
-      nil
-    end
-
     def metadata?(
       repository_uri : String,
       entrypoint : String,
@@ -111,31 +95,6 @@ module PlaceOS::Build
         password: password,
       ) do |repository_path|
         local_metadata?(repository_path, entrypoint, commit, crystal_version)
-      end
-    end
-
-    def local_compile(
-      repository_path : Path,
-      entrypoint : String,
-      commit : String,
-      force_recompile : Bool = true,
-      crystal_version : String? = nil
-    )
-      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
-
-      # Look for an exact match
-      return Compilation::Success.new(binary_store.path(executable)) if !force_recompile && binary_store.exists?(executable)
-
-      # Look for drivers with matching hash, but different commit
-      if !force_recompile && (unchanged_executable = binary_store.query(entrypoint, digest: executable.digest, crystal_version: executable.crystal_version).first?)
-        # If it exists, copy with the current commit for the binary
-        binary_store.link(unchanged_executable, executable)
-        Compilation::Success.new(binary_store.path(executable))
-      else
-        build_driver(
-          executable: executable,
-          working_directory: repository_path.to_s,
-        )
       end
     end
 
@@ -260,6 +219,84 @@ module PlaceOS::Build
     def cloned_repositories : Array(String)
       repository_store_path.children.compact_map do |path|
         self.class.directory_to_uri(path) if Dir.exists? path
+      end
+    end
+
+    # Local methods
+    #
+    # These methods are intended for use on existing git repositories at `repository_path`.
+    ###############################################################################################
+
+    def local_discover_drivers?(repository_path : Path) : Array(String)?
+      Dir.glob(repository_path / "drivers/**/*.cr").select! do |file|
+        !file.ends_with?("_spec.cr") && File.read_lines(file).any?(&.includes?("< PlaceOS::Driver"))
+      end
+    rescue e
+      Log.warn(exception: e) { {
+        message:         "failed to discover drivers",
+        repository_path: repository_path.to_s,
+      } }
+      nil
+    end
+
+    def local_compiled(
+      repository_path : Path,
+      entrypoint : String,
+      commit : String,
+      crystal_version : String? = nil
+    )
+      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+      executable.filename if binary_store.exists?(executable)
+    rescue e
+      Log.debug(exception: e) { {
+        message:         "failed to determine if driver was compiled",
+        repository_path: repository_path.to_s,
+        entrypoint:      entrypoint,
+        commit:          commit,
+      } }
+      nil
+    end
+
+    def local_metadata?(
+      repository_path : Path,
+      entrypoint : String,
+      commit : String,
+      crystal_version : String? = nil
+    )
+      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+      binary_store.info(executable)
+    rescue e
+      Log.debug(exception: e) { {
+        message:         "failed to extract metadata",
+        repository_path: repository_path.to_s,
+        entrypoint:      entrypoint,
+        commit:          commit,
+      } }
+      nil
+    end
+
+    def local_compile(
+      repository_path : Path,
+      entrypoint : String,
+      commit : String,
+      force_recompile : Bool = true,
+      crystal_version : String? = nil
+    )
+      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+
+      # Look for an exact match
+      return Compilation::Success.new(binary_store.path(executable)) if !force_recompile && binary_store.exists?(executable)
+
+      # Look for drivers with matching hash, but different commit
+      if !force_recompile && (unchanged_executable = binary_store.query(entrypoint, digest: executable.digest, crystal_version: executable.crystal_version).first?)
+        # If it exists, copy with the current commit for the binary
+        binary_store.link(unchanged_executable, executable)
+        Compilation::Success.new(binary_store.path(executable))
+      else
+        build_driver(
+          executable: executable,
+          working_directory: repository_path.to_s,
+        )
       end
     end
 
