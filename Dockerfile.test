@@ -44,11 +44,6 @@ RUN shards install --ignore-crystal-version
 
 COPY scripts /app/scripts
 
-COPY src/dependency_graph.cr src/dependency_graph.cr
-COPY src/digest_cli.cr src/digest_cli.cr
-
-RUN shards build --release digest_cli
-
 # These provide certificate chain validation where communicating with external services over TLS
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
