@@ -12,21 +12,6 @@ module PlaceOS::Build::Api
 
     delegate builder, to: Build::Api
 
-    # Parameters
-    ###########################################################################
-
-    getter repository_uri : String do
-      param url : String, "URL for a git repository"
-    end
-
-    getter commit : String do
-      param commit : String = "HEAD", "Commit to checkout"
-    end
-
-    getter repository_path : String? do
-      param repository_path : String? = nil, "Local path to a repository if `build` is configured to support builds referencing a path"
-    end
-
     ###########################################################################
 
     get("/", :query_drivers, annotations: @[OpenAPI(<<-YAML

@@ -148,6 +148,29 @@ module PlaceOS::Build
       end
     end
 
+    def discover_drivers(
+      url : String,
+      commit : String = "HEAD",
+      branch : String = "master",
+      username : String? = nil,
+      password : String? = nil,
+      request_id : String? = nil
+    ) : Array(String)
+      params = HTTP::Params{
+        "url"    => url,
+        "commit" => commit,
+        "branch" => branch,
+      }
+
+      if path = repository_path.presence
+        params["repository_path"] = path
+      end
+
+      parse_to_return_type do
+        get("/repository/discover/drivers?#{params}", authorization_header(username, password), request_id: request_id)
+      end
+    end
+
     # Drivers
     ###########################################################################
 
