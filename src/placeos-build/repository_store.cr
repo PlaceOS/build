@@ -44,7 +44,8 @@ module PlaceOS::Build
       password : String? = nil
     )
       with_repository(uri, file, "HEAD", branch, username, password) do |repository_path|
-        requires = Digest.requires([file], repository_path.to_s)
+        entrypoint = repository_path / file
+        requires = Digest.requires([entrypoint.to_s])
         Git.commits(requires.unshift("shard.lock"), repository_path.basename, repository_path.parent.to_s, limit)
       end
     rescue e

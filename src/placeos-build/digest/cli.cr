@@ -8,10 +8,13 @@ require "placeos-log-backend"
 require "./dependency_graph"
 
 module PlaceOS::Build::Digest
+  extend self
+
   Log = ::Log.for(self)
 
-  delegate digest, to: ::PlaceOS::Build::Digest::Digest
   delegate requires, to: ::PlaceOS::Build::Digest::Requires
+
+  delegate digest, to: ::PlaceOS::Build::Digest::Digest
 
   def self.run
     if (command = Cli.parse).is_a? Clip::Mapper::Help
@@ -66,6 +69,14 @@ module PlaceOS::Build::Digest
 
   @[Clip::Doc("Outputs a list of crystal files in a source graphs, one file per line")]
   struct Requires < Cli
+    def self.requires(entrypoints : Array) : Array(String)
+      Array(String).new(entrypoints.size).tap do |array|
+        ::PlaceOS::Build::Digest::Requires.requires(entrypoints) do |path|
+          array << path
+        end
+      end
+    end
+
     def self.requires(entrypoints : Array, & : String ->)
       require_channel = Channel(Set(String)).new
 
