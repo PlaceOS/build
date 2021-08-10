@@ -26,7 +26,7 @@ module PlaceOS::Build
     getter? strict_driver_info : Bool
 
     private getter compile_lock = Mutex.new
-    private getter compiling = Hash(Executable, Bool).new(false)
+    private getter compiling = Hash(Executable, Array(Channel(Nil))).new
 
     getter binary_store : DriverStore
     getter repository_store : RepositoryStore
@@ -213,43 +213,47 @@ module PlaceOS::Build
       executable : Executable,
       working_directory : String
     ) : Compilation::Success | Compilation::Failure
-      start = Time.utc
-      path = if self.class.legacy_build_method?
-               result = PlaceOS::Compiler.build_driver(
-                 source_file: executable.entrypoint,
-                 repository: ".",
-                 commit: executable.commit,
-                 working_directory: working_directory,
-                 binary_directory: working_directory,
-               )
-               return Compilation::Failure.new(result.output) unless result.success?
+      wait_for_compilation(executable) do
+        begin
+          start = Time.utc
+          path = if self.class.legacy_build_method?
+                   result = PlaceOS::Compiler.build_driver(
+                     source_file: executable.entrypoint,
+                     repository: ".",
+                     commit: executable.commit,
+                     working_directory: working_directory,
+                     binary_directory: working_directory,
+                   )
+                   return Compilation::Failure.new(result.output) unless result.success?
 
-               result.path
-             else
-               executable_name = UUID.random.to_s
-               result = ExecFrom.exec_from(
-                 working_directory,
-                 "crystal",
-                 {"build", "--static", "--error-trace", "--no-color", "-o", executable_name, executable.entrypoint}
-               )
-               return Compilation::Failure.new(result.output.to_s) unless result.status.success?
+                   result.path
+                 else
+                   executable_name = UUID.random.to_s
+                   result = ExecFrom.exec_from(
+                     working_directory,
+                     "crystal",
+                     {"build", "--static", "--error-trace", "--no-color", "-o", executable_name, executable.entrypoint}
+                   )
+                   return Compilation::Failure.new(result.output.to_s) unless result.status.success?
 
-               File.join(working_directory, executable_name)
-             end
+                   File.join(working_directory, executable_name)
+                 end
 
-      Log.info { "compiling #{executable} took #{(Time.utc - start).total_seconds}s" }
+          Log.info { "compiling #{executable} took #{(Time.utc - start).total_seconds}s" }
 
-      # Write the binary to the store
-      File.open(path) do |file_io|
-        binary_store.write(executable.filename, file_io)
+          # Write the binary to the store
+          File.open(path) do |file_io|
+            binary_store.write(executable.filename, file_io)
+          end
+
+          # Extract the metadata to the store
+          binary_store.info(executable) if strict_driver_info?
+
+          Compilation::Success.new(executable.filename)
+        ensure
+          path.try { |p| File.delete(p) } rescue nil
+        end
       end
-
-      # Extract the metadata to the store
-      binary_store.info(executable) if strict_driver_info?
-
-      Compilation::Success.new(executable.filename)
-    ensure
-      path.try { |p| File.delete(p) } rescue nil
     end
 
     # Returns the URIs of repositories in the `repository_store_path`
@@ -259,8 +263,47 @@ module PlaceOS::Build
       end
     end
 
+    # File Helpers
+    ###############################################################################################
+
     private def modification_time(executable) : Time
       File.info(binary_store.path(executable)).modification_time
+    end
+
+    # Compilation helpers
+    ###############################################################################################
+
+    private def wait_for_compilation(executable : Executable)
+      block_compilation(executable)
+      yield
+    ensure
+      unblock_compilation(executable)
+    end
+
+    # Blocks if compilation for the executable is in progress
+    private def block_compilation(executable : Executable)
+      channel = nil
+      compile_lock.synchronize do
+        if compiling.has_key? executable
+          channel = Channel(Nil).new
+          compiling[executable] << channel
+        else
+          compiling[executable] = [] of Channel(Nil)
+        end
+      end
+
+      if channel
+        channel.receive?
+        block_compilation(executable)
+      end
+    end
+
+    private def unblock_compilation(executable : Executable)
+      compile_lock.synchronize do
+        if waiting = compiling.delete(executable)
+          waiting.each &.send(nil)
+        end
+      end
     end
   end
 end
