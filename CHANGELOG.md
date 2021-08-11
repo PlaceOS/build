@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 ## Features
 
 *   support local paths ([7624f6ae](7624f6ae))
-*   openAPI client generation ([74b776d0](74b776d0))
 *   source and requires ingester ([a1393ca4](a1393ca4))
 * **api:**
   *  add discover_drivers ([edb16117](edb16117))
