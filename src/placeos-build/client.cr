@@ -99,7 +99,7 @@ module PlaceOS::Build
       end
 
       parse_to_return_type do
-        get("/repository?#{params}", authorization_header(username, password), request_id: request_id)
+        get("/repository/commits?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 
@@ -124,7 +124,7 @@ module PlaceOS::Build
       end
 
       parse_to_return_type do
-        get("/repository/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id)
+        get("/repository/commits/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id)
       end
     end
 

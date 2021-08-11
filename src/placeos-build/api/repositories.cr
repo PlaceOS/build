@@ -21,7 +21,7 @@ module PlaceOS::Build::Api
 
     # Returns the commits for a repository.
     # GET /repository?url=[repository url]&count=[commit count: 50]&branch=[master]
-    get("/", :repository_commits, annotations: @[OpenAPI(<<-YAML
+    get("/commits", :repository_commits, annotations: @[OpenAPI(<<-YAML
         summary: Returns the commit for a repository
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
