@@ -31,7 +31,7 @@ COPY src /app/src
 RUN PLACE_COMMIT=${PLACE_COMMIT} \
     PLACE_VERSION=${PLACE_VERSION} \
     UNAME_AT_COMPILE_TIME=true \
-    CRYSTAL_VERSION=${CRYSTAL_VERSION}} \
+    CRYSTAL_VERSION=${CRYSTAL_VERSION} \
     shards build --release --error-trace --ignore-crystal-version --production
 
 RUN rm -r lib src
@@ -60,4 +60,4 @@ RUN chown appuser -R /app
 
 EXPOSE 3000
 HEALTHCHECK CMD /app/bin/build server --curl http://localhost:3000/api/build/v1
-CMD ["bash", "/app/scripts/entrypoint.sh", "server", "--host", "0.0.0.0", "--port", "3000"]
+CMD /bin/bash /app/scripts/entrypoint.sh server --host 0.0.0.0 --port 3000
