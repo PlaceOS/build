@@ -122,9 +122,9 @@ Returns an array of files containing driver implementations for a repository.
 
 Returns the branches for a repository
 
-### Build Artefacts
+### Driver Artefacts
 
-#### `POST /build/<file>?url=<repository url>&commit=<commit hash>`
+#### `POST /build/driver/<file>?url=<repository url>&commit=<commit hash>`
 
 Triggers a build of object with <file> as the entrypoint
 Returns…
@@ -132,19 +132,19 @@ Returns…
 - 500 if the object failed to compile
 - 404 if entrypoint was not found
 
-#### `GET /build/<file>/metadata?url=<repository url>&commit=<commit hash>`
+#### `GET /build/driver/<file>/metadata?url=<repository url>&commit=<commit hash>`
 
 Returns the metadata extracted from the built artefact.
 
-#### `GET /build/<file>/docs?url=<repository url>&commit=<commit hash>`
+#### `GET /build/driver/<file>/docs?url=<repository url>&commit=<commit hash>`
 
 Returns the docs extracted from the artefact.
 
-#### `GET /build?file=<driver entrypoint>&commit=<commit hash>&crystal_version=<version>&digest=<SHA-1 digest>`
+#### `GET /build/driver?file=<driver entrypoint>&commit=<commit hash>&crystal_version=<version>&digest=<SHA-1 digest>`
 
 Query the driver store for driver binaries.
 
-#### `GET /build/<file>/compiled?url=<repository url>&commit=<commit hash>`
+#### `GET /build/driver/<file>/compiled?url=<repository url>&commit=<commit hash>`
 
 Returns...
 - 200 if compiled
