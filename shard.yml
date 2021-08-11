@@ -7,7 +7,7 @@ targets:
   build:
     main: src/build_app.cr
   digest:
-    main: src/placeos-build/digest.cr
+    main: src/digest_app.cr
 
 dependencies:
   action-controller:
