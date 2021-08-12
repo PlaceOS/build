@@ -22,6 +22,10 @@ module PlaceOS::Build
         true
       end
 
+      def executable : Executable
+        Executable.new(path)
+      end
+
       getter path : String
 
       @[JSON::Field(converter: Time::EpochMillisConverter)]
