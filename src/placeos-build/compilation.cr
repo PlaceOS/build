@@ -1,17 +1,24 @@
+require "./executable"
+
 module PlaceOS::Build
   module Compilation
-    alias Result = Success | Failure | NotFound
+    module Result
+      abstract def success? : Bool
+    end
 
     record NotFound do
-      def success?
+      include Result
+
+      def success? : Bool
         false
       end
     end
 
     struct Success
+      include Result
       include JSON::Serializable
 
-      def success?
+      def success? : Bool
         true
       end
 
@@ -33,9 +40,10 @@ module PlaceOS::Build
     end
 
     record Failure, error : String do
+      include Result
       include JSON::Serializable
 
-      def success?
+      def success? : Bool
         false
       end
     end
