@@ -4,7 +4,7 @@ on:
 jobs:
   schema:
     runs-on: ubuntu-latest
-    container: crystal-lang/crystal:latest
+    container: crystallang/crystal:latest
     outputs:
       changed: ${{ steps.check.conclusion == 'failure' }}
     steps:
@@ -20,7 +20,7 @@ jobs:
     - name: Commit files
       run: |
         git config --local user.email "robot@place.tech"
-        git config --local user.name "Mx. Placentina Robot"
+        git config --local user.name "Mx. Place Robot"
         git commit -am "docs(openapi.yaml): update for ${{ github.sha }}"
     - name: Push changes
       uses: ad-m/github-push-action@master
@@ -40,7 +40,7 @@ jobs:
     - name: Commit files
       run: |
         git config --local user.email "robot@place.tech"
-        git config --local user.name "Mx. Placentina Robot"
+        git config --local user.name "Mx. Place Robot"
         git commit -am "feat(client): generate client for changes from ${{ github.sha }}"
     - name: Push changes
       uses: ad-m/github-push-action@master
