@@ -146,7 +146,7 @@ module PlaceOS::Build::Digest
       Log.debug { "digesting #{entrypoint}" }
       futures = DependencyGraph.requires(entrypoint).map do |file|
         future {
-          Log.debug { file }
+          Log.trace { {entrypoint: entrypoint, file: file} }
           file_hash(file) if File.exists?(file)
         }
       end
