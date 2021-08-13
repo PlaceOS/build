@@ -214,7 +214,7 @@ module PlaceOS::Build
         params["repository_path"] = path
       end
 
-      post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, raises: false, retries: 2) do |response|
+      post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, retries: 2) do |response|
         key = response.headers[DRIVER_HEADER_KEY]
         time = response.headers[DRIVER_HEADER_TIME].to_i64
         yield key, response.body_io
