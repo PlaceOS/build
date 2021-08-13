@@ -228,9 +228,12 @@ module PlaceOS::Build
     ###############################################################################################
 
     def local_discover_drivers?(repository_path : Path) : Array(String)?
-      Dir.glob(repository_path / "drivers/**/*.cr").select! do |file|
-        !file.ends_with?("_spec.cr") && File.read_lines(file).any?(&.includes?("< PlaceOS::Driver"))
-      end
+      Dir
+        .glob(repository_path / "drivers/**/*.cr")
+        .select! { |file|
+          !file.ends_with?("_spec.cr") && File.read_lines(file).any?(&.includes?("< PlaceOS::Driver"))
+        }
+        .map &.lchop(repository_path.to_s).lchop('/')
     rescue e
       Log.warn(exception: e) { {
         message:         "failed to discover drivers",
