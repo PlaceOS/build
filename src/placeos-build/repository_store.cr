@@ -45,8 +45,12 @@ module PlaceOS::Build
     )
       with_repository(uri, file, "HEAD", branch, username, password) do |repository_path|
         entrypoint = repository_path / file
-        requires = Digest.requires([entrypoint.to_s])
-        Git.commits(requires.unshift("shard.lock"), repository_path.basename, repository_path.parent.to_s, limit)
+        shard_lock = repository_path / "shard.lock"
+        requires = Digest
+          .requires([entrypoint.to_s])
+          .unshift(shard_lock.to_s)
+          .select(&.starts_with?(repository_path.to_s))
+        Git.commits(requires, repository_path.basename, repository_path.parent.to_s, limit)
       end
     rescue e
       Log.error(exception: e) { "failed to fetch commits for #{file} in #{uri}" }
