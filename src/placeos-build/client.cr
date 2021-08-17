@@ -1,6 +1,7 @@
 require "http"
 require "json"
 require "mutex"
+require "placeos-compiler/git"
 require "placeos-models/version"
 require "responsible"
 require "retriable"
@@ -79,6 +80,8 @@ module PlaceOS::Build
     # Repositories
     ###########################################################################
 
+    alias Commit = ::PlaceOS::Compiler::Git::Commit
+
     # Returns the commits for a repository
     def repository_commits(
       url : String,
@@ -87,7 +90,7 @@ module PlaceOS::Build
       username : String? = nil,
       password : String? = nil,
       request_id : String? = nil
-    ) : Array(String)
+    ) : Array(Commit)
       params = HTTP::Params{
         "url"    => url,
         "branch" => branch,
@@ -112,7 +115,7 @@ module PlaceOS::Build
       username : String? = nil,
       password : String? = nil,
       request_id : String? = nil
-    ) : Array(String)
+    ) : Array(Commit)
       params = HTTP::Params{
         "url"    => url,
         "branch" => branch,
