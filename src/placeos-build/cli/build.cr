@@ -10,7 +10,7 @@ module PlaceOS::Build
       getter repository_path : String? = nil
 
       @[Clip::Doc("Varying this is currently unsupported")]
-      getter crystal_version : String = "1.0.0"
+      getter crystal_version : String = CRYSTAL_VERSION
 
       @[Clip::Doc("Where the git repositories are mounted")]
       getter repository_store_path : String = "./repositories"
