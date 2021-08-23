@@ -25,7 +25,10 @@ module PlaceOS::Build
       getter password : String? = nil
 
       @[Clip::Doc("Extract driver info on build")]
-      getter strict_driver_info : Bool = false
+      getter strict_driver_info : Bool = true
+
+      @[Clip::Doc("Disocover drivers and compile them")]
+      getter discover : Bool = false
 
       @[Clip::Doc("URI of the git repository")]
       @[Clip::Option]
@@ -41,22 +44,21 @@ module PlaceOS::Build
 
       @[Clip::Doc("Driver entrypoints relative to specified repository")]
       @[Clip::Option]
-      getter entrypoints : Array(String)
+      getter entrypoints : Array(String) = [] of String
 
       def run
         repository_store = RepositoryStore.new(repository_store_path)
-
         repository_path.try { |path| repository_store.link_existing(repository_uri, path) }
 
-        valid_driver_entrypoints = drivers(repository_store)
+        driver_store = DriverStore.from_credentials(aws_credentials)
+        builder = Drivers.new(driver_store, repository_store, strict_driver_info: strict_driver_info)
+
+        valid_driver_entrypoints = drivers(builder)
 
         if valid_driver_entrypoints.empty?
           Log.info { "no valid driver entrypoints passed" }
           exit 0
         end
-
-        driver_store = DriverStore.from_credentials(aws_credentials)
-        builder = Drivers.new(driver_store, repository_store, strict_driver_info: strict_driver_info)
 
         valid_driver_entrypoints.each do |entrypoint|
           args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
@@ -76,9 +78,9 @@ module PlaceOS::Build
         end
       end
 
-      def drivers(store : RepositoryStore) : Array(String)
-        entrypoints.compact_map do |file|
-          store.with_repository(repository_uri, file, commit, branch, username, password) do |path|
+      def drivers(builder : PlaceOS::Build::Drivers) : Array(String)
+        valid_driver_entrypoints = entrypoints.compact_map do |file|
+          builder.repository_store.with_repository(repository_uri, file, commit, branch, username, password) do |path|
             driver = path.join(file)
             if !File.exists?(driver)
               Log.warn { "#{driver} is not a file" }
@@ -90,6 +92,13 @@ module PlaceOS::Build
             file
           end
         end
+
+        if discover
+          found = builder.discover_drivers?(repository_uri, branch, commit, username, password)
+          valid_driver_entrypoints.concat(found).uniq! unless found.nil? || found.empty?
+        end
+
+        valid_driver_entrypoints
       end
 
       protected def self.is_driver?(path : Path)
