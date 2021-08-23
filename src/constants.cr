@@ -25,14 +25,15 @@ module PlaceOS::Build
   # S3 caching
   #############################################################################
 
-  AWS_REGION    = ENV["AWS_REGION"]?.presence
   AWS_KEY       = ENV["AWS_KEY"]?.presence
   AWS_SECRET    = ENV["AWS_SECRET"]?.presence
+  AWS_REGION    = ENV["AWS_REGION"]?.presence
   AWS_S3_BUCKET = ENV["AWS_S3_BUCKET"]?.presence
 
   #############################################################################
 
-  REPOS = ENV["ENGINE_REPOS"]? || Path["./repositories"].expand.to_s
+  REPOSITORY_STORE_PATH = ENV["PLACEOS_REPOSITORIES"]?.presence || Path["./repositories"].expand.to_s
+  BINARY_STORE_PATH     = ENV["PLACEOS_DRIVER_BINARIES"]?.presence || Path["./bin/drivers"].expand.to_s
 
   class_getter? production : Bool { ENV["SG_ENV"]? == "production" }
 end
