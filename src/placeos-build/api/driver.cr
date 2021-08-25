@@ -45,7 +45,7 @@ module PlaceOS::Build::Api
 
       args = {entrypoint: file, commit: commit, crystal_version: CRYSTAL_VERSION, force_recompile: force_recompile}
 
-      Log.context.set **args
+      Log.context.set(**args)
 
       result = if (path = repository_path.presence) && Build.support_local_builds?
                  builder.local_compile(Path[path].expand, **args)
@@ -62,10 +62,12 @@ module PlaceOS::Build::Api
         head code: :not_found
       in Build::Compilation::Success
         response.content_type = "application/octet-stream"
-
         result.to_http_headers.each { |k, v| response.headers[k] = v }
-        response.content_length = File.size(result.path)
-        File.open(result.path) do |file_io|
+
+        path = builder.binary_store.path(result.executable)
+
+        response.content_length = File.size(path)
+        File.open(path) do |file_io|
           IO.copy(file_io, response)
         end
 
