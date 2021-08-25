@@ -69,7 +69,15 @@ module PlaceOS::Build
     def link_existing(uri, path)
       key = self.class.uri_to_directory(uri)
       link_path = File.join(store_path, key)
-      FileUtils.cp_r(path, link_path)
+      self.class.cp_r(path, link_path)
+    end
+
+    def self.cp_r(source, destination)
+      # Remove the destination directory first
+      FileUtils.rm_r(destination) rescue nil
+      io = IO::Memory.new
+      status = Process.run("cp", {"-R", source, destination}, error: io)
+      raise "Failed to run `cp -R #{source} #{destination}`: #{io}" unless status.success?
     end
 
     def with_repository(
@@ -81,13 +89,19 @@ module PlaceOS::Build
       password : String?,
       & : Path ->
     )
+      Log.trace { {
+        message: "checking out repository",
+        branch:  branch,
+        commit:  commit,
+        file:    file,
+      } }
       key = clone(uri, branch, username, password)
 
       # Copy repository to a temporary directory
       repository_path = File.join(store_path, key)
       key = UUID.random.to_s
       temporary_path = File.join(Dir.tempdir, key)
-      FileUtils.cp_r(repository_path, temporary_path)
+      self.class.cp_r(repository_path, temporary_path)
       repository_path = temporary_path
 
       # Checkout temporary copy to desired commit.
@@ -115,9 +129,11 @@ module PlaceOS::Build
       }
 
       if Dir.exists?(path)
+        Log.trace { {message: "cloning", uri: uri, branch: branch} }
         # Pull if repository already exists
         Git.pull(**args)
       else
+        Log.trace { {message: "pulling", uri: uri, branch: branch} }
         Git.clone(**args.merge(
           username: username,
           password: password,

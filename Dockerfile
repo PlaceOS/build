@@ -32,7 +32,13 @@ RUN PLACE_COMMIT=${PLACE_COMMIT} \
     PLACE_VERSION=${PLACE_VERSION} \
     UNAME_AT_COMPILE_TIME=true \
     CRYSTAL_VERSION=${CRYSTAL_VERSION} \
-    shards build --release --error-trace --ignore-crystal-version --production
+    shards build \
+        build \
+        --debug \
+        --error-trace \
+        --ignore-crystal-version \
+        --production \
+        --release
 
 RUN rm -r lib src
 

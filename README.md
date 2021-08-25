@@ -23,16 +23,18 @@ Options:
   --branch TEXT                   Branch to checkout  [required]
   --commit TEXT                   Commit to check the file out to  [required]
   --repository-uri TEXT           URI of the git repository  [required]
+  --discover / --no-discover      Discover drivers and compile them
+                                  [default: false]
   --strict-driver-info / --no-strict-driver-info
-                                  Extract driver info on build  [default: false]
+                                  Extract driver info on build  [default: true]
   --password TEXT                 Password for git repository
   --username TEXT                 Username for git repository
   --binary-store-path TEXT        Where the binaries are mounted
-                                  [default: ./bin/drivers]
+                                  [default: BINARY_STORE_PATH]
   --repository-store-path TEXT    Where the git repositories are mounted
-                                  [default: ./repositories]
+                                  [default: REPOSITORY_STORE_PATH]
   --crystal-version TEXT          Varying this is currently unsupported
-                                  [default: 1.0.0]
+                                  [default: CRYSTAL_VERSION]
   --repository-path TEXT          Path to existing repository
   --aws-s3-bucket TEXT            [default: AWS_S3_BUCKET]
   --aws-secret TEXT               [default: AWS_SECRET]
@@ -41,7 +43,7 @@ Options:
   -e, --env                       List the application environment
                                   [default: false]
   --entrypoints TEXT              Driver entrypoints relative to specified
-                                  repository  [required]
+                                  repository  [default: [] of String]
   --help                          Show this message and exit.
 ```
 

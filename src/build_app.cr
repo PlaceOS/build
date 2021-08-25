@@ -1,4 +1,4 @@
-require "./placeos-build/cli"
 require "./config"
+require "./placeos-build/cli"
 
 PlaceOS::Build.run

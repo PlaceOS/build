@@ -7,7 +7,10 @@ module PlaceOS::Build
   BUILD_TIME   = {{ system("date -u").chomp.stringify }}
   BUILD_COMMIT = {{ env("PLACE_COMMIT") || "DEV" }}
 
-  CRYSTAL_VERSION = {{ env("CRYSTAL_VERSION") || "latest" }}
+  CRYSTAL_VERSION = {{ env("CRYSTAL_VERSION") || "1.1.1" }}
+
+  TRACE      = !!ENV["PLACEOS_ENABLE_TRACE"]?.presence.try(&.in?("1", "true"))
+  PRODUCTION = ENV["SG_ENV"]? == "production"
 
   #############################################################################
 
@@ -35,5 +38,6 @@ module PlaceOS::Build
   REPOSITORY_STORE_PATH = ENV["PLACEOS_REPOSITORIES"]?.presence || Path["./repositories"].expand.to_s
   BINARY_STORE_PATH     = ENV["PLACEOS_DRIVER_BINARIES"]?.presence || Path["./bin/drivers"].expand.to_s
 
-  class_getter? production : Bool { ENV["SG_ENV"]? == "production" }
+  class_getter? production : Bool { PRODUCTION }
+  class_getter? trace : Bool { TRACE }
 end

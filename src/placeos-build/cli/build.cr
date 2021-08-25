@@ -1,3 +1,5 @@
+require "placeos-log-backend"
+
 require "../driver_store/s3"
 
 module PlaceOS::Build
@@ -27,7 +29,7 @@ module PlaceOS::Build
       @[Clip::Doc("Extract driver info on build")]
       getter strict_driver_info : Bool = true
 
-      @[Clip::Doc("Disocover drivers and compile them")]
+      @[Clip::Doc("Discover drivers and compile them")]
       getter discover : Bool = false
 
       @[Clip::Doc("URI of the git repository")]
@@ -48,8 +50,6 @@ module PlaceOS::Build
 
       def run
         repository_store = RepositoryStore.new(repository_store_path)
-        repository_path.try { |path| repository_store.link_existing(repository_uri, path) }
-
         driver_store = DriverStore.from_credentials(aws_credentials)
         builder = Drivers.new(driver_store, repository_store, strict_driver_info: strict_driver_info)
 
@@ -62,18 +62,23 @@ module PlaceOS::Build
 
         valid_driver_entrypoints.each do |entrypoint|
           args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
-          begin
-            if (path = repository_path)
-              builder.local_compile(Path[path].expand, **args)
-            else
-              builder.compile(repository_uri,
-                **args,
-                username: username,
-                password: password,
-              )
+          ::Log.with_context do
+            Log.context.set(**args)
+            begin
+              if (path = repository_path)
+                Log.debug { "local compile" }
+                builder.local_compile(Path[path].expand, **args)
+              else
+                Log.debug { "cloned compile" }
+                builder.compile(repository_uri,
+                  **args,
+                  username: username,
+                  password: password,
+                )
+              end
+            rescue e
+              Log.warn(exception: e) { "failed to compile #{entrypoint}" }
             end
-          rescue e
-            Log.warn(exception: e) { "failed to compile #{entrypoint}" }
           end
         end
       end
@@ -82,19 +87,21 @@ module PlaceOS::Build
         valid_driver_entrypoints = entrypoints.compact_map do |file|
           builder.repository_store.with_repository(repository_uri, file, commit, branch, username, password) do |path|
             driver = path.join(file)
-            if !File.exists?(driver)
-              Log.warn { "#{driver} is not a file" }
-              file = nil
-            elsif !Build.is_driver?(driver)
+            if File.exists?(driver) && Build.is_driver?(driver)
+              file
+            else
               Log.warn { "#{driver} is not a driver" }
-              file = nil
+              nil
             end
-            file
           end
         end
 
         if discover
-          found = builder.discover_drivers?(repository_uri, branch, commit, username, password)
+          found = if (path = repository_path)
+                    builder.local_discover_drivers?(Path[path].expand)
+                  else
+                    builder.discover_drivers?(repository_uri, branch, commit, username, password)
+                  end
           valid_driver_entrypoints.concat(found).uniq! unless found.nil? || found.empty?
         end
 

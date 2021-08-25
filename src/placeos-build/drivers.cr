@@ -46,7 +46,9 @@ module PlaceOS::Build
       password : String? = nil
     ) : Array(String)?
       repository_store.with_repository(repository_uri, "shard.yml", commit, branch, username, password) do |path|
-        local_discover_drivers?(path)
+        local_discover_drivers?(path).tap do |found|
+          Log.trace { {message: "discovered drivers", drivers: found} }
+        end
       end
     rescue e
       Log.warn(exception: e) { {
@@ -173,46 +175,78 @@ module PlaceOS::Build
       working_directory : String
     ) : Compilation::Success | Compilation::Failure
       wait_for_compilation(executable) do
-        begin
-          start = Time.utc
-          path = if self.class.legacy_build_method?
-                   result = PlaceOS::Compiler.build_driver(
-                     source_file: executable.entrypoint,
-                     repository: ".",
-                     commit: executable.commit,
-                     working_directory: working_directory,
-                     binary_directory: working_directory,
-                   )
-                   return Compilation::Failure.new(result.output) unless result.success?
+        ::Log.with_context do
+          Log.context.set(entrypoint: executable.entrypoint, commit: executable.commit)
+          begin
+            start = Time.utc
+            result = if self.class.legacy_build_method?
+                       legacy_build(executable, working_directory)
+                     else
+                       require_build(executable, working_directory)
+                     end
 
-                   result.path
-                 else
-                   executable_name = UUID.random.to_s
-                   result = ExecFrom.exec_from(
-                     working_directory,
-                     "crystal",
-                     {"build", "--static", "--error-trace", "--no-color", "-o", executable_name, executable.entrypoint}
-                   )
-                   return Compilation::Failure.new(result.output.to_s) unless result.status.success?
+            return result if result.is_a? Compilation::Failure
+            path = result
 
-                   File.join(working_directory, executable_name)
-                 end
+            Log.info { "compiling #{executable} took #{(Time.utc - start).total_seconds}s" }
 
-          Log.info { "compiling #{executable} took #{(Time.utc - start).total_seconds}s" }
+            # Write the binary to the store
+            File.open(path) do |file_io|
+              binary_store.write(executable.filename, file_io)
+            end
 
-          # Write the binary to the store
-          File.open(path) do |file_io|
-            binary_store.write(executable.filename, file_io)
+            # Extract the metadata to the store
+            binary_store.info(executable) if strict_driver_info?
+
+            Compilation::Success.new(executable.filename)
+          ensure
+            path.try { |p| File.delete(p) } rescue nil
           end
-
-          # Extract the metadata to the store
-          binary_store.info(executable) if strict_driver_info?
-
-          Compilation::Success.new(executable.filename)
-        ensure
-          path.try { |p| File.delete(p) } rescue nil
         end
       end
+    end
+
+    private def legacy_build(executable, working_directory) : String | Compilation::Failure
+      Log.trace { "using legacy build method" }
+      result = PlaceOS::Compiler.build_driver(
+        source_file: executable.entrypoint,
+        repository: ".",
+        commit: executable.commit,
+        working_directory: working_directory,
+        binary_directory: working_directory,
+      )
+      unless result.success?
+        output = result.output.to_s
+        Log.error { "build failed with #{output}" }
+        return Compilation::Failure.new(output)
+      end
+
+      result.path
+    end
+
+    private def require_build(executable, working_directory) : String | Compilation::Failure
+      Log.trace { "using require based method" }
+      executable_name = UUID.random.to_s
+      result = ExecFrom.exec_from(
+        working_directory,
+        "crystal",
+        {
+          "build",
+          "--static",
+          "--error-trace",
+          "--no-color",
+          "-o", executable_name,
+          executable.entrypoint,
+        }
+      )
+
+      unless result.status.success?
+        output = result.output.to_s
+        Log.error { "build failed with #{output}" }
+        return Compilation::Failure.new(output)
+      end
+
+      File.join(working_directory, executable_name)
     end
 
     # Returns the URIs of repositories in the `repository_store_path`
@@ -288,13 +322,19 @@ module PlaceOS::Build
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
 
       # Look for an exact match
-      return Compilation::Success.new(binary_store.path(executable)) if !force_recompile && binary_store.exists?(executable)
+      if !force_recompile && binary_store.exists?(executable)
+        path = binary_store.path(executable)
+        Log.trace { {message: "driver compiled and on disk", path: path} }
+        return Compilation::Success.new(path)
+      end
 
       # Look for drivers with matching hash, but different commit
       if !force_recompile && (unchanged_executable = binary_store.query(entrypoint, digest: executable.digest, crystal_version: executable.crystal_version).first?)
         # If it exists, copy with the current commit for the binary
         binary_store.link(unchanged_executable, executable)
-        Compilation::Success.new(binary_store.path(executable))
+        path = binary_store.path(executable)
+        Log.trace { {message: "matching driver found in store", path: path} }
+        Compilation::Success.new(path)
       else
         build_driver(
           executable: executable,
