@@ -224,6 +224,8 @@ module PlaceOS::Build
       result.path
     end
 
+    class_property build_threads : Int32 = 1
+
     private def require_build(executable, working_directory) : String | Compilation::Failure
       Log.trace { "using require based method" }
       executable_name = UUID.random.to_s
@@ -232,9 +234,10 @@ module PlaceOS::Build
         "crystal",
         {
           "build",
-          "--static",
           "--error-trace",
           "--no-color",
+          "--static",
+          "--threads", self.class.build_threads.to_s,
           "-o", executable_name,
           executable.entrypoint,
         }
