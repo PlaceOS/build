@@ -5,6 +5,17 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.7.0](https://github.com/PlaceOS/build/compare/v0.6.0...v0.7.0)
+
+## Changed
+
+* Use `PLACEOS_LOCAL_BUILD` instead of `PLACEOS_BUILD_LOCAL_BUILDS` to enable local builds.
+
+## Fixed
+
+* **executable**:
+  * Correct construction of file glob.
+
 ## [0.6.0](https://github.com/PlaceOS/build/compare/v0.5.1...v0.6.0)
 
 ### Added
