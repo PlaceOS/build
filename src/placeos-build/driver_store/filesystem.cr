@@ -4,7 +4,7 @@ module PlaceOS::Build
   class Filesystem < DriverStore
     protected getter binary_store : String
 
-    def initialize(@binary_store : String = Path["./bin/drivers"].expand.to_s)
+    def initialize(@binary_store : String = BINARY_STORE_PATH)
       Dir.mkdir_p binary_store
     end
 
@@ -22,9 +22,10 @@ module PlaceOS::Build
       commit : String? = nil,
       crystal_version : SemanticVersion | String? = nil
     ) : Enumerable(Executable)
-      Dir.glob(File.join(binary_store, Executable.glob(entrypoint, digest, commit, crystal_version)), follow_symlinks: true)
+      glob = File.join(binary_store, Executable.glob(entrypoint, digest, commit, crystal_version))
+      Dir.glob(glob, follow_symlinks: true)
         .reject(&.ends_with?(Executable::INFO_EXT))
-        .map { |filename| Executable.new(filename) }
+        .map(&->Executable.new(String))
     end
 
     # Query for metadata for an exact driver executable

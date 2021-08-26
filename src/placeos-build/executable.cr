@@ -91,10 +91,11 @@ module PlaceOS::Build
     #
     def self.glob(entrypoint : String?, digest : String?, commit : String?, crystal_version : SemanticVersion | String?)
       {
-        entrypoint.try &->encoded_directory(String),
-        digest,
+        entrypoint.try &->name(String),
         commit,
-        crystal_version.try &.to_s,
+        digest,
+        crystal_version,
+        entrypoint.try &->encoded_directory(String),
       }.join(SEPERATOR) do |value|
         value || "*"
       end

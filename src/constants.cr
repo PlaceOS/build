@@ -14,7 +14,7 @@ module PlaceOS::Build
 
   #############################################################################
 
-  SUPPORT_LOCAL_BUILDS = !!ENV["PLACEOS_BUILD_LOCAL_BUILDS"]?.presence.try(&.downcase.in?("1", "true"))
+  SUPPORT_LOCAL_BUILDS = !!ENV["PLACEOS_BUILD_LOCAL"]?.presence.try(&.downcase.in?("1", "true"))
 
   # Whether the API supports path referencing in builds. Defaults to `false`
   class_getter? support_local_builds = SUPPORT_LOCAL_BUILDS

@@ -46,9 +46,7 @@ module PlaceOS::Build
       password : String? = nil
     ) : Array(String)?
       repository_store.with_repository(repository_uri, "shard.yml", commit, branch, username, password) do |path|
-        local_discover_drivers?(path).tap do |found|
-          Log.trace { {message: "discovered drivers", drivers: found} }
-        end
+        local_discover_drivers?(path)
       end
     rescue e
       Log.warn(exception: e) { {
@@ -270,7 +268,10 @@ module PlaceOS::Build
         .select! { |file|
           !file.ends_with?("_spec.cr") && File.read_lines(file).any?(&.includes?("< PlaceOS::Driver"))
         }
-        .map &.lchop(repository_path.to_s).lchop('/')
+        .map(&.lchop(repository_path.to_s).lchop('/'))
+        .tap do |drivers|
+          Log.debug { {message: "discovered drivers", drivers: drivers} }
+        end
     rescue e
       Log.warn(exception: e) { {
         message:         "failed to discover drivers",
