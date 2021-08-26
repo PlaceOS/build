@@ -5,6 +5,25 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.6.0](https://github.com/PlaceOS/build/compare/v0.5.1...v0.6.0)
+
+### Added
+
+* **logging**:
+  * Expand trace logging ([c6015e3](https://github.com/PlaceOS/build/commit/c6015e3))
+  * `PLACEOS_ENABLE_TRACE` to enable trace logging ([c6015e3](https://github.com/PlaceOS/build/commit/c6015e3))
+
+* **cli:build**:
+  * Add `--discover` to auto-discover drivers ([2e0cb79](https://github.com/PlaceOS/build/commit/2e0cb79) )
+
+### Fixed
+
+* **api:driver**: correct path to binary ([638e38f](https://github.com/PlaceOS/build/commit/638e38f))
+* **cli:build**: extract crystal version from constants ([77aa6f4](https://github.com/PlaceOS/build/commit/77aa6f4))
+* **repository_store**: ignore requires outside repository ([b2a8e38](https://github.com/PlaceOS/build/commit/b2a8e38))
+* **client**: return Array(commits), not Array(String) ([d63404f](https://github.com/PlaceOS/build/commit/d63404f))
+* **drivers**: configure threads for require builds ([5d81c24](https://github.com/PlaceOS/build/commit/5d81c24))
+
 ## [0.5.1](https://github.com/PlaceOS/build/compare/v0.5.0...v0.5.1)
 
 ### Changed
