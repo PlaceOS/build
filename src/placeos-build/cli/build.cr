@@ -55,10 +55,7 @@ module PlaceOS::Build
 
         valid_driver_entrypoints = drivers(builder)
 
-        if valid_driver_entrypoints.empty?
-          Log.info { "no valid driver entrypoints passed" }
-          exit 0
-        end
+        abort("no valid driver entrypoints passed") if valid_driver_entrypoints.empty?
 
         valid_driver_entrypoints.each do |entrypoint|
           args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
