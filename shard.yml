@@ -43,6 +43,9 @@ dependencies:
   placeos-models:
     github: placeos/models
     version: ~> 5.6
+  raven:
+    github: Sija/raven.cr
+    branch: master
   responsible:
     github: place-labs/responsible
     version: ~> 1.2

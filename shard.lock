@@ -16,6 +16,10 @@ shards:
     git: https://github.com/crystal-ameba/ameba.git
     version: 0.14.3
 
+  any_hash:
+    git: https://github.com/sija/any_hash.cr.git
+    version: 0.2.5
+
   awscr-s3:
     git: https://github.com/taylorfinnell/awscr-s3.git
     version: 0.8.3+git.commit.559518424669934ee6390541a6d88262ef75a370
@@ -23,6 +27,10 @@ shards:
   awscr-signer:
     git: https://github.com/taylorfinnell/awscr-signer.git
     version: 0.8.2
+
+  backtracer:
+    git: https://github.com/sija/backtracer.cr.git
+    version: 1.2.1
 
   bindata:
     git: https://github.com/spider-gazelle/bindata.git
@@ -134,7 +142,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 5.4.16
+    version: 5.4.17
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git
@@ -151,6 +159,10 @@ shards:
   promise:
     git: https://github.com/spider-gazelle/promise.git
     version: 2.2.3
+
+  raven:
+    git: https://github.com/sija/raven.cr.git
+    version: 1.9.1+git.commit.d53319dc4ce26fc44f13b9c1c6ffb8699e22899b
 
   redis:
     git: https://github.com/stefanwille/crystal-redis.git

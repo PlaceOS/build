@@ -1,3 +1,4 @@
+require "./logging"
 require "./config"
 require "./placeos-build/cli"
 
