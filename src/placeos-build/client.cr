@@ -217,7 +217,7 @@ module PlaceOS::Build
         params["repository_path"] = path
       end
 
-      post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, retries: 2) do |response|
+      post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, raises: true, retries: 2) do |response|
         key = response.headers[DRIVER_HEADER_KEY]
         time = response.headers[DRIVER_HEADER_TIME].to_i64
         yield key, response.body_io
@@ -331,7 +331,7 @@ module PlaceOS::Build
       #
       # The response status will be automatically checked and a `PlaceOS::Build::ClientError` raised if
       # unsuccessful and `raises` is `true`.
-      private def {{method.id}}(path, headers : HTTP::Headers? = nil, body : HTTP::Client::BodyType = nil, request_id : String? = nil, raises : Bool = false, retries : Int32 = 10)
+      private def {{method.id}}(path, headers : HTTP::Headers? = nil, body : HTTP::Client::BodyType = nil, request_id : String? = nil, raises : Bool = true, retries : Int32 = 10)
         headers ||= HTTP::Headers.new
         headers["Content-Type"] = "application/json"
         headers["X-Request-ID"] = request_id || UUID.random.to_s unless headers.has_key? "X-Request-ID"
