@@ -75,6 +75,7 @@ module PlaceOS::Build
     end
 
     def read(filename : String, & : IO ->)
+      filename = URI.encode(filename)
       filesystem.read(filename) do |file_io|
         yield file_io
       end
@@ -124,13 +125,14 @@ module PlaceOS::Build
       # FIXME: Is there a better way to do this?
       filesystem.write(filename, io)
       io.rewind
-      client.write(filename, io)
+      client.write(URI.encode(filename), io)
     end
 
     protected def query_binary(key)
+      key = URI.encode(key)
       client
         .list(key)
-        .map { |object| Executable.new Path[object.key].basename }
+        .map { |object| Executable.new Path[URI.decode(object.key)].basename }
     end
   end
 end
