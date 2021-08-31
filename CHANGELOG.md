@@ -5,6 +5,13 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.8.0](https://github.com/PlaceOS/build/compare/v0.7.0...v0.8.0)
+
+* **executable**: Digest before commit in filename, provides easier S3 queries ([f7316ea](https://github.com/PlaceOS/build/commit/f7316ea)) 
+* **s3**: Encode key before write ([b1d86a7](https://github.com/PlaceOS/build/commit/b1d86a7)) 
+* **cli:build**: Abort if no entrypoints supplied to build ([a02542e](https://github.com/PlaceOS/build/commit/a02542e))
+* **logging**: add sentry ([383829f](https://github.com/PlaceOS/build/commit/383829f))
+
 ## [0.7.0](https://github.com/PlaceOS/build/compare/v0.6.0...v0.7.0)
 
 ## Changed
