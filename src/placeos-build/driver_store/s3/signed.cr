@@ -1,3 +1,4 @@
+require "uri"
 require "./client"
 
 module PlaceOS::Build
@@ -11,12 +12,14 @@ module PlaceOS::Build
       end
 
       def read(object : String, & : IO ->)
+        object = URI.encode_www_form(object)
         s3.get_object(bucket, object, headers: headers) do |stream|
           yield stream.body_io
         end
       end
 
       def write(key : String, io : IO) : Nil
+        key = URI.encode_www_form(key)
         uploader = Awscr::S3::FileUploader.new(s3)
         rewind_io = ->(e : Exception, _a : Int32, _t : Time::Span, _n : Time::Span) {
           Log.error(exception: e) { {key: key, message: "failed to write to S3"} }
@@ -30,6 +33,7 @@ module PlaceOS::Build
       end
 
       def copy(source : String, destination : String) : Nil
+        source, destination = {source, destination}.map { |v| URI.encode_www_form(v) }
         log_failure = ->(e : Exception, _a : Int32, _t : Time::Span, _n : Time::Span) {
           Log.error(exception: e) { {source: source, destination: destination, message: "failed to copy in to S3"} }
         }
@@ -40,6 +44,7 @@ module PlaceOS::Build
       end
 
       def list(prefix = nil, max_keys = nil) : Iterator(Awscr::S3::Object)
+        prefix = URI.encode_www_form(prefix) unless prefix.nil?
         ObjectPaginator.new s3.list_objects(bucket, prefix: prefix, max_keys: max_keys)
       end
 
