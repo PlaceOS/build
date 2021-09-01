@@ -6,6 +6,7 @@ module PlaceOS::Build
       private getter client : HTTP::Client
 
       def self.url(bucket : String, region : String?)
+        # NOTE: There is no `Tuple(*T).compact`
         hostname = [bucket, "s3", region].compact.join('.')
         URI.parse "https://#{hostname}.amazonaws.com"
       end
@@ -15,6 +16,7 @@ module PlaceOS::Build
       end
 
       def read(key : String, & : IO ->)
+        key = URI.encode_www_form(key)
         client.get("/#{key}", headers: HTTP::Headers{"Accept" => "application/xml"}) do |response|
           unless response.success?
             raise File::NotFoundError.new("Not present in S3", file: key)
@@ -24,6 +26,7 @@ module PlaceOS::Build
       end
 
       def list(prefix = nil, max_keys = nil) : Iterator(Object)
+        prefix = URI.encode_www_form(prefix) unless prefix.nil?
         ObjectPaginator.new(client, prefix, max_keys)
       end
 
