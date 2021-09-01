@@ -42,7 +42,7 @@ dependencies:
     github: place-labs/log-backend
   placeos-models:
     github: placeos/models
-    version: ~> 5.6
+    version: ~> 5.9
   raven:
     github: Sija/raven.cr
     branch: master
