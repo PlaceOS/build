@@ -62,7 +62,7 @@ module PlaceOS::Build::Api
         head code: :not_found
       in Build::Compilation::Success
         response.content_type = "application/octet-stream"
-        result.to_http_headers.each { |k, v| response.headers[k] = v }
+        response.headers.merge! result.to_http_headers
 
         path = builder.binary_store.path(result.executable)
 
