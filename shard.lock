@@ -98,7 +98,7 @@ shards:
 
   jwt:
     git: https://github.com/crystal-community/jwt.git
-    version: 1.5.1
+    version: 1.6.0
 
   log_helper:
     git: https://github.com/spider-gazelle/log_helper.git
@@ -142,7 +142,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 5.4.17
+    version: 5.5.0
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git

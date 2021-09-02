@@ -6,9 +6,17 @@ module PlaceOS::Build
   describe S3::Unsigned do
     client = S3::Unsigned.new("placeos-drivers", "ap-southeast-2")
 
+    before_all do
+      WebMock.allow_net_connect = false
+      WebMock.reset
+    end
+
+    after_all do
+      WebMock.allow_net_connect = true
+    end
+
     describe "#read" do
       it "returns an object" do
-        WebMock.allow_net_connect = false
         WebMock
           .stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com/test.html")
           .to_return(body_io: IO::Memory.new)
@@ -21,8 +29,6 @@ module PlaceOS::Build
 
     describe "#list" do
       it "lists objects in the bucket" do
-        WebMock.allow_net_connect = false
-        WebMock.reset
         WebMock
           .stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com")
           .to_return(body: LIST_XML)

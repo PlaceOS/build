@@ -2,17 +2,16 @@ require "placeos-log-backend"
 require "spec"
 require "webmock"
 
-require "../src/placeos-build"
-require "../src/placeos-build/*"
+# Helper methods for testing controllers (curl, with_server, context)
+require "../lib/action-controller/spec/curl_context"
 
 Spec.before_suite do
-  ::Log.setup do |builder|
-    backend = PlaceOS::LogBackend.log_backend
-    builder.bind "place_os.*", :trace, backend
-    builder.bind "*", :trace, backend
-  end
+  WebMock.allow_net_connect = true
+  backend = PlaceOS::LogBackend::STDOUT
+  Log.builder.bind "place_os.*", :trace, backend
+  Log.builder.bind "*", :trace, backend
 end
 
-Spec.before_each do
-  WebMock.allow_net_connect = true
-end
+require "../src/config"
+require "../src/placeos-build"
+require "../src/placeos-build/*"

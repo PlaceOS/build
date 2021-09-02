@@ -6,9 +6,17 @@ module PlaceOS::Build
   describe S3::Signed do
     client = S3::Signed.new("placeos-drivers", "ap-southeast-2", "key", "secret")
 
+    before_all do
+      WebMock.allow_net_connect = false
+      WebMock.reset
+    end
+
+    after_all do
+      WebMock.allow_net_connect = true
+    end
+
     describe "#read" do
       it "returns an object" do
-        WebMock.allow_net_connect = false
         WebMock
           .stub(:get, "https://s3-ap-southeast-2.amazonaws.com/placeos-drivers/test.html")
           .to_return(body_io: IO::Memory.new)
@@ -20,7 +28,6 @@ module PlaceOS::Build
 
     describe "#list" do
       it "lists objects in the bucket" do
-        WebMock.allow_net_connect = false
         WebMock
           .stub(:get, "https://s3-ap-southeast-2.amazonaws.com/placeos-drivers?list-type=2")
           .to_return(body: LIST_XML)
@@ -30,7 +37,6 @@ module PlaceOS::Build
 
     describe "#write" do
       it "writes bytes to a bucket" do
-        WebMock.allow_net_connect = false
         WebMock
           .stub(:put, "https://s3-ap-southeast-2.amazonaws.com/placeos-drivers/test")
           .with(body: "test")
@@ -41,7 +47,6 @@ module PlaceOS::Build
 
     describe "#copy" do
       it "copies a file within a bucket" do
-        WebMock.allow_net_connect = false
         WebMock
           .stub(:put, "https://s3-ap-southeast-2.amazonaws.com/placeos-drivers/destination")
           .with(body: "", headers: {"x-amz-copy-source" => "/placeos-drivers/source"})
