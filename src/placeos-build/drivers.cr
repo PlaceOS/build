@@ -215,7 +215,7 @@ module PlaceOS::Build
       )
       unless result.success?
         output = result.output.to_s
-        Log.error { "build failed with #{output}" }
+        Log.trace { "build failed with #{output}" }
         return Compilation::Failure.new(output)
       end
 

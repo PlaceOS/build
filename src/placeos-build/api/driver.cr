@@ -30,8 +30,8 @@ module PlaceOS::Build::Api
     #
     # Returns…
     #     200 if compiled, returning a stream of the binary
-    #     500 if the object failed to compile, and error or build output
     #     404 if repository, entrypoint, or commit was not found
+    #     422 if the object failed to compile, and error or build output
     # POST /build/<file>?url=[repository url]&commit=[HEAD]
     post("/:file", :trigger_build, annotations: @[OpenAPI(<<-YAML
         summary: Triggers a build of an object with as the entrypoint
@@ -73,7 +73,7 @@ module PlaceOS::Build::Api
 
         head code: :ok
       in Build::Compilation::Failure
-        render status_code: :internal_server_error, json: result
+        render status_code: :unprocessable_entity, json: result
       end
     end
 
