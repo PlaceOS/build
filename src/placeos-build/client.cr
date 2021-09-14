@@ -51,15 +51,11 @@ module PlaceOS::Build
       uri_host = uri.host.presence
       @host = uri_host if uri_host
       @port = uri.port || 3000
-      @connection = HTTP::Client.new(uri)
-      @connection.read_timeout = 6.minutes
     end
 
     def initialize(host : String? = nil, port : Int32? = nil, @build_version : String = BUILD_VERSION)
       @host = host if host && host.presence
       @port = port if port
-      @connection = HTTP::Client.new(host: @host, port: @port)
-      @connection.read_timeout = 6.minutes
     end
 
     # Root
@@ -217,18 +213,21 @@ module PlaceOS::Build
         params["repository_path"] = path
       end
 
-      post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, raises: true, retries: 2) do |response|
-        key = response.headers[DRIVER_HEADER_KEY]
-        time = response.headers[DRIVER_HEADER_TIME].to_i64
-        yield key, response.body_io
-        Compilation::Success.new(key, time)
-      end
-    rescue e : Build::ClientError
-      case e.response.status_code
-      when 404 then Compilation::NotFound.new
-      when 500 then Compilation::Failure.from_json(e.response.body)
-      else
-        raise e
+      begin
+        post("/driver/#{URI.encode_www_form(file)}?#{params}", authorization_header(username, password), request_id: request_id, raises: true, retries: 2) do |response|
+          key = response.headers[DRIVER_HEADER_KEY]
+          time = response.headers[DRIVER_HEADER_TIME].to_i64
+          yield key, response.body_io
+          Compilation::Success.new(key, time)
+        end
+      rescue e : Build::ClientError
+        case e.response.status_code
+        when 404 then Compilation::NotFound.new
+        when 422
+          Compilation::Failure.from_json(e.body)
+        else
+          raise e
+        end
       end
     end
 
@@ -303,8 +302,17 @@ module PlaceOS::Build
     # Connection
     ###########################################################################
 
-    protected getter connection : HTTP::Client
     protected getter connection_lock : Mutex = Mutex.new
+
+    protected getter connection : HTTP::Client do
+      new_connection
+    end
+
+    protected def new_connection : HTTP::Client
+      @connection = HTTP::Client.new(host: @host, port: @port).tap do |con|
+        con.read_timeout = 6.minutes
+      end
+    end
 
     def close
       connection_lock.synchronize do
@@ -340,7 +348,9 @@ module PlaceOS::Build
         rewind_io = ->(e : Exception, _a : Int32, _t : Time::Span, _n : Time::Span) {
           Log.error(exception: e) { {method: {{ method }}, path: path, message: "failed to request build"} }
           body.rewind if body.responds_to? :rewind
+          new_connection
         }
+
         Retriable.retry times: retries, max_interval: 1.minute, on_retry: rewind_io do
           connection_lock.synchronize do
             connection.{{method.id}}(path, headers, body) do |response|

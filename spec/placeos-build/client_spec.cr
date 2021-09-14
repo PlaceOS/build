@@ -1,7 +1,7 @@
 require "../helper"
 
 module PlaceOS::Build
-  describe Client, focus: true do
+  describe Client do
     before_each do
       WebMock.allow_net_connect = false
     end

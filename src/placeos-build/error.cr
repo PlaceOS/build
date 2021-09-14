@@ -21,13 +21,20 @@ module PlaceOS::Build
   class ClientError < Error
     getter response : HTTP::Client::Response
     delegate status_code, to: response
+    getter body : String
 
     def initialize(@response : HTTP::Client::Response, message = "")
+      @body = response.body_io.gets_to_end
       super(message)
     end
 
     def initialize(path : String, @response)
-      super("request to #{path} failed with\n#{response.body}")
+      if @response.is_a? HTTP::Client::Response
+        @body = response.body_io.gets_to_end
+      else
+        @body = ""
+      end
+      super("request to #{path} failed")
     end
 
     def self.from_response(path : String, response : HTTP::Client::Response)
