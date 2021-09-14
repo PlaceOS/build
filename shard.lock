@@ -21,8 +21,8 @@ shards:
     version: 0.2.5
 
   awscr-s3:
-    git: https://github.com/taylorfinnell/awscr-s3.git
-    version: 0.8.3+git.commit.559518424669934ee6390541a6d88262ef75a370
+    git: https://github.com/stakach/awscr-s3.git
+    version: 0.8.4+git.commit.24a1eea075a938cd2a0e55cf3780c6aeb0ec48d4
 
   awscr-signer:
     git: https://github.com/taylorfinnell/awscr-signer.git
