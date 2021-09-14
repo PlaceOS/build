@@ -7,7 +7,7 @@ module PlaceOS::Build
   BUILD_TIME   = {{ system("date -u").chomp.stringify }}
   BUILD_COMMIT = {{ env("PLACE_COMMIT") || "DEV" }}
 
-  CRYSTAL_VERSION = {{ env("CRYSTAL_VERSION") || "1.1.1" }}
+  CRYSTAL_VERSION = {{ env("CRYSTAL_VERSION") }}.presence || "1.1.1"
 
   TRACE      = !!ENV["PLACEOS_ENABLE_TRACE"]?.presence.try(&.in?("1", "true"))
   PRODUCTION = ENV["SG_ENV"]? == "production"

@@ -4,6 +4,8 @@ ARG PLACE_VERSION="DEV"
 
 FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
 
+ARG CRYSTAL_VERSION=1.1.1
+
 WORKDIR /app
 
 RUN apk upgrade && \

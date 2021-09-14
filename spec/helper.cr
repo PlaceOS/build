@@ -10,6 +10,7 @@ Spec.before_suite do
   backend = PlaceOS::LogBackend::STDOUT
   Log.builder.bind "place_os.*", :trace, backend
   Log.builder.bind "*", :trace, backend
+  Log.builder.bind "raven", :warn, backend
 end
 
 require "../src/config"
