@@ -15,44 +15,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   test:
-    name: "crystal: ${{ matrix.crystal }}, legacy: ${{ matrix.legacy }}, MT: ${{ matrix.MT }}, stable: ${{ matrix.stable }}"
+    name: "crystal: ${{ matrix.crystal }}, require: ${{ matrix.require }}, MT: ${{ matrix.MT }}, stable: ${{ matrix.stable }}"
     runs-on: ubuntu-latest
     continue-on-error: ${{ !matrix.stable }}
     strategy:
       fail-fast: false
       matrix:
+        require: [true, false]
         stable: [true]
-        legacy: [true, false]
+        MT: [false]
         crystal:
           - 1.0.0
-          - 1.1.0
           - 1.1.1
-        MT: [false]
         include:
           - stable: false
             MT: false
-            legacy: true
+            require: true
             crystal: nightly
           - stable: false
             MT: false
-            legacy: false
+            require: false
             crystal: nightly
-        #   - stable: false
-        #     MT: true
-        #     legacy: true
-        #     crystal: nightly
-        #   - stable: false
-        #     MT: true
-        #     legacy: false
-        #     crystal: nightly
-        #   - stable: false
-        #     MT: true
-        #     legacy: true
-        #     crystal: latest
-        #   - stable: false
-        #     MT: true
-        #     legacy: false
-        #     crystal: latest
     steps:
       - uses: actions/checkout@v2
       - name: Test
@@ -60,10 +43,10 @@ jobs:
         run: ./test
         env:
           CRYSTAL_VERSION: ${{ matrix.crystal }}
-          TEST_LEGACY: "${{ matrix.legacy }}"
+          TEST_LEGACY: "${{ matrix.require }}"
       - name: Test with Multithreading
         if: ${{ matrix.MT }}
         run: ./test -Dpreview_mt
         env:
           CRYSTAL_VERSION: ${{ matrix.crystal }}
-          TEST_LEGACY: "${{ matrix.legacy }}"
+          TEST_LEGACY: "${{ matrix.require }}"
