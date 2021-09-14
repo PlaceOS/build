@@ -46,7 +46,8 @@ module PlaceOS::Build
         url = "https://github.com/placeos/drivers"
         commit = "abcdef"
 
-        WebMock.stub(:post, "http://localhost:3000/api/build/v1/driver/drivers%2Ftest.cr?url=https%3A%2F%2Fgithub.com%2Fplaceos%2Fdrivers&commit=abcdef&force_recompile=false")
+        WebMock
+          .stub(:post, "http://localhost:3000/api/build/v1/driver/drivers%2Ftest.cr?url=https%3A%2F%2Fgithub.com%2Fplaceos%2Fdrivers&commit=abcdef&force_recompile=false")
           .to_return(status: 500, body: Compilation::Failure.new("failed to compile").to_json)
 
         response = Client.client do |client|
