@@ -5,6 +5,27 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.8.2](https://github.com/PlaceOS/build/compare/v0.8.0...v0.8.2)
+
+### Changed
+
+* **dependencies**: point to steve's s3 fork ([6709c7f](https://github.com/PlaceOS/build/commit/6709c7f))
+* **ci**:
+  - use 1.1.1 for tests ([6ff6256](https://github.com/PlaceOS/build/commit/6ff6256))
+  - remove driver spec fixture ([2e58060](https://github.com/PlaceOS/build/commit/2e58060))
+  - remove commented matrix ([0c18e59](https://github.com/PlaceOS/build/commit/0c18e59))
+* **test**:
+  - reduce logging from raven shard ([ace08ab](https://github.com/PlaceOS/build/commit/ace08ab))
+  - **(api:driver)**: client handle compile errors ([b9bea2d](https://github.com/PlaceOS/build/commit/b9bea2d))
+  - **(client_spec)**: fix mocking ([50e829a](https://github.com/PlaceOS/build/commit/50e829a))
+
+### Fixed
+
+* **client**:
+  - extract `body_io` and fallback to `body` ([e24498b](https://github.com/PlaceOS/build/commit/e24498b))
+  - graceful handling of build failures ([375d96d](https://github.com/PlaceOS/build/commit/375d96d))
+* **s3**: url form encode before writes ([2eaabb0](https://github.com/PlaceOS/build/commit/2eaabb0))
+
 ## [0.8.0](https://github.com/PlaceOS/build/compare/v0.7.0...v0.8.0)
 
 * **executable**: Digest before commit in filename, provides easier S3 queries ([f7316ea](https://github.com/PlaceOS/build/commit/f7316ea)) 
@@ -14,11 +35,11 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
 ## [0.7.0](https://github.com/PlaceOS/build/compare/v0.6.0...v0.7.0)
 
-## Changed
+### Changed
 
 * Use `PLACEOS_LOCAL_BUILD` instead of `PLACEOS_BUILD_LOCAL_BUILDS` to enable local builds.
 
-## Fixed
+### Fixed
 
 * **executable**:
   * Correct construction of file glob.
