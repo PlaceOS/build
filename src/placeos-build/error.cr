@@ -24,13 +24,13 @@ module PlaceOS::Build
     getter body : String
 
     def initialize(@response : HTTP::Client::Response, message = "")
-      @body = response.body_io.gets_to_end
+      @body = response.body_io?.try(&.gets_to_end) || response.body
       super(message)
     end
 
     def initialize(path : String, @response)
       if @response.is_a? HTTP::Client::Response
-        @body = response.body_io.gets_to_end
+        @body = response.body_io?.try(&.gets_to_end) || response.body
       else
         @body = ""
       end
