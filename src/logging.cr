@@ -18,6 +18,7 @@ module PlaceOS::Build::Logging
 
   ::Log.setup do |config|
     config.bind "*", Build.trace? ? Log::Severity::Trace : Log::Severity::Warn, log_backend
+    config.bind "raven", :warn, log_backend
 
     namespaces.each do |namespace|
       config.bind namespace, log_level, log_backend
