@@ -131,8 +131,8 @@ Returns the branches for a repository
 Triggers a build of object with <file> as the entrypoint
 Returns…
 - 200 if compiled
-- 500 if the object failed to compile
 - 404 if entrypoint was not found
+- 422 if the object failed to compile
 
 #### `GET /build/driver/<file>/metadata?url=<repository url>&commit=<commit hash>`
 
