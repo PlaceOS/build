@@ -213,6 +213,7 @@ module PlaceOS::Build
         working_directory: working_directory,
         binary_directory: working_directory,
       )
+
       unless result.success?
         output = result.output.to_s
         Log.debug { "build failed with #{output}" }
