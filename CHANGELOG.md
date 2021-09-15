@@ -5,6 +5,15 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.8.3](https://github.com/PlaceOS/build/compare/v0.8.2...v0.8.3)
+
+### Fixed
+
+* **driver_store**:
+  - **s3**: missing link operation ([a1748f6](https://github.com/PlaceOS/build/commit/a1748f6))
+  - fetch driver from s3 store ([5f67fde](https://github.com/PlaceOS/build/commit/5f67fde)) 
+  - bug with info retrieval  ([5d4b10c](https://github.com/PlaceOS/build/commit/5d4b10c))
+
 ## [0.8.2](https://github.com/PlaceOS/build/compare/v0.8.0...v0.8.2)
 
 ### Changed
