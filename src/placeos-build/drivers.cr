@@ -193,8 +193,10 @@ module PlaceOS::Build
               binary_store.write(executable.filename, file_io)
             end
 
-            # Extract the metadata to the store
-            binary_store.info(executable) if strict_driver_info?
+            if strict_driver_info?
+              # Extract the metadata to the store
+              binary_store.info(executable)
+            end
 
             Compilation::Success.new(executable.filename)
           ensure

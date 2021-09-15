@@ -90,46 +90,23 @@ module PlaceOS::Build
       client.copy(source.filename, destination.filename)
     end
 
-    def read(filename : String, & : IO ->)
-      Log.trace { "reading #{filename} from S3" }
-
-      filesystem.read(filename) do |file_io|
-        yield file_io
-      end
-    rescue e : File::NotFoundError
-      raise e unless e.file == filename
-
-      client.read(filename) do |s3_io|
-        yield s3_io
-      end
-    end
-
     def info(driver : Executable) : Executable::Info
       # Check filesystem for info first
-      return filesystem.info(driver) if File.exists? info_path(driver)
+      return filesystem.info(driver) if File.exists?(info_path(driver)) || File.exists?(filesystem.path(driver))
 
-      # Check S3
-      begin
-        memory_io = IO::Memory.new
-        File.open(info_path(driver), mode: "w+") do |file_io|
-          read(driver.info_filename) do |s3_io|
-            IO.copy(s3_io, IO::MultiWriter.new(memory_io, file_io))
+      File.open(info_path(driver), mode: "w+") do |file_io|
+        unless info = fetch_info(driver)
+          # Fetch the driver from S3
+          read(driver.filename) do |s3_io|
+            filesystem.write(driver.filename, s3_io)
           end
+
+          info = filesystem.info(driver)
         end
 
-        json = memory_io.rewind.to_s
+        info.to_json(file_io)
 
-        raise File::NotFoundError.new("Not found in s3", file: driver.info_filename) unless json.presence
-
-        Executable::Info.from_json(json)
-      rescue File::NotFoundError
-        # Extract the metadata
-        filesystem.info(driver).tap do
-          # Write it to S3
-          File.open(info_path(driver)) do |file_io|
-            write(driver.info_filename, file_io)
-          end
-        end
+        info
       end
     end
 
@@ -138,7 +115,26 @@ module PlaceOS::Build
     end
 
     def path(driver : Executable) : String
-      filesystem.path(driver)
+      local_path = filesystem.path(driver)
+      unless File.exists?(local_path)
+        read(driver.filename) do |s3_io|
+          filesystem.write(driver.filename, s3_io)
+        end
+      end
+      local_path
+    end
+
+    def read(filename : String, & : IO ->)
+      filesystem.read(filename) do |file_io|
+        yield file_io
+      end
+    rescue e : File::NotFoundError
+      raise e unless e.file == filename
+
+      Log.trace { "reading #{filename} from S3" }
+      client.read(filename) do |s3_io|
+        yield s3_io
+      end
     end
 
     # Simultaneously write S3 and the filesystem store
