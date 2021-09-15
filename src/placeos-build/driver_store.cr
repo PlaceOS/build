@@ -49,7 +49,7 @@ module PlaceOS::Build
       read(driver.info_filename) do |io|
         Executable::Info.from_json(io)
       end
-    rescue e : File::NotFoundError
+    rescue e : File::NotFoundError | JSON::ParseException
     end
 
     # Write the `Executable::Info` to the cache

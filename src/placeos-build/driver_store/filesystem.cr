@@ -22,6 +22,14 @@ module PlaceOS::Build
       commit : String? = nil,
       crystal_version : SemanticVersion | String? = nil
     ) : Enumerable(Executable)
+      Log.trace { {
+        message:         "query",
+        entrypoint:      entrypoint,
+        digest:          digest,
+        commit:          commit,
+        crystal_version: crystal_version,
+      } }
+
       glob = File.join(binary_store, Executable.glob(entrypoint, digest, commit, crystal_version))
       Dir.glob(glob, follow_symlinks: true)
         .reject(&.ends_with?(Executable::INFO_EXT))
@@ -30,20 +38,17 @@ module PlaceOS::Build
 
     # Query for metadata for an exact driver executable
     def info(driver : Executable) : Executable::Info
-      # Return local value if found
-      path = info_path(driver)
-      return File.open(path) { |io| Executable::Info.from_json(io) } if File.exists? path
+      Log.debug { "extracting info for #{driver}" }
 
       # Check the cache
-      info = fetch_info(driver)
-
-      # Extract the info from the driver if not found in the cache
-      unless info
-        info = driver.info(binary_store)
-        cache_info(driver, info)
+      if existing = fetch_info(driver)
+        return existing
       end
 
-      info
+      # Extract the info from the driver if not found in the cache
+      driver.info(binary_store).tap do |info|
+        cache_info(driver, info)
+      end
     end
 
     def link(source : Executable, destination : Executable) : Nil

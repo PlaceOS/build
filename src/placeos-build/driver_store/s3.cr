@@ -75,6 +75,8 @@ module PlaceOS::Build
     end
 
     def read(filename : String, & : IO ->)
+      Log.trace { "reading #{filename} from S3" }
+
       filesystem.read(filename) do |file_io|
         yield file_io
       end
@@ -99,7 +101,11 @@ module PlaceOS::Build
           end
         end
 
-        Executable::Info.from_json(memory_io)
+        json = memory_io.rewind.to_s
+
+        raise File::NotFoundError.new("Not found in s3", file: driver.info_filename) unless json.presence
+
+        Executable::Info.from_json(json)
       rescue File::NotFoundError
         # Extract the metadata
         filesystem.info(driver).tap do
@@ -121,6 +127,8 @@ module PlaceOS::Build
 
     # Simultaneously write S3 and the filesystem store
     def write(filename : String, io : IO) : Nil
+      Log.trace { "writing #{filename} to S3" }
+
       # FIXME: Is there a better way to do this?
       filesystem.write(filename, io)
       io.rewind
