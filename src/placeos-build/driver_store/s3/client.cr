@@ -7,6 +7,8 @@ module PlaceOS::Build
       alias ListObjectsV2 = Awscr::S3::Response::ListObjectsV2
       alias Object = Awscr::S3::Object
 
+      abstract def can_write? : Bool
+
       abstract def copy(source : String, destination : String)
       abstract def list(prefix = nil, max_keys = nil) : Iterator(Object)
       abstract def read(key : String, & : IO ->)

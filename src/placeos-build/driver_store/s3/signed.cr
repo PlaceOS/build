@@ -8,6 +8,8 @@ module PlaceOS::Build
       private getter s3 : Awscr::S3::Client { Awscr::S3::Client.new(region, key, secret) }
       private getter headers : Hash(String, String) = {} of String => String
 
+      getter? can_write : Bool = true
+
       def initialize(@bucket : String, @region : String, @key : String, @secret : String)
       end
 

@@ -143,8 +143,10 @@ module PlaceOS::Build
 
       # FIXME: Is there a better way to do this?
       filesystem.write(filename, io)
-      io.rewind
-      client.write(filename, io)
+      if client.can_write?
+        io.rewind
+        client.write(filename, io)
+      end
     end
 
     protected def query_binary(key)

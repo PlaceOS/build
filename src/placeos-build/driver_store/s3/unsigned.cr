@@ -5,6 +5,8 @@ module PlaceOS::Build
     class Unsigned < Client
       private getter client : HTTP::Client
 
+      getter? can_write : Bool = true
+
       def self.url(bucket : String, region : String?)
         # NOTE: There is no `Tuple(*T).compact`
         hostname = [bucket, "s3", region].compact.join('.')
