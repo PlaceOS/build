@@ -47,17 +47,19 @@ module PlaceOS::Build
     # Fetch a `Executable::Info` from the cache
     def fetch_info(driver : Executable) : Executable::Info?
       read(driver.info_filename) do |io|
-        Executable::Info.from_json(io)
+        json = io.gets_to_end
+        raise File::NotFoundError.new("info not present", file: driver.info_filename) unless json.presence
+        Executable::Info.from_json(json)
       end
-    rescue e : File::NotFoundError | JSON::ParseException
+    rescue File::NotFoundError
+      Log.debug { "info not in store for #{driver}" }
+      nil
     end
 
     # Write the `Executable::Info` to the cache
     def cache_info(driver : Executable, info : Executable::Info)
-      io = IO::Memory.new
-      info.to_json(io)
-      io.rewind
-      write(driver.info_filename, io)
+      Log.trace { "caching info for #{driver}" }
+      write(driver.info_filename, IO::Memory.new(info.to_json))
     end
   end
 end

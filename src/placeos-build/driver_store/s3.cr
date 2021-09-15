@@ -32,8 +32,10 @@ module PlaceOS::Build
     def self.client_from_credentials(credentials : Credentials) : Client
       case credentials
       in Read
+        Log.debug { "creating an unsigned s3 client" }
         Unsigned.new(credentials.aws_s3_bucket, credentials.aws_region)
       in ReadWrite
+        Log.debug { "creating a signed s3 client" }
         Signed.new(credentials.aws_s3_bucket, credentials.aws_region, credentials.aws_key, credentials.aws_secret)
       end
     end
@@ -50,20 +52,33 @@ module PlaceOS::Build
       commit : String? = nil,
       crystal_version : SemanticVersion | String? = nil
     ) : Enumerable(Executable)
-      if entrypoint && digest && commit && crystal_version
-        exact = Executable.new(entrypoint, digest, commit, crystal_version)
+      ::Log.with_context do
+        Log.context.set(
+          entrypoint: entrypoint,
+          digest: digest,
+          commit: commit,
+          crystal_version: crystal_version.to_s
+        )
+
+        if entrypoint && digest && commit && crystal_version
+          exact = Executable.new(entrypoint, digest, commit, crystal_version)
+        end
+
+        # Query for an exact match on the filesystem
+        filesystem_results = filesystem.query(entrypoint, digest, commit, crystal_version)
+        if exact.try &.in? filesystem_results
+          Log.trace { "exact match found in filesystem cache" }
+          return filesystem_results
+        end
+
+        # Otherwise, query S3
+
+        # Strip everything after the first '*'.
+        # S3 only supports prefix matching.
+        prefix = Executable.glob(entrypoint, digest, commit, crystal_version).split('*').first
+
+        query_binary(prefix).to_a
       end
-
-      # First query for an exact match on the filesystem
-      filesystem_results = filesystem.query(entrypoint, digest, commit, crystal_version)
-      return filesystem_results if exact.try &.in? filesystem_results
-
-      # Otherwise query S3
-
-      glob = Executable.glob(entrypoint, digest, commit, crystal_version)
-      first_glob = glob.index('*')
-      prefix = first_glob.nil? ? glob : glob[0...first_glob]
-      query_binary(prefix).to_a
     end
 
     def exists?(executable : Executable) : Bool
@@ -72,6 +87,7 @@ module PlaceOS::Build
 
     def link(source : Executable, destination : Executable) : Nil
       filesystem.link(source, destination)
+      client.copy(source.filename, destination.filename)
     end
 
     def read(filename : String, & : IO ->)
