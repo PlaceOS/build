@@ -78,7 +78,7 @@ module PlaceOS::Build
         prefix = Executable.glob(entrypoint, digest, commit, crystal_version).split('*').first
 
         query_binary(prefix).to_a.tap do |results|
-          Log.trace { { message: "s3 query", prefix: prefix, results: results.map(&.to_s) } }
+          Log.trace { {message: "s3 query", prefix: prefix, results: results.map(&.to_s)} }
         end
       end
     end

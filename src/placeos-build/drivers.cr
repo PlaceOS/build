@@ -3,6 +3,7 @@ require "file_utils"
 require "uuid"
 
 require "placeos-compiler"
+require "placeos-compiler/git"
 
 require "./compilation"
 require "./compiler"
@@ -264,7 +265,6 @@ module PlaceOS::Build
     #
     # These methods are intended for use on existing git repositories at `repository_path`.
     ###############################################################################################
-
     def local_discover_drivers?(repository_path : Path) : Array(String)?
       Dir
         .glob(repository_path / "drivers/**/*.cr")
@@ -289,6 +289,9 @@ module PlaceOS::Build
       commit : String,
       crystal_version : String? = nil
     )
+      # Attempt to get file's commit first
+      commit = file_commit(repository_path, entrypoint) || commit
+
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
       executable.filename if binary_store.exists?(executable)
     rescue e
@@ -307,6 +310,9 @@ module PlaceOS::Build
       commit : String,
       crystal_version : String? = nil
     )
+      # Attempt to get file's commit first
+      commit = file_commit(repository_path, entrypoint) || commit
+
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
       binary_store.info(executable)
     rescue e
@@ -326,6 +332,9 @@ module PlaceOS::Build
       force_recompile : Bool = true,
       crystal_version : String? = nil
     )
+      # Attempt to get file's commit first
+      commit = file_commit(repository_path, entrypoint) || commit
+
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
 
       # Look for an exact match
@@ -353,8 +362,16 @@ module PlaceOS::Build
     # File Helpers
     ###############################################################################################
 
+    # Get the last modification time
     private def modification_time(executable) : Time
       File.info(binary_store.path(executable)).modification_time
+    end
+
+    # Attempt to extract the commit on disk
+    private def file_commit(repository_path : Path, entrypoint : String)
+      repository = repository_path.basename
+      working_directory = repository_path.parent.to_s
+      PlaceOS::Compiler::Git.current_file_commit(entrypoint, repository, working_directory) rescue nil
     end
 
     # Compilation helpers
