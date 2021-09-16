@@ -5,11 +5,21 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.9.1](https://github.com/PlaceOS/build/compare/v0.9.0...v0.9.1)
+
+### Changed
+
+* **driver_store/s3**: simplify cache lookup ([0f40887](https://github.com/PlaceOS/build/commit/0f40887))
+
 ## [0.9.0](https://github.com/PlaceOS/build/compare/v0.8.4...v0.9.0)
+
+### Changed
 
 * **executable**: place commit before digest ([1206a01](https://github.com/PlaceOS/build/commit/1206a01))
 
 ## [0.8.4](https://github.com/PlaceOS/build/compare/v0.8.3...v0.8.4)
+
+### Fixed
 
 * **drivers**:
   - default `force_recompile` to false ([2a3b60d](https://github.com/PlaceOS/build/commit/2a3b60d))
