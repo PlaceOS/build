@@ -175,7 +175,12 @@ module PlaceOS::Build
     ) : Compilation::Success | Compilation::Failure
       wait_for_compilation(executable) do
         ::Log.with_context do
-          Log.context.set(entrypoint: executable.entrypoint, commit: executable.commit)
+          Log.context.set(
+            entrypoint: executable.entrypoint,
+            commit: executable.commit,
+            digest: executable.digest,
+          )
+
           begin
             start = Time.utc
             result = if self.class.legacy_build_method?
@@ -371,7 +376,7 @@ module PlaceOS::Build
     private def file_commit(repository_path : Path, entrypoint : String)
       repository = repository_path.basename
       working_directory = repository_path.parent.to_s
-      PlaceOS::Compiler::Git.current_file_commit(entrypoint, repository, working_directory) rescue nil
+      PlaceOS::Compiler::Git.current_file_commit(entrypoint, repository, working_directory)[0, 6] rescue nil
     end
 
     # Compilation helpers
