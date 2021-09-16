@@ -103,7 +103,7 @@ module PlaceOS::Build
       repository_uri : String,
       entrypoint : String,
       commit : String,
-      force_recompile : Bool = true,
+      force_recompile : Bool = false,
       crystal_version : String? = nil,
       username : String? = nil,
       password : String? = nil
@@ -334,7 +334,7 @@ module PlaceOS::Build
       repository_path : Path,
       entrypoint : String,
       commit : String,
-      force_recompile : Bool = true,
+      force_recompile : Bool = false,
       crystal_version : String? = nil
     )
       # Attempt to get file's commit first
@@ -343,25 +343,34 @@ module PlaceOS::Build
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
 
       # Look for an exact match
-      if !force_recompile && binary_store.exists?(executable)
-        path = binary_store.path(executable)
-        Log.trace { {message: "driver compiled and on disk", path: path} }
-        return Compilation::Success.new(path)
+      unless force_recompile
+        if binary_store.exists?(executable)
+          path = binary_store.path(executable)
+          Log.trace { {message: "driver compiled and on disk", path: path} }
+          return Compilation::Success.new(path)
+        elsif unchanged_executable = query_unchanged(executable)
+          # Look for drivers with matching hash, but different commit
+
+          # If it exists, copy with the current commit for the binary
+          binary_store.link(unchanged_executable, executable)
+          path = binary_store.path(executable)
+          Log.trace { {message: "matching driver found in store", path: path} }
+          return Compilation::Success.new(path)
+        end
       end
 
-      # Look for drivers with matching hash, but different commit
-      if !force_recompile && (unchanged_executable = binary_store.query(entrypoint, digest: executable.digest, crystal_version: executable.crystal_version).first?)
-        # If it exists, copy with the current commit for the binary
-        binary_store.link(unchanged_executable, executable)
-        path = binary_store.path(executable)
-        Log.trace { {message: "matching driver found in store", path: path} }
-        Compilation::Success.new(path)
-      else
-        build_driver(
-          executable: executable,
-          working_directory: repository_path.to_s,
-        )
-      end
+      build_driver(
+        executable: executable,
+        working_directory: repository_path.to_s,
+      )
+    end
+
+    # Lookup drivers that match except for the file commit
+    #
+    def query_unchanged(executable)
+      binary_store
+        .query(executable.entrypoint, digest: executable.digest)
+        .find(&.crystal_version.==(executable.crystal_version))
     end
 
     # File Helpers
