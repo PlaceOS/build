@@ -48,8 +48,8 @@ module PlaceOS::Build
 
     def query(
       entrypoint : String? = nil,
-      digest : String? = nil,
       commit : String? = nil,
+      digest : String? = nil,
       crystal_version : SemanticVersion | String? = nil
     ) : Enumerable(Executable)
       ::Log.with_context do

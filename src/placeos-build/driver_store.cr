@@ -15,8 +15,8 @@ module PlaceOS::Build
 
     abstract def query(
       entrypoint : String? = nil,
-      digest : String? = nil,
       commit : String? = nil,
+      digest : String? = nil,
       crystal_version : SemanticVersion | String? = nil
     ) : Enumerable(Executable)
 
@@ -33,7 +33,7 @@ module PlaceOS::Build
 
     # Allow looser guarantees for metadata lookups
     def info?(entrypoint : String, commit : String) : Executable::Info?
-      query(entrypoint: entrypoint, commit: commit).first?.try do |executable|
+      query(entrypoint, commit: commit).first?.try do |executable|
         info(executable)
       end
     end
