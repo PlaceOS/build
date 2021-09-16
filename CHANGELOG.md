@@ -5,6 +5,18 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.8.4](https://github.com/PlaceOS/build/compare/v0.8.3...v0.8.4)
+
+* **drivers**:
+  - default `force_recompile` to false ([2a3b60d](https://github.com/PlaceOS/build/commit/2a3b60d))
+  - use short commit ([ea04c0e](https://github.com/PlaceOS/build/commit/ea04c0e))
+  - prioritise local commit in local_ methods ([1a19ffb](https://github.com/PlaceOS/build/commit/1a19ffb))
+
+* **driver_store**:
+  - s3 lookup broken ([8a24d35](https://github.com/PlaceOS/build/commit/8a24d35))
+  - log query results ([0d0d8af](https://github.com/PlaceOS/build/commit/0d0d8af))
+  - prevent writes on unsigned client ([422c4ff](https://github.com/PlaceOS/build/commit/422c4ff))
+
 ## [0.8.3](https://github.com/PlaceOS/build/compare/v0.8.2...v0.8.3)
 
 ### Fixed
