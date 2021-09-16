@@ -270,6 +270,7 @@ module PlaceOS::Build
     #
     # These methods are intended for use on existing git repositories at `repository_path`.
     ###############################################################################################
+
     def local_discover_drivers?(repository_path : Path) : Array(String)?
       Dir
         .glob(repository_path / "drivers/**/*.cr")
@@ -342,20 +343,23 @@ module PlaceOS::Build
 
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
 
-      # Look for an exact match
       unless force_recompile
+        # Look for an exact match
         if binary_store.exists?(executable)
-          path = binary_store.path(executable)
-          Log.trace { {message: "driver compiled and on disk", path: path} }
-          return Compilation::Success.new(path)
+          found = binary_store.path(executable)
+          Log.trace { {message: "driver compiled and on disk", path: found} }
         elsif unchanged_executable = query_unchanged(executable)
           # Look for drivers with matching hash, but different commit
-
           # If it exists, copy with the current commit for the binary
           binary_store.link(unchanged_executable, executable)
-          path = binary_store.path(executable)
-          Log.trace { {message: "matching driver found in store", path: path} }
-          return Compilation::Success.new(path)
+          found = binary_store.path(executable)
+          Log.trace { {message: "matching driver found in store", path: found} }
+        end
+
+        if found
+          # Extract the metadata to the store
+          binary_store.info(executable) if strict_driver_info?
+          return Compilation::Success.new(found)
         end
       end
 

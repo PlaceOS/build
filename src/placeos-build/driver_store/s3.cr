@@ -131,7 +131,7 @@ module PlaceOS::Build
         yield file_io
       end
     rescue e : File::NotFoundError
-      raise e unless e.file == filename
+      raise e unless e.file.ends_with? filename
 
       Log.trace { "reading #{filename} from S3" }
       client.read(filename) do |s3_io|
