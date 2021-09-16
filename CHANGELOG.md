@@ -5,6 +5,10 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.9.0](https://github.com/PlaceOS/build/compare/v0.8.4...v0.9.0)
+
+* **executable**: place commit before digest ([1206a01](https://github.com/PlaceOS/build/commit/1206a01))
+
 ## [0.8.4](https://github.com/PlaceOS/build/compare/v0.8.3...v0.8.4)
 
 * **drivers**:
