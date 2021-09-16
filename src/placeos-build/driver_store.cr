@@ -58,7 +58,7 @@ module PlaceOS::Build
 
     # Write the `Executable::Info` to the cache
     def cache_info(driver : Executable, info : Executable::Info)
-      Log.trace { "caching info for #{driver}" }
+      Log.trace { "caching info for #{driver.entrypoint}" }
       write(driver.info_filename, IO::Memory.new(info.to_json))
     end
   end

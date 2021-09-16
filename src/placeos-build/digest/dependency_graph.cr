@@ -68,7 +68,7 @@ module DependencyGraph
     end
 
     def build
-      Log.trace { "Starting to build dependancy graph for these paths: #{@lookup_paths.join(", ")}" }
+      Log.trace { "building dependency graph for #{ @lookup_paths.join(", ") }" }
       graph = Graph.new
       @lookup_paths
         .map { |e| Dir.exists?(e) ? File.join(File.expand_path(e), "**", "*.cr") : File.expand_path(e) }

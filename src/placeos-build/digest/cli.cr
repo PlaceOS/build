@@ -1,9 +1,10 @@
+require "log"
+require "placeos-log-backend"
+
 require "clip"
 require "colorize"
 require "digest/sha1"
 require "future"
-require "log"
-require "placeos-log-backend"
 
 require "./dependency_graph"
 
@@ -34,7 +35,6 @@ module PlaceOS::Build::Digest
 
     macro inherited
       include Clip::Mapper
-      Log = ::Log.for({{ @type }})
     end
 
     Clip.add_commands({
