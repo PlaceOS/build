@@ -37,7 +37,7 @@ module PlaceOS::Build
 
     def initialize(filename : String)
       begin
-        name, digest, commit, crystal_version, encoded_directory = File.basename(filename).split(SEPERATOR)
+        name, commit, digest, crystal_version, encoded_directory = File.basename(filename).split(SEPERATOR)
         directory = Base64.decode_string(encoded_directory)
         crystal_version = SemanticVersion.parse(crystal_version)
       rescue e
@@ -62,7 +62,7 @@ module PlaceOS::Build
 
     @[JSON::Field(ignore: true)]
     getter filename : String do
-      {name, digest, commit, crystal_version, encoded_directory}.join(SEPERATOR)
+      {name, commit, digest, crystal_version, encoded_directory}.join(SEPERATOR)
     end
 
     def to_s(io)
@@ -89,11 +89,11 @@ module PlaceOS::Build
 
     # Produces a glob to match relevant executables
     #
-    def self.glob(entrypoint : String?, digest : String?, commit : String?, crystal_version : SemanticVersion | String?)
+    def self.glob(entrypoint : String?, commit : String?, digest : String?, crystal_version : SemanticVersion | String?)
       {
         entrypoint.try &->name(String),
-        digest,
         commit,
+        digest,
         crystal_version,
         entrypoint.try &->encoded_directory(String),
       }.join(SEPERATOR) do |value|
