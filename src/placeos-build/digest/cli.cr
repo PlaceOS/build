@@ -143,7 +143,7 @@ module PlaceOS::Build::Digest
 
     def self.program_hash(entrypoint : String | Path, shard_digest)
       # Calculate SHA-1 hash of entrypoint's requires
-      Log.debug { "digesting #{entrypoint}" }
+      Log.trace { "digesting #{entrypoint}" }
       futures = DependencyGraph.requires(entrypoint).map do |file|
         future {
           Log.trace { {entrypoint: entrypoint, file: file} }
