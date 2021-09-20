@@ -145,7 +145,8 @@ module PlaceOS::Build
 
       # FIXME: Is there a better way to do this?
       filesystem.write(filename, io)
-      if client.can_write?
+
+      if client.can_write? && is_elf?(io)
         io.rewind
         client.write(filename, io)
       end
@@ -155,6 +156,27 @@ module PlaceOS::Build
       client
         .list(key)
         .map { |object| Executable.new Path[URI.decode_www_form(object.key)].basename }
+    end
+
+    # Helpers
+    ###########################################################################
+
+    private ELF_HEADER = Bytes[
+      0x7f,
+      'E'.bytes.first,
+      'L'.bytes.first,
+      'F'.bytes.first,
+    ]
+
+    # Check if `io` is an ELF binary.
+    private def is_elf?(io) : Bool
+      io.rewind # Reset to start of IO
+
+      slice = Bytes.new(size: 4)
+      io.read_fully(slice)
+      slice == ELF_HEADER
+    rescue
+      false
     end
   end
 end
