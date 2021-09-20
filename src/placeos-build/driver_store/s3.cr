@@ -5,6 +5,8 @@ require "./s3/unsigned"
 
 module PlaceOS::Build
   class S3 < DriverStore
+    Log = ::Log.for(self)
+
     alias Credentials = Read | ReadWrite
     record Read, aws_s3_bucket : String, aws_region : String
     record ReadWrite, aws_s3_bucket : String, aws_region : String, aws_key : String, aws_secret : String
