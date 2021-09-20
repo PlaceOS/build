@@ -166,6 +166,7 @@ module PlaceOS::Build
       'E'.bytes.first,
       'L'.bytes.first,
       'F'.bytes.first,
+      read_only: true,
     ]
 
     # Check if `io` is an ELF binary.
