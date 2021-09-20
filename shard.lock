@@ -22,7 +22,7 @@ shards:
 
   awscr-s3:
     git: https://github.com/stakach/awscr-s3.git
-    version: 0.8.4+git.commit.24a1eea075a938cd2a0e55cf3780c6aeb0ec48d4
+    version: 0.8.4+git.commit.5ddb957ca338ea9b9c4b25be62a73e3cebed7a68
 
   awscr-signer:
     git: https://github.com/taylorfinnell/awscr-signer.git
@@ -106,7 +106,7 @@ shards:
 
   lucky_router:
     git: https://github.com/luckyframework/lucky_router.git
-    version: 0.5.0
+    version: 0.5.1
 
   molinillo:
     git: https://github.com/crystal-lang/crystal-molinillo.git
@@ -142,7 +142,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 5.5.9
+    version: 5.5.14
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git
