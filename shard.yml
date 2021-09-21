@@ -1,5 +1,5 @@
 name: placeos-build
-version: 0.9.1
+version: 0.10.0
 crystal: ">= 1.0.0"
 license: MIT
 

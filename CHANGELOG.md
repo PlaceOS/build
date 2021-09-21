@@ -5,6 +5,21 @@ All changes are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## [0.10.0](https://github.com/PlaceOS/build/compare/v0.9.1...v0.10.0)
+
+### Changed
+
+* Removed padding from base64 strings ([6e24534](https://github.com/PlaceOS/build/commit/6e24534))
+
+### Fixed
+
+* **s3**:
+    * prevent writes on unsigned client ([af58a44](https://github.com/PlaceOS/build/commit/af58a44))
+    * prevent double encoding ([7070d23](https://github.com/PlaceOS/build/commit/7070d23))
+    * make ELF header read-only    ([f48019a](https://github.com/PlaceOS/build/commit/f48019a))
+    * ensure stored drivers are ELF ([1576ea3](https://github.com/PlaceOS/build/commit/1576ea3))
+* **api**: add s3 backed store flow ([55845df](https://github.com/PlaceOS/build/commit/55845df))
+
 ## [0.9.1](https://github.com/PlaceOS/build/compare/v0.9.0...v0.9.1)
 
 ### Changed
