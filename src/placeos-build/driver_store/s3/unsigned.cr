@@ -5,7 +5,7 @@ module PlaceOS::Build
     class Unsigned < Client
       private getter client : HTTP::Client
 
-      getter? can_write : Bool = true
+      getter? can_write : Bool = false
 
       def self.url(bucket : String, region : String?)
         # NOTE: There is no `Tuple(*T).compact`
