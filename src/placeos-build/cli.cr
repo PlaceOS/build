@@ -1,8 +1,8 @@
 require "clip"
-require "log"
 
-require "../constants"
 require "../logging"
+require "../constants"
+
 require "./cli/*"
 require "./driver_store/s3"
 

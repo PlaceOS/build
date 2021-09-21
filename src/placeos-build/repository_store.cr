@@ -8,7 +8,7 @@ module PlaceOS::Build
     getter store_path : String
 
     def self.uri_to_directory(uri)
-      Base64.urlsafe_encode(uri)
+      Base64.urlsafe_encode(uri, padding: false)
     end
 
     def self.directory_to_uri(key)

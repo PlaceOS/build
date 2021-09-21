@@ -84,7 +84,7 @@ module PlaceOS::Build
     end
 
     def self.encoded_directory(entrypoint)
-      Base64.urlsafe_encode Path[entrypoint].dirname
+      Base64.urlsafe_encode(Path[entrypoint].dirname, padding: false)
     end
 
     # Produces a glob to match relevant executables
