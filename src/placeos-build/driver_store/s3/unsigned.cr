@@ -18,17 +18,13 @@ module PlaceOS::Build
       end
 
       def read(key : String, & : IO ->)
-        key = URI.encode_www_form(key)
-        client.get("/#{key}", headers: HTTP::Headers{"Accept" => "application/xml"}) do |response|
-          unless response.success?
-            raise File::NotFoundError.new("Not present in S3", file: key)
-          end
+        client.get("/#{key}") do |response|
+          raise File::NotFoundError.new("Not present in S3", file: key) unless response.success?
           yield response.body_io
         end
       end
 
       def list(prefix = nil, max_keys = nil) : Iterator(Object)
-        prefix = URI.encode_www_form(prefix) unless prefix.nil?
         ObjectPaginator.new(client, prefix, max_keys)
       end
 
