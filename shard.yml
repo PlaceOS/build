@@ -14,8 +14,8 @@ dependencies:
     github: spider-gazelle/action-controller
     version: ~> 4.4
   awscr-s3:
-    github: stakach/awscr-s3
-    branch: master
+    github: taylorfinnell/awscr-s3
+    version: ~> 0.8
   clip:
     github: erdnaxeli/clip
   exec_from:

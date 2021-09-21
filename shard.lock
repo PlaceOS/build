@@ -21,8 +21,8 @@ shards:
     version: 0.2.5
 
   awscr-s3:
-    git: https://github.com/stakach/awscr-s3.git
-    version: 0.8.4+git.commit.5ddb957ca338ea9b9c4b25be62a73e3cebed7a68
+    git: https://github.com/taylorfinnell/awscr-s3.git
+    version: 0.8.3
 
   awscr-signer:
     git: https://github.com/taylorfinnell/awscr-signer.git
@@ -51,6 +51,10 @@ shards:
   cron_parser:
     git: https://github.com/kostya/cron_parser.git
     version: 0.4.0
+
+  crunits:
+    git: https://github.com/spider-gazelle/crunits.git
+    version: 1.1.0
 
   db:
     git: https://github.com/crystal-lang/crystal-db.git
@@ -132,6 +136,10 @@ shards:
     git: https://github.com/spider-gazelle/openssl_ext.git
     version: 2.1.5
 
+  pars:
+    git: https://github.com/place-labs/pars.git
+    version: 1.1.0
+
   placeos-compiler:
     git: https://github.com/placeos/compiler.git
     version: 4.8.0
@@ -142,7 +150,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 5.5.14
+    version: 5.7.2
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git
