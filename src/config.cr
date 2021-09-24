@@ -1,8 +1,9 @@
+require "./logging"
+
 # Application dependencies
 require "action-controller"
 
 # Application code
-require "./logging"
 require "./placeos-build"
 require "./placeos-build/api/*"
 

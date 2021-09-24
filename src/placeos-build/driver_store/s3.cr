@@ -157,7 +157,7 @@ module PlaceOS::Build
     protected def query_binary(key)
       client
         .list(key)
-        .map { |object| Executable.new Path[URI.decode_www_form(object.key)].basename }
+        .map { |object| Executable.new(Path[object.key].basename) }
     end
 
     # Helpers

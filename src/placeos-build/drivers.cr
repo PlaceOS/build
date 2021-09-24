@@ -235,7 +235,9 @@ module PlaceOS::Build
 
     private def require_build(executable, working_directory) : String | Compilation::Failure
       Log.trace { "using require based method" }
-      executable_name = UUID.random.to_s
+      compile_directory = File.join(working_directory, "bin/drivers")
+      Dir.mkdir_p compile_directory
+      executable_path = File.join(compile_directory, UUID.random.to_s)
       result = ExecFrom.exec_from(
         working_directory,
         "crystal",
@@ -245,7 +247,7 @@ module PlaceOS::Build
           "--no-color",
           "--static",
           "--threads", self.class.build_threads.to_s,
-          "-o", executable_name,
+          "-o", executable_path,
           executable.entrypoint,
         }
       )
@@ -256,7 +258,7 @@ module PlaceOS::Build
         return Compilation::Failure.new(output)
       end
 
-      File.join(working_directory, executable_name)
+      executable_path
     end
 
     # Returns the URIs of repositories in the `repository_store_path`

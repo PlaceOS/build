@@ -11,7 +11,7 @@ require "./dependency_graph"
 module PlaceOS::Build::Digest
   extend self
 
-  Log = ::Log.for(self)
+  Log = ::Log.for(PlaceOS::Build::Digest)
 
   delegate requires, to: ::PlaceOS::Build::Digest::Requires
 
@@ -143,7 +143,7 @@ module PlaceOS::Build::Digest
 
     def self.program_hash(entrypoint : String | Path, shard_digest)
       # Calculate SHA-1 hash of entrypoint's requires
-      Log.trace { "digesting #{entrypoint}" }
+      Log.trace { "digesting source tree of #{entrypoint}" }
       futures = DependencyGraph.requires(entrypoint).map do |file|
         future {
           Log.trace { {entrypoint: entrypoint, file: file} }
