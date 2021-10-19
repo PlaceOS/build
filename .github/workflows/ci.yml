@@ -2,51 +2,8 @@ name: CI
 on:
   push:
 jobs:
-  style:
-    runs-on: ubuntu-latest
-    container:
-      image: crystallang/crystal
-    steps:
-      - uses: actions/checkout@v2
-      - name: Format
-        run: crystal tool format --check
-      - name: Lint
-        uses: crystal-ameba/github-action@v0.2.12
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   test:
-    name: "crystal: ${{ matrix.crystal }}, require: ${{ matrix.require }}, MT: ${{ matrix.MT }}, stable: ${{ matrix.stable }}"
-    runs-on: ubuntu-latest
-    continue-on-error: ${{ !matrix.stable }}
-    strategy:
-      fail-fast: false
-      matrix:
-        require: [true, false]
-        stable: [true]
-        MT: [false]
-        crystal:
-          - 1.0.0
-          - 1.1.1
-        include:
-          - stable: false
-            MT: false
-            require: true
-            crystal: nightly
-          - stable: false
-            MT: false
-            require: false
-            crystal: nightly
-    steps:
-      - uses: actions/checkout@v2
-      - name: Test
-        if: ${{ !matrix.MT }}
-        run: ./test
-        env:
-          CRYSTAL_VERSION: ${{ matrix.crystal }}
-          TEST_LEGACY: "${{ matrix.require }}"
-      - name: Test with Multithreading
-        if: ${{ matrix.MT }}
-        run: ./test -Dpreview_mt
-        env:
-          CRYSTAL_VERSION: ${{ matrix.crystal }}
-          TEST_LEGACY: "${{ matrix.require }}"
+    uses: PlaceOS/.github/.github/workflows/containerised-test.yml@main
+
+  crystal-style:
+    uses: PlaceOS/.github/.github/workflows/crystal-style.yml@main
