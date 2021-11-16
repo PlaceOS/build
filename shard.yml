@@ -54,6 +54,8 @@ dependencies:
   shards:
     github: crystal-lang/shards
     version: ~> 0.14
+  lz4:
+    github: naqvis/lz4.cr
 
 development_dependencies:
   ameba:

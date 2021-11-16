@@ -13,10 +13,12 @@ ENV CRYSTAL_VERSION=${CRYSTAL_VERSION}
 
 RUN apk upgrade && \
     apk add --update --no-cache \
-      bash \
-      ca-certificates \
-      libssh2-static \
-      yaml-static
+    bash \
+    lz4 \
+    lz4-dev \
+    ca-certificates \
+    libssh2-static \
+    yaml-static
 
 # Add trusted CAs for communicating with external services
 RUN  update-ca-certificates
@@ -33,12 +35,12 @@ RUN PLACE_COMMIT=${PLACE_COMMIT} \
     UNAME_AT_COMPILE_TIME=true \
     CRYSTAL_VERSION=${CRYSTAL_VERSION} \
     shards build \
-        build \
-        --debug \
-        --error-trace \
-        --ignore-crystal-version \
-        --production \
-        --release
+    build \
+    --debug \
+    --error-trace \
+    --ignore-crystal-version \
+    --production \
+    --release
 
 RUN rm -r lib src
 

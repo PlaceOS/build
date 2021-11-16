@@ -1,5 +1,6 @@
 require "uri"
 require "./client"
+require "lz4"
 
 module PlaceOS::Build
   class S3 < DriverStore
@@ -15,7 +16,9 @@ module PlaceOS::Build
 
       def read(object : String, & : IO ->)
         s3.get_object(bucket, object, headers: headers) do |stream|
-          yield stream.body_io
+          Compress::LZ4::Reader.open(stream.body_io) do |lz4|
+            yield lz4
+          end
         end
       end
 
@@ -26,9 +29,17 @@ module PlaceOS::Build
           io.rewind
         }
 
+        File.open("./compressfile.xz", "w") do |output_file|
+          Compress::LZ4::Writer.open(output_file) do |lz4|
+            IO.copy(io, lz4)
+          end
+        end
+
         Retriable.retry times: 10, max_interval: 1.minute, on_retry: rewind_io do
           Log.debug { {key: key, message: "writing to S3"} }
-          uploader.upload(bucket, key, io, headers)
+          File.open(File.expand_path("./compressfile.xz"), "r") do |file|
+            uploader.upload(bucket, key, file, headers)
+          end
         end
       end
 
