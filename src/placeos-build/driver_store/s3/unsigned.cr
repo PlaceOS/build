@@ -20,7 +20,9 @@ module PlaceOS::Build
       def read(key : String, & : IO ->)
         client.get("/#{key}") do |response|
           raise File::NotFoundError.new("Not present in S3", file: key) unless response.success?
-          yield response.body_io
+          Compress::LZ4::Reader.open(response.body_io) do |lz4|
+            yield lz4
+          end
         end
       end
 

@@ -29,7 +29,10 @@ module PlaceOS::Build
           io.rewind
         }
 
-        File.open("./compressfile.xz", "w") do |output_file|
+        temp_name = Random.rand(UInt32)
+        temporary_path = Path.new("#{Dir.tempdir}/#{temp_name}.xz")
+
+        File.open(temporary_path, "w") do |output_file|
           Compress::LZ4::Writer.open(output_file) do |lz4|
             IO.copy(io, lz4)
           end
@@ -37,10 +40,12 @@ module PlaceOS::Build
 
         Retriable.retry times: 10, max_interval: 1.minute, on_retry: rewind_io do
           Log.debug { {key: key, message: "writing to S3"} }
-          File.open(File.expand_path("./compressfile.xz"), "r") do |file|
+          File.open(temporary_path, "r") do |file|
             uploader.upload(bucket, key, file, headers)
           end
         end
+
+        File.delete(temporary_path)
       end
 
       def copy(source : String, destination : String) : Nil
