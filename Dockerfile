@@ -14,10 +14,9 @@ ENV CRYSTAL_VERSION=${CRYSTAL_VERSION}
 RUN apk upgrade && \
     apk add --update --no-cache \
     bash \
-    lz4 \
-    lz4-dev \
     ca-certificates \
     libssh2-static \
+    lz4-static \
     yaml-static
 
 # Add trusted CAs for communicating with external services
