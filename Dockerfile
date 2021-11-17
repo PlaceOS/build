@@ -16,6 +16,7 @@ RUN apk upgrade && \
     bash \
     ca-certificates \
     libssh2-static \
+    lz4-dev \
     lz4-static \
     yaml-static
 
