@@ -9,12 +9,14 @@ ARG CRYSTAL_VERSION=1.1.1
 WORKDIR /app
 
 RUN apk upgrade && \
-    apk add --update --no-cache \
-      bash \
-      ca-certificates \
-      iputils \
-      libssh2-static \
-      yaml-static
+  apk add --update --no-cache \
+  bash \
+  ca-certificates \
+  iputils \
+  libssh2-static \
+  lz4-dev \
+  lz4-static \
+  yaml-static
 
 # Add trusted CAs for communicating with external services
 RUN update-ca-certificates
