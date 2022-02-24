@@ -152,13 +152,9 @@ Returns...
 - 200 if compiled
 - 404 not compiled
 
-## Dependencies
+## Contributing
 
-Build requires the following commands to be in the `PATH`...
-
-- [asdf](https://asdf-vm.com/)
-- [curl](https://curl.se/)
-- [git](https://git-scm.com/)
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## Contributors
 
