@@ -277,7 +277,9 @@ module PlaceOS::Build
       Dir
         .glob(repository_path / "drivers/**/*.cr")
         .select! { |file|
-          !file.ends_with?("_spec.cr") && File.read_lines(file).any?(&.includes?("< PlaceOS::Driver"))
+          !file.ends_with?("_spec.cr") && File.read_lines(file).any? { |line|
+            line.includes?("< PlaceOS::Driver") && !line.includes?("abstract ")
+          }
         }
         .map(&.lchop(repository_path.to_s).lchop('/'))
         .tap do |drivers|
