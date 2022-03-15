@@ -1,4 +1,8 @@
-## Unreleased
+## v0.11.1 (2022-03-15)
+
+### Fix
+
+- **drivers**: discovery matches abstract classes ([#39](https://github.com/PlaceOS/build/pull/39))
 
 ## v0.11.0 (2022-02-24)
 
