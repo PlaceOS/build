@@ -1,3 +1,4 @@
+# NOTICE: This lockfile contains some overrides from shard.override.yml
 version: 2.0
 shards:
   CrystalEmail:
@@ -10,7 +11,7 @@ shards:
 
   active-model:
     git: https://github.com/spider-gazelle/active-model.git
-    version: 3.1.1
+    version: 4.0.0
 
   ameba:
     git: https://github.com/crystal-ameba/ameba.git
@@ -96,10 +97,6 @@ shards:
     git: https://github.com/sija/ipaddress.cr.git
     version: 0.2.1
 
-  json_mapping:
-    git: https://github.com/crystal-lang/json_mapping.cr.git
-    version: 0.1.1
-
   jwt:
     git: https://github.com/crystal-community/jwt.git
     version: 1.6.0
@@ -140,8 +137,8 @@ shards:
     git: https://github.com/spider-gazelle/openssl_ext.git
     version: 2.1.5
 
-  pars:
-    git: https://github.com/place-labs/pars.git
+  pars: # Overridden
+    git: https://github.com/spider-gazelle/pars.git
     version: 1.1.0
 
   placeos-compiler:
@@ -150,11 +147,11 @@ shards:
 
   placeos-core-client:
     git: https://github.com/placeos/core-client.git
-    version: 0.4.0
+    version: 0.5.2
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 6.2.1
+    version: 6.3.3
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git
@@ -162,7 +159,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 6.6.6
+    version: 8.1.0
 
   pool:
     git: https://github.com/ysbaddaden/pool.git
@@ -193,12 +190,12 @@ shards:
     version: 1.2.3
 
   rethinkdb:
-    git: https://github.com/place-labs/crystal-rethinkdb.git
-    version: 0.3.1+git.commit.07ce7c694a367efe3af9f8cb5670bc4bff5b6df0
+    git: https://github.com/kingsleyh/crystal-rethinkdb.git
+    version: 0.3.1
 
   rethinkdb-orm:
     git: https://github.com/spider-gazelle/rethinkdb-orm.git
-    version: 5.0.4
+    version: 6.0.2
 
   retriable:
     git: https://github.com/sija/retriable.cr.git
@@ -214,7 +211,7 @@ shards:
 
   shards:
     git: https://github.com/crystal-lang/shards.git
-    version: 0.16.0
+    version: 0.17.0
 
   simple_retry:
     git: https://github.com/spider-gazelle/simple_retry.git
@@ -222,7 +219,7 @@ shards:
 
   ssh2:
     git: https://github.com/spider-gazelle/ssh2.cr.git
-    version: 1.5.2
+    version: 1.5.3
 
   tasker:
     git: https://github.com/spider-gazelle/tasker.git
@@ -239,8 +236,4 @@ shards:
   webmock:
     git: https://github.com/manastech/webmock.cr.git
     version: 0.14.0
-
-  yaml_mapping:
-    git: https://github.com/crystal-lang/yaml_mapping.cr.git
-    version: 0.1.1
 
