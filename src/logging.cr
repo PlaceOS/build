@@ -16,18 +16,24 @@ module PlaceOS::Build::Logging
   log_level = Log::Severity::Trace if Build.trace?
   namespaces = ["action-controller.*", "place_os.*"]
 
-  ::Log.setup do |config|
-    config.bind "*", Build.trace? ? Log::Severity::Trace : Log::Severity::Warn, log_backend
-    config.bind "raven", :warn, log_backend
+  builder = ::Log.builder
+  builder.bind "*", Build.trace? ? Log::Severity::Trace : Log::Severity::Warn, log_backend
+  builder.bind "raven", :warn, log_backend
 
-    namespaces.each do |namespace|
-      config.bind namespace, log_level, log_backend
+  namespaces.each do |namespace|
+    builder.bind namespace, log_level, log_backend
 
-      # Bind raven's backend
-      config.bind namespace, :info, standard_sentry
-      config.bind namespace, :warn, comprehensive_sentry
-    end
+    # Bind raven's backend
+    builder.bind namespace, :info, standard_sentry
+    builder.bind namespace, :warn, comprehensive_sentry
   end
+
+  ::Log.setup_from_env(
+    default_level: log_level,
+    builder: builder,
+    backend: log_backend,
+    log_level_env: "LOG_LEVEL",
+  )
 
   # Configure Sentry
   Raven.configure &.async=(true)
