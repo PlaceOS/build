@@ -61,7 +61,7 @@ module PlaceOS::Build
         end
 
         private def next_response
-          query_string = params.join('&') { |k, v| "#{k}=#{URI.encode(string: v, space_to_plus: true)}" }
+          query_string = params.join('&') { |k, v| "#{k}=#{URI.encode_path(v)}" }
           response = client.get("/?#{query_string}", headers: HTTP::Headers{"Accept" => "application/xml"})
           ListObjectsV2.from_response(response)
         end
