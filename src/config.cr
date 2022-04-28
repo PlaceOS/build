@@ -7,6 +7,9 @@ require "action-controller"
 require "./placeos-build"
 require "./placeos-build/api/*"
 
+# Require telemetry after application code
+require "./telemetry"
+
 # Server required after application controllers
 require "action-controller/server"
 
