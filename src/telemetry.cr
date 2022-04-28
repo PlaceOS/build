@@ -7,4 +7,3 @@ module PlaceOS::Build
     service_version: VERSION,
   )
 end
-
