@@ -11,17 +11,19 @@ module PlaceOS::Build::Api
 
     base "/api/build/v1"
 
-    get("/", :root, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Service healthcheck
       YAML
-    )]) do
+    )]
+    get "/", :root do
       head code: :ok
     end
 
-    get("/version", :version, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Service version
       YAML
-    )]) do
+    )]
+    get "/version", :version do
       render status_code: :ok, json: Root.version
     end
 

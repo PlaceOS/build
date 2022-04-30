@@ -13,11 +13,11 @@ module PlaceOS::Build::Api
     delegate builder, to: Build::Api
 
     ###########################################################################
-
-    get("/", :query_drivers, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Query the driver store for driver binaries.
       YAML
-    )]) do
+    )]
+    get "/", :query_drivers do
       file = param file : String? = nil, "Entrypoint of the driver"
       digest = param digest : String? = nil, "Digest of the driver"
       commit = param commit : String? = nil, "Commit of the driver"
@@ -33,13 +33,14 @@ module PlaceOS::Build::Api
     #     404 if repository, entrypoint, or commit was not found
     #     422 if the object failed to compile, and error or build output
     # POST /build/<file>?url=[repository url]&commit=[HEAD]
-    post("/:file", :trigger_build, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Triggers a build of an object with as the entrypoint
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
-    )]) do
+    )]
+    post "/:file", :trigger_build do
       file = route_params["file"]
       force_recompile = param force_recompile : Bool = false, "Whether to force a build in case of existing binary"
 
@@ -78,13 +79,14 @@ module PlaceOS::Build::Api
     end
 
     # GET /build/<file>/metadata?url=[repository url]&commit=[HEAD]
-    get("/:file/metadata", :metadata, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Returns the metadata extracted from the built artefact.
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
-    )]) do
+    )]
+    get "/:file/metadata", :metadata do
       file = route_params["file"]
 
       metadata = Api::Driver.metadata(repository_uri, file, commit, repository_path, username, password)
@@ -98,13 +100,14 @@ module PlaceOS::Build::Api
 
     # This can be built independently of the artefact's compilation, so if not present, try to build the docs.
     # GET /build/<file>/docs?url=[repository url]&commit=[HEAD]
-    get("/:file/docs", :documentation, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Returns the docs extracted from the artefact.
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
-    )]) do
+    )]
+    get "/:file/docs", :documentation do
       file = route_params["file"]
 
       metadata = Api::Driver.metadata(repository_uri, file, commit, repository_path, username, password)
@@ -137,13 +140,14 @@ module PlaceOS::Build::Api
     # 200 if compiled
     # 404 not compiled
     # GET /build/<file>/compiled?url=[repository url]&commit=[HEAD]
-    get("/:file/compiled", :compiled?, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Compilation status of an artefact
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
-    )]) do
+    )]
+    get "/:file/compiled", :compiled? do
       file = route_params["file"]
 
       if filename = Api::Driver.compiled(repository_uri, file, commit, repository_path, username, password)

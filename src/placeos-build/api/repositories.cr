@@ -21,50 +21,54 @@ module PlaceOS::Build::Api
 
     # Returns the commits for a repository.
     # GET /repository?url=[repository url]&count=[commit count: 50]&branch=[master]
-    get("/commits", :repository_commits, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Returns the commit for a repository
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
-    )]) do
+    )]
+    get("/commits", :repository_commits) do
       query_store &.repository_commits?(repository_uri, count, branch, username: username, password: password)
     end
 
     # Returns the commits for a file.
     # GET /repository/<file>?url=[repository url]&count=[commit count: 50]&branch=[master]
-    get("/commits/:file", :file_commits, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Returns the commits for a file
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
-    )]) do
+    )]
+    get("/commits/:file", :file_commits) do
       file = params["file"]
       query_store &.file_commits?(file, repository_uri, count, branch, username: username, password: password)
     end
 
     # Returns the branches for a repository
     # GET /repository/branches?url=[repository url]
-    get("/branches", :repository_branches, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Returns the branches for a repository
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
-    )]) do
+    )]
+    get("/branches", :repository_branches) do
       query_store &.branches?(repository_uri, username: username, password: password)
     end
 
     # Returns an array of files containing driver implementations for a repository
     # GET /repository/discover/drivers?url=[repository url]&branch=[master]&commit=[HEAD]
-    get("/discover/drivers", :discover_drivers, annotations: @[OpenAPI(<<-YAML
+    @[OpenAPI(<<-YAML
         summary: Returns the files containing PlaceOS driver implementations
         parameters:
           #{Schema.header_param("X-Git-Username", "An optional git username", required: false, type: "string")}
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
-    )]) do
+    )]
+    get("/discover/drivers", :discover_drivers) do
       if drivers = Api::Repositories.discover_drivers?(repository_uri, branch, commit, repository_path, username, password)
         render status_code: :ok, json: drivers
       else
