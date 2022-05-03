@@ -1,4 +1,8 @@
-## Unreleased
+## v0.13.3 (2022-05-03)
+
+### Fix
+
+- update `placeos-log-backend`
 
 ## v0.13.2 (2022-04-30)
 
