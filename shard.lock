@@ -171,7 +171,7 @@ shards:
 
   placeos-compiler:
     git: https://github.com/placeos/compiler.git
-    version: 4.9.1
+    version: 4.9.2
 
   placeos-core-client:
     git: https://github.com/placeos/core-client.git
@@ -187,7 +187,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 8.5.0
+    version: 8.7.0
 
   pool:
     git: https://github.com/ysbaddaden/pool.git
