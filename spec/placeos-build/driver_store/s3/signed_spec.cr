@@ -1,5 +1,6 @@
-require "../../../helper.cr"
+require "lz4"
 
+require "../../../helper"
 require "./responses"
 
 module PlaceOS::Build
@@ -18,7 +19,7 @@ module PlaceOS::Build
     describe "#read" do
       it "returns an object" do
         WebMock
-          .stub(:get, "https://s3-ap-southeast-2.amazonaws.com/placeos-drivers/test.html")
+          .stub(:get, "http://s3-ap-southeast-2.amazonaws.com/placeos-drivers/test.html")
           .to_return(body_io: IO::Memory.new)
         client.read("test.html") do |io|
           io.gets_to_end.should be_empty
@@ -29,7 +30,7 @@ module PlaceOS::Build
     describe "#list" do
       it "lists objects in the bucket" do
         WebMock
-          .stub(:get, "https://s3-ap-southeast-2.amazonaws.com/placeos-drivers?list-type=2")
+          .stub(:get, "http://s3-ap-southeast-2.amazonaws.com/placeos-drivers?list-type=2")
           .to_return(body: LIST_XML)
         client.list.should_not be_empty
       end
@@ -37,18 +38,26 @@ module PlaceOS::Build
 
     describe "#write" do
       it "writes bytes to a bucket" do
+        value = "test"
+        input = IO::Memory.new(value)
+        expected = IO::Memory.new
+
+        Compress::LZ4::Writer.open(expected) do |lz4|
+          IO.copy(input, lz4)
+        end
+
         WebMock
-          .stub(:put, "https://s3-ap-southeast-2.amazonaws.com/placeos-drivers/test")
-          .with(body: "test")
+          .stub(:put, "http://s3-ap-southeast-2.amazonaws.com/placeos-drivers/test")
+          .with(body: expected.to_s)
           .to_return(body: "", headers: {"ETag" => "s0m3th1ngs0m3th1ng"})
-        client.write("test", IO::Memory.new("test"))
+        client.write(value, IO::Memory.new(value))
       end
     end
 
     describe "#copy" do
       it "copies a file within a bucket" do
         WebMock
-          .stub(:put, "https://s3-ap-southeast-2.amazonaws.com/placeos-drivers/destination")
+          .stub(:put, "http://s3-ap-southeast-2.amazonaws.com/placeos-drivers/destination")
           .with(body: "", headers: {"x-amz-copy-source" => "/placeos-drivers/source"})
           .to_return(body: COPY_XML)
         client.copy("source", "destination")
