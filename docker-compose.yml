@@ -4,6 +4,7 @@ services:
   test:
     image: placeos/service-spec-runner:${CRYSTAL_VERSION:-1.4.1}
     volumes:
+      - ${PWD}/bin:/app/bin:rw
       - ${PWD}/lib:/app/lib:rw
       - ${PWD}/coverage:/app/coverage
       - ${PWD}/shard.lock:/app/shard.lock
