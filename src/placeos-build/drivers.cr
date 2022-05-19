@@ -160,13 +160,11 @@ module PlaceOS::Build
       working_directory : String
     ) : Compilation::Success | Compilation::Failure
       wait_for_compilation(executable) do
-        ::Log.with_context do
-          Log.context.set(
-            entrypoint: executable.entrypoint,
-            commit: executable.commit,
-            digest: executable.digest,
-          )
-
+        ::Log.with_context(
+          entrypoint: executable.entrypoint,
+          commit: executable.commit,
+          digest: executable.digest,
+        ) do
           begin
             start = Time.utc
             result = require_build(executable, working_directory)
