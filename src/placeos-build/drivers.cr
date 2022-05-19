@@ -1,9 +1,6 @@
-require "base64"
-require "file_utils"
-require "uuid"
-
-require "placeos-compiler"
+require "git-repository"
 require "placeos-compiler/git"
+require "uuid"
 
 require "./compilation"
 require "./compiler"
@@ -19,9 +16,6 @@ module PlaceOS::Build
     protected class_property shards_cache_path do
       ENV["SHARDS_CACHE_PATH"]? || ENV["HOME"]?.try { |p| File.join(p, ".shards") } || File.join(Dir.current, ".shards")
     end
-
-    # Whether to build via the entrypoint environment variable method or not
-    class_property? legacy_build_method = false
 
     # Extract the driver metadata after compilation, rather than lazily
     getter? strict_driver_info : Bool
@@ -41,20 +35,18 @@ module PlaceOS::Build
 
     def discover_drivers?(
       repository_uri : String,
-      branch : String,
-      commit : String,
+      ref : String,
       username : String? = nil,
       password : String? = nil
     ) : Array(String)?
-      repository_store.with_repository(repository_uri, "shard.yml", commit, branch, username, password) do |path|
-        local_discover_drivers?(path)
+      repository_store.with_repository(repository_uri, ref, username, password) do |downloaded_repository|
+        local_discover_drivers?(downloaded_repository.path)
       end
     rescue e
       Log.warn(exception: e) { {
         message:        "failed to discover drivers",
         repository_uri: repository_uri,
-        branch:         branch,
-        commit:         commit,
+        ref:            ref,
       } }
       nil
     end
@@ -62,20 +54,18 @@ module PlaceOS::Build
     def compiled(
       repository_uri : String,
       entrypoint : String,
-      commit : String,
+      ref : String,
       crystal_version : String? = nil,
       username : String? = nil,
       password : String? = nil
     ) : String?
       repository_store.with_repository(
         repository_uri,
-        entrypoint,
-        commit,
-        branch: nil,
+        ref,
         username: username,
         password: password,
-      ) do |repository_path|
-        local_compiled(repository_path, entrypoint, commit, crystal_version)
+      ) do |downloaded_repository|
+        local_compiled(downloaded_repository.path, entrypoint, downloaded_repository.commit.hash, crystal_version)
       end
     end
 
@@ -89,13 +79,11 @@ module PlaceOS::Build
     )
       repository_store.with_repository(
         repository_uri,
-        entrypoint,
         commit,
-        branch: nil,
         username: username,
         password: password,
-      ) do |repository_path|
-        local_metadata?(repository_path, entrypoint, commit, crystal_version)
+      ) do |downloaded_repository|
+        local_metadata?(downloaded_repository.path, entrypoint, downloaded_repository.commit.hash, crystal_version)
       end
     end
 
@@ -110,21 +98,19 @@ module PlaceOS::Build
     ) : Compilation::Result
       repository_store.with_repository(
         repository_uri,
-        entrypoint,
         commit,
-        branch: nil,
         username: username,
         password: password,
-      ) do |repository_path|
+      ) do |downloaded_repository|
         local_compile(
-          repository_path: repository_path,
+          repository_path: downloaded_repository.path,
           entrypoint: entrypoint,
-          commit: commit,
+          commit: downloaded_repository.commit.hash,
           force_recompile: force_recompile,
           crystal_version: crystal_version,
         )
       end
-    rescue e : PlaceOS::Compiler::Error::Git
+    rescue e : GitRepository::Error
       Compilation::NotFound.new
     end
 
@@ -183,11 +169,7 @@ module PlaceOS::Build
 
           begin
             start = Time.utc
-            result = if self.class.legacy_build_method?
-                       legacy_build(executable, working_directory)
-                     else
-                       require_build(executable, working_directory)
-                     end
+            result = require_build(executable, working_directory)
 
             return result if result.is_a? Compilation::Failure
             path = result
@@ -210,25 +192,6 @@ module PlaceOS::Build
           end
         end
       end
-    end
-
-    private def legacy_build(executable, working_directory) : String | Compilation::Failure
-      Log.trace { "using legacy build method" }
-      result = PlaceOS::Compiler.build_driver(
-        source_file: executable.entrypoint,
-        repository: ".",
-        commit: executable.commit,
-        working_directory: working_directory,
-        binary_directory: working_directory,
-      )
-
-      unless result.success?
-        output = result.output.to_s
-        Log.debug { "build failed with #{output}" }
-        return Compilation::Failure.new(output)
-      end
-
-      result.path
     end
 
     class_property build_threads : Int32 = 1
@@ -296,20 +259,17 @@ module PlaceOS::Build
     def local_compiled(
       repository_path : Path,
       entrypoint : String,
-      commit : String,
+      ref : String,
       crystal_version : String? = nil
     )
-      # Attempt to get file's commit first
-      commit = file_commit(repository_path, entrypoint) || commit
-
-      executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
+      executable = extract_executable(repository_path, entrypoint, ref, crystal_version)
       executable.filename if binary_store.exists?(executable)
     rescue e
       Log.debug(exception: e) { {
         message:         "failed to determine if driver was compiled",
         repository_path: repository_path.to_s,
         entrypoint:      entrypoint,
-        commit:          commit,
+        ref:             ref,
       } }
       nil
     end
@@ -320,9 +280,6 @@ module PlaceOS::Build
       commit : String,
       crystal_version : String? = nil
     )
-      # Attempt to get file's commit first
-      commit = file_commit(repository_path, entrypoint) || commit
-
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
       binary_store.info(executable)
     rescue e
@@ -338,13 +295,10 @@ module PlaceOS::Build
     def local_compile(
       repository_path : Path,
       entrypoint : String,
-      commit : String,
+      commit : String?,
       force_recompile : Bool = false,
       crystal_version : String? = nil
     )
-      # Attempt to get file's commit first
-      commit = file_commit(repository_path, entrypoint) || commit
-
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
 
       # Look for an exact match in the driver store
@@ -368,13 +322,6 @@ module PlaceOS::Build
     # Get the last modification time
     private def modification_time(executable) : Time
       File.info(binary_store.path(executable)).modification_time
-    end
-
-    # Attempt to extract the commit on disk
-    private def file_commit(repository_path : Path, entrypoint : String)
-      repository = repository_path.basename
-      working_directory = repository_path.parent.to_s
-      PlaceOS::Compiler::Git.current_file_commit(entrypoint, repository, working_directory)[0, 6] rescue nil
     end
 
     # Compilation helpers

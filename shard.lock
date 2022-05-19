@@ -93,6 +93,10 @@ shards:
     git: https://github.com/crystal-community/future.cr.git
     version: 1.0.0
 
+  git-repository:
+    git: https://github.com/place-labs/git-repository.git
+    version: 1.3.0
+
   habitat:
     git: https://github.com/luckyframework/habitat.git
     version: 0.4.7

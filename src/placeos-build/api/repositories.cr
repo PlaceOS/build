@@ -65,21 +65,21 @@ module PlaceOS::Build::Api
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
     )]) do
-      if drivers = Api::Repositories.discover_drivers?(repository_uri, branch, commit, repository_path, username, password)
+      ref = branch || commit
+      if drivers = Api::Repositories.discover_drivers?(repository_uri, ref, repository_path, username, password)
         render status_code: :ok, json: drivers
       else
         head code: :not_found
       end
     end
 
-    def self.discover_drivers?(repository_uri, branch, commit, repository_path, username, password)
+    def self.discover_drivers?(repository_uri, ref, repository_path, username, password)
       if (path = repository_path.presence) && Build.support_local_builds?
         Api.builder.local_discover_drivers?(Path[path].expand)
       else
         Api.builder.discover_drivers?(
           repository_uri,
-          commit: commit,
-          branch: branch,
+          ref: ref,
           username: username,
           password: password,
         )

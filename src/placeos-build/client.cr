@@ -1,8 +1,8 @@
 require "http"
 require "json"
 require "mutex"
-require "placeos-compiler/git"
 require "placeos-models/version"
+require "git-repository"
 require "responsible"
 require "retriable"
 require "uri"
@@ -76,7 +76,7 @@ module PlaceOS::Build
     # Repositories
     ###########################################################################
 
-    alias Commit = ::PlaceOS::Compiler::Git::Commit
+    alias Commit = ::GitRepository::Commit
 
     # Returns the commits for a repository
     def repository_commits(
