@@ -1,4 +1,5 @@
 require "git-repository"
+require "opentelemetry-api"
 require "placeos-compiler/git"
 require "uuid"
 
@@ -8,6 +9,7 @@ require "./digest/cli"
 require "./driver_store"
 require "./executable"
 require "./repository_store"
+require "./run_from"
 
 module PlaceOS::Build
   class Drivers
@@ -146,12 +148,12 @@ module PlaceOS::Build
     end
 
     protected def install_shards(repository_path : String) : Nil
-      result = ExecFrom.exec_from(repository_path, "shards", {"--no-color", "check", "--ignore-crystal-version", "--production"})
+      result = RunFrom.run_from(repository_path, "shards", {"--no-color", "check", "--ignore-crystal-version", "--production"})
       output = result.output.to_s
       return if result.status.success? || output.includes?("Dependencies are satisfied")
 
       # Otherwise install shards
-      result = ExecFrom.exec_from(repository_path, "shards", {"--no-color", "install", "--ignore-crystal-version", "--production"}, environment: {"SHARDS_CACHE_PATH" => self.class.shards_cache_path})
+      result = RunFrom.run_from(repository_path, "shards", {"--no-color", "install", "--ignore-crystal-version", "--production"}, env: {"SHARDS_CACHE_PATH" => self.class.shards_cache_path})
       raise Build::Error.new(result.output) unless result.status.success?
     end
 
@@ -199,7 +201,8 @@ module PlaceOS::Build
       compile_directory = File.join(working_directory, "bin/drivers")
       Dir.mkdir_p compile_directory
       executable_path = File.join(compile_directory, UUID.random.to_s)
-      result = ExecFrom.exec_from(
+
+      result = RunFrom.run_from(
         working_directory,
         "crystal",
         {

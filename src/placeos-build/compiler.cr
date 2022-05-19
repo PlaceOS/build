@@ -4,6 +4,7 @@ require "exec_from"
 require "yaml"
 
 require "./error"
+require "./run_from"
 
 module PlaceOS::Build::Compiler
   module Crystal
@@ -71,7 +72,7 @@ module PlaceOS::Build::Compiler
 
     def self.current(directory : String = ".")
       if asdf_enabled?
-        result = ExecFrom.exec_from(directory, "asdf", {"current", "crystal"})
+        result = RunFrom.run_from(directory, "asdf", {"current", "crystal"})
         raise Error.new(result.output) unless result.status.success?
 
         parts = result.output.to_s.chomp.split(/\s+/)
@@ -110,7 +111,7 @@ module PlaceOS::Build::Compiler
       if asdf_enabled?
         version = version.value if version.is_a?(Shards::Version)
 
-        result = ExecFrom.exec_from(directory, "asdf", {"local", "crystal", version})
+        result = RunFrom.run_from(directory, "asdf", {"local", "crystal", version})
         raise Error.new(result.output) unless result.status.success?
       end
     end
