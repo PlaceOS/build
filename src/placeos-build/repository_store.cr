@@ -23,7 +23,7 @@ module PlaceOS::Build
       nil
     end
 
-    private def repository(
+    protected def repository(
       uri : String,
       username : String? = nil,
       password : String? = nil,

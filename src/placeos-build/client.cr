@@ -149,20 +149,21 @@ module PlaceOS::Build
 
     def discover_drivers(
       url : String,
-      commit : String = "HEAD",
-      branch : String = "master",
+      ref : String? = nil,
       username : String? = nil,
       password : String? = nil,
       request_id : String? = nil
     ) : Array(String)
       params = HTTP::Params{
-        "url"    => url,
-        "commit" => commit,
-        "branch" => branch,
+        "url" => url,
       }
 
       if path = repository_path.presence
         params["repository_path"] = path
+      end
+
+      if reference = ref.presence
+        params["ref"] = reference
       end
 
       parse_to_return_type do

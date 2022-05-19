@@ -57,7 +57,7 @@ module PlaceOS::Build::Api
     end
 
     # Returns an array of files containing driver implementations for a repository
-    # GET /repository/discover/drivers?url=[repository url]&branch=[master]&commit=[HEAD]
+    # GET /repository/discover/drivers?url=[repository url]&ref=[master]&commit=[HEAD]
     get("/discover/drivers", :discover_drivers, annotations: @[OpenAPI(<<-YAML
         summary: Returns the files containing PlaceOS driver implementations
         parameters:
@@ -65,7 +65,7 @@ module PlaceOS::Build::Api
           #{Schema.header_param("X-Git-Password", "An optional git password", required: false, type: "string")}
       YAML
     )]) do
-      ref = branch || commit
+      ref = param ref : String? = nil, "Ref on remote to discover drivers from. Defaults to default branch HEAD"
       if drivers = Api::Repositories.discover_drivers?(repository_uri, ref, repository_path, username, password)
         render status_code: :ok, json: drivers
       else

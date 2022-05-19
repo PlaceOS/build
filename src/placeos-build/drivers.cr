@@ -37,10 +37,15 @@ module PlaceOS::Build
 
     def discover_drivers?(
       repository_uri : String,
-      ref : String,
+      ref : String?,
       username : String? = nil,
       password : String? = nil
     ) : Array(String)?
+      # Default to the default branch's HEAD if no ref passed
+      if ref.nil?
+        ref = repository_store.repository(repository_uri, username, password).default_branch
+      end
+
       repository_store.with_repository(repository_uri, ref, username, password) do |downloaded_repository|
         local_discover_drivers?(downloaded_repository.path)
       end
