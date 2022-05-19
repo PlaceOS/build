@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   test:
-    image: placeos/service-spec-runner:${CRYSTAL_VERSION:-1.4.0}
+    image: placeos/service-spec-runner:${CRYSTAL_VERSION:-1.4.1}
     volumes:
       - ${PWD}/bin:/app/bin
       - ${PWD}/coverage:/app/coverage
