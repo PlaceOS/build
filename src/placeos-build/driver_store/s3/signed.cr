@@ -1,6 +1,6 @@
-require "uri"
-require "./client"
 require "lz4"
+
+require "./client"
 
 module PlaceOS::Build
   class S3 < DriverStore

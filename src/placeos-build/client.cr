@@ -1,8 +1,8 @@
 require "http"
 require "json"
 require "mutex"
-require "placeos-compiler/git"
 require "placeos-models/version"
+require "git-repository"
 require "responsible"
 require "retriable"
 require "uri"
@@ -76,7 +76,7 @@ module PlaceOS::Build
     # Repositories
     ###########################################################################
 
-    alias Commit = ::PlaceOS::Compiler::Git::Commit
+    alias Commit = ::GitRepository::Commit
 
     # Returns the commits for a repository
     def repository_commits(
@@ -149,20 +149,21 @@ module PlaceOS::Build
 
     def discover_drivers(
       url : String,
-      commit : String = "HEAD",
-      branch : String = "master",
+      ref : String? = nil,
       username : String? = nil,
       password : String? = nil,
       request_id : String? = nil
     ) : Array(String)
       params = HTTP::Params{
-        "url"    => url,
-        "commit" => commit,
-        "branch" => branch,
+        "url" => url,
       }
 
       if path = repository_path.presence
         params["repository_path"] = path
+      end
+
+      if reference = ref.presence
+        params["ref"] = reference
       end
 
       parse_to_return_type do

@@ -2,11 +2,11 @@ version: "3.7"
 
 services:
   test:
-    image: placeos/service-spec-runner:${CRYSTAL_VERSION:-1.4.0}
+    image: placeos/service-spec-runner:${CRYSTAL_VERSION:-1.4.1}
     volumes:
-      - ${PWD}/bin:/app/bin
+      - ${PWD}/bin:/app/bin:rw
+      - ${PWD}/lib:/app/lib:rw
       - ${PWD}/coverage:/app/coverage
-      - ${PWD}/lib:/app/lib
       - ${PWD}/shard.lock:/app/shard.lock
       - ${PWD}/shard.override.yml:/app/shard.override.yml
       - ${PWD}/shard.yml:/app/shard.yml

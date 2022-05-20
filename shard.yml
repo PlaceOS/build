@@ -6,6 +6,7 @@ license: MIT
 targets:
   build:
     main: src/build_app.cr
+
   digest:
     main: src/digest_app.cr
 
@@ -13,31 +14,42 @@ dependencies:
   action-controller:
     github: spider-gazelle/action-controller
     version: ~> 4.4
+
   awscr-s3:
     github: taylorfinnell/awscr-s3
     version: ~> 0.8
+
   clip:
     github: erdnaxeli/clip
+
   exec_from:
     github: place-labs/exec_from
     version: ~> 2
+
   future:
     github: crystal-community/future.cr
     version: ~> 1.0
+
+  git-repository:
+    github: place-labs/git-repository
+
+  placeos-compiler:
+    github: placeos/compiler
+
   http-params-serializable:
     github: place-labs/http-params-serializable
     version: ~> 0.5
+
   habitat:
     github: luckyframework/habitat
+
   log_helper:
     github: spider-gazelle/log_helper
     version: ~> 1
+
   openapi-generator:
     github: place-labs/openapi-generator
     branch: master
-  placeos-compiler:
-    github: placeos/compiler
-    version: ~> 4
 
   placeos-log-backend:
     github: place-labs/log-backend
@@ -46,17 +58,22 @@ dependencies:
   placeos-models:
     github: placeos/models
     version: ">= 7.0"
+
   raven:
     github: Sija/raven.cr
     branch: master
+
   responsible:
     github: place-labs/responsible
     version: ~> 1.2
+
   secrets-env:
     github: place-labs/secrets-env
+
   shards:
     github: crystal-lang/shards
     version: ~> 0.14
+
   lz4:
     github: naqvis/lz4.cr
 
@@ -64,5 +81,6 @@ development_dependencies:
   ameba:
     github: crystal-ameba/ameba
     version: ~> 1.0
+
   webmock:
     github: manastech/webmock.cr

@@ -10,7 +10,9 @@ module PlaceOS::Build
       def self.url(bucket : String, region : String?)
         # NOTE: There is no `Tuple(*T).compact`
         hostname = [bucket, "s3", region].compact.join('.')
-        URI.parse "https://#{hostname}.amazonaws.com"
+        uri = URI.parse("https://#{hostname}.amazonaws.com")
+        uri.scheme = "https"
+        uri
       end
 
       def initialize(bucket : String, region : String?)

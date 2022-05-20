@@ -44,7 +44,6 @@ module PlaceOS::Build::Api
       force_recompile = param force_recompile : Bool = false, "Whether to force a build in case of existing binary"
 
       args = {entrypoint: file, commit: commit, crystal_version: CRYSTAL_VERSION, force_recompile: force_recompile}
-
       Log.context.set(**args)
 
       result = if (path = repository_path.presence) && Build.support_local_builds?
@@ -153,8 +152,8 @@ module PlaceOS::Build::Api
       end
     end
 
-    def self.compiled(repository_uri, entrypoint, commit, repository_path, username, password, crystal_version = CRYSTAL_VERSION)
-      args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
+    def self.compiled(repository_uri, entrypoint, ref, repository_path, username, password, crystal_version = CRYSTAL_VERSION)
+      args = {entrypoint: entrypoint, ref: ref, crystal_version: crystal_version}
 
       if (path = repository_path.presence) && Build.support_local_builds?
         Api.builder.local_compiled(Path[path].expand, **args)

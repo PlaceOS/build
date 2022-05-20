@@ -36,20 +36,16 @@ module PlaceOS::Build
       @[Clip::Option]
       getter repository_uri : String
 
-      @[Clip::Doc("Commit to check the file out to")]
+      @[Clip::Doc("Ref to checkout")]
       @[Clip::Option]
-      getter commit : String
-
-      @[Clip::Doc("Branch to checkout")]
-      @[Clip::Option]
-      getter branch : String
+      getter ref : String
 
       @[Clip::Doc("Driver entrypoints relative to specified repository")]
       @[Clip::Option]
       getter entrypoints : Array(String) = [] of String
 
       def run
-        repository_store = RepositoryStore.new(repository_store_path)
+        repository_store = RepositoryStore.new
         driver_store = DriverStore.from_credentials(aws_credentials)
         builder = Drivers.new(driver_store, repository_store, strict_driver_info: strict_driver_info)
 
@@ -58,9 +54,8 @@ module PlaceOS::Build
         abort("no valid driver entrypoints passed") if valid_driver_entrypoints.empty?
 
         valid_driver_entrypoints.each do |entrypoint|
-          args = {entrypoint: entrypoint, commit: commit, crystal_version: crystal_version}
-          ::Log.with_context do
-            Log.context.set(**args)
+          args = {entrypoint: entrypoint, commit: ref, crystal_version: crystal_version}
+          ::Log.with_context(**args) do
             begin
               if (path = repository_path)
                 Log.debug { "local compile" }
@@ -82,8 +77,8 @@ module PlaceOS::Build
 
       def drivers(builder : PlaceOS::Build::Drivers) : Array(String)
         valid_driver_entrypoints = entrypoints.compact_map do |file|
-          builder.repository_store.with_repository(repository_uri, file, commit, branch, username, password) do |path|
-            driver = path.join(file)
+          builder.repository_store.with_repository(repository_uri, ref, username, password) do |downloaded_repository|
+            driver = downloaded_repository.path.join(file)
             if File.exists?(driver) && Build.is_driver?(driver)
               file
             else
@@ -97,7 +92,7 @@ module PlaceOS::Build
           found = if (path = repository_path)
                     builder.local_discover_drivers?(Path[path].expand)
                   else
-                    builder.discover_drivers?(repository_uri, branch, commit, username, password)
+                    builder.discover_drivers?(repository_uri, ref, username, password)
                   end
           valid_driver_entrypoints.concat(found).uniq! unless found.nil? || found.empty?
         end

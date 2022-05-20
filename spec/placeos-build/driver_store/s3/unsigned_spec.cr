@@ -18,7 +18,7 @@ module PlaceOS::Build
     describe "#read" do
       it "returns an object" do
         WebMock
-          .stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com/test.html")
+          .stub(:get, "http://placeos-drivers.s3.ap-southeast-2.amazonaws.com/test.html")
           .to_return(body_io: IO::Memory.new)
 
         client.read("test.html") do |io|
@@ -30,7 +30,7 @@ module PlaceOS::Build
     describe "#list" do
       it "lists objects in the bucket" do
         WebMock
-          .stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com")
+          .stub(:get, "http://placeos-drivers.s3.ap-southeast-2.amazonaws.com")
           .to_return(body: LIST_XML)
 
         client.list.should_not be_empty

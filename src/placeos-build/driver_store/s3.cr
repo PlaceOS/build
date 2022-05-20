@@ -54,14 +54,12 @@ module PlaceOS::Build
       digest : String? = nil,
       crystal_version : SemanticVersion | String? = nil
     ) : Enumerable(Executable)
-      ::Log.with_context do
-        Log.context.set(
-          entrypoint: entrypoint,
-          digest: digest,
-          commit: commit,
-          crystal_version: crystal_version.to_s
-        )
-
+      ::Log.with_context(
+        entrypoint: entrypoint,
+        digest: digest,
+        commit: commit,
+        crystal_version: crystal_version.to_s
+      ) do
         if entrypoint && digest && commit && crystal_version
           exact = Executable.new(entrypoint, digest, commit, crystal_version)
         end

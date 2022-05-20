@@ -23,8 +23,8 @@ module PlaceOS::Build::Api
       param url : String, "URL for a git repository"
     end
 
-    getter branch : String do
-      param branch : String = "master", "Branch to return commits for"
+    getter branch : String? do
+      param branch : String? = nil, "Branch to return commits for"
     end
 
     getter commit : String do
