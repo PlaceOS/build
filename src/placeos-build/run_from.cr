@@ -21,7 +21,6 @@ module RunFrom
           output: output,
           error: output,
           chdir: path,
-          clear_env: true, # May be an issue if dependent on proxy environment variable
         )
 
         status = process.as(Process).wait
