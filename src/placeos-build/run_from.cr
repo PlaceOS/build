@@ -1,3 +1,4 @@
+require "opentelemetry-api"
 require "./error"
 
 module RunFrom
@@ -9,30 +10,39 @@ module RunFrom
     # Run in a different thread to prevent blocking
     channel = Channel(Process::Status).new(capacity: 1)
     output = IO::Memory.new
-    trace = OpenTelemetry.trace
-    spawn(same_thread: false) do
-      status = trace.in_span("Run `#{command}`") do
-        Process.run(
-          command,
-          **rest,
-          args: args,
-          input: Process::Redirect::Close,
-          output: output,
-          error: output,
-          chdir: path,
-          clear_env: true, # May be an issue if dependent on proxy environment variable
-        )
+    OpenTelemetry.trace.in_span("Run #{command}") do
+      process = Process.new(
+        command,
+        **rest,
+        args: args,
+        input: Process::Redirect::Close,
+        output: output,
+        error: output,
+        chdir: path,
+        clear_env: true, # May be an issue if dependent on proxy environment variable
+      )
+
+      fiber = spawn(same_thread: false) do
+        status = process.wait
+        channel.send(status) unless channel.closed?
       end
 
-      channel.send(status)
-    end
+      fiber.resume if fiber.running?
 
-    select
-    when status = channel.receive
-    when timeout(timeout)
-      raise PlaceOS::Build::Error.new("Running #{command} timed out after #{timeout.total_seconds}s")
-    end
+      select
+      when status = channel.receive
+      when timeout(timeout)
+        channel.close
+        begin
+          process.terminate
+        rescue RuntimeError
+          # Ignore missing process
+        end
 
-    Result.new(status, output)
+        raise PlaceOS::Build::Error.new("Running #{command} timed out after #{timeout.total_seconds}s with:\n#{output}")
+      end
+
+      Result.new(status, output)
+    end
   end
 end

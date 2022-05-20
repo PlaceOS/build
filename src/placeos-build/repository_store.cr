@@ -1,5 +1,6 @@
-require "git-repository"
 require "file_utils"
+require "git-repository"
+require "opentelemetry-api"
 
 module PlaceOS::Build
   class RepositoryStore
@@ -85,7 +86,9 @@ module PlaceOS::Build
       key = UUID.random.to_s
       temporary_path = File.join(Dir.tempdir, key)
 
-      commit = repository(uri, username, password).fetch_commit(ref, download_to_path: temporary_path)
+      commit = OpenTelemetry.trace.in_span("Downloading #{uri} at #{ref}") do
+        repository(uri, username, password).fetch_commit(ref, download_to_path: temporary_path)
+      end
 
       Log.trace { {
         message: "checked out repository",
