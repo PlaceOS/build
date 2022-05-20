@@ -22,7 +22,7 @@ module RunFrom
         clear_env: true, # May be an issue if dependent on proxy environment variable
       )
 
-      fiber = spawn(same_thread: false) do
+      fiber = spawn(same_thread: true) do
         status = process.wait
         channel.send(status) unless channel.closed?
       end
