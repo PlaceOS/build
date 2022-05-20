@@ -57,7 +57,7 @@ module PlaceOS::Build::Api
     end
 
     # Returns an array of files containing driver implementations for a repository
-    # GET /repository/discover/drivers?url=[repository url]&ref=[master]&commit=[HEAD]
+    # GET /repository/discover/drivers?url=[repository url]&ref=<default branch>
     get("/discover/drivers", :discover_drivers, annotations: @[OpenAPI(<<-YAML
         summary: Returns the files containing PlaceOS driver implementations
         parameters:
