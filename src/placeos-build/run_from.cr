@@ -10,23 +10,25 @@ module RunFrom
     # Run in a different thread to prevent blocking
     channel = Channel(Process::Status).new(capacity: 1)
     output = IO::Memory.new
+    process = nil
     OpenTelemetry.trace.in_span("Run #{command}") do
-      process = Process.new(
-        command,
-        **rest,
-        args: args,
-        input: Process::Redirect::Close,
-        output: output,
-        error: output,
-        chdir: path,
-        clear_env: true, # May be an issue if dependent on proxy environment variable
-      )
-
       fiber = spawn(same_thread: true) do
-        status = process.wait
+        process = Process.new(
+          command,
+          **rest,
+          args: args,
+          input: Process::Redirect::Close,
+          output: output,
+          error: output,
+          chdir: path,
+          clear_env: true, # May be an issue if dependent on proxy environment variable
+        )
+
+        status = process.as(Process).wait
         channel.send(status) unless channel.closed?
       end
 
+      Fiber.yield
       fiber.resume if fiber.running?
 
       select
@@ -34,7 +36,7 @@ module RunFrom
       when timeout(timeout)
         channel.close
         begin
-          process.terminate
+          process.try(&.terminate)
         rescue RuntimeError
           # Ignore missing process
         end

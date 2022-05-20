@@ -4,6 +4,8 @@ on:
 jobs:
   test:
     uses: PlaceOS/.github/.github/workflows/containerised-test.yml@main
+    with:
+      test_mt: false
 
   crystal-style:
     uses: PlaceOS/.github/.github/workflows/crystal-style.yml@main
