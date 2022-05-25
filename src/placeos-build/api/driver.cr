@@ -60,17 +60,16 @@ module PlaceOS::Build::Api
       in Build::Compilation::NotFound
         head code: :not_found
       in Build::Compilation::Success
-        response.content_type = "application/octet-stream"
-        response.headers.merge! result.to_http_headers
-
         path = builder.binary_store.path(result.executable)
 
+        response.content_type = "application/octet-stream"
+        response.headers.merge! result.to_http_headers
         response.content_length = File.size(path)
+        response.status_code = 200
+
         File.open(path) do |file_io|
           IO.copy(file_io, response)
         end
-
-        head code: :ok
       in Build::Compilation::Failure
         render status_code: :unprocessable_entity, json: result
       end
