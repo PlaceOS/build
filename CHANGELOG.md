@@ -1,3 +1,9 @@
+## v1.0.2 (2022-05-25)
+
+### Fix
+
+- **api**: write headers before body ([#42](https://github.com/PlaceOS/build/pull/42))
+
 ## v1.0.1 (2022-05-20)
 
 ### Fix
