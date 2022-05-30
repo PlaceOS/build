@@ -1,3 +1,4 @@
+require "../error"
 require "../api"
 require "./application"
 

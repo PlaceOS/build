@@ -1,13 +1,12 @@
 require "git-repository"
 require "opentelemetry-api"
-require "placeos-compiler/git"
+require "placeos-models/executable"
 require "uuid"
 
 require "./compilation"
 require "./compiler"
 require "./digest/cli"
 require "./driver_store"
-require "./executable"
 require "./repository_store"
 require "./run_from"
 
@@ -23,7 +22,7 @@ module PlaceOS::Build
     getter? strict_driver_info : Bool
 
     private getter compile_lock = Mutex.new
-    private getter compiling = Hash(Executable, Array(Channel(Nil))).new
+    private getter compiling = Hash(Model::Executable, Array(Channel(Nil))).new
 
     getter binary_store : DriverStore
     getter repository_store : RepositoryStore
@@ -149,7 +148,7 @@ module PlaceOS::Build
 
       crystal_version = crystal_version.value if crystal_version.is_a? ::Shards::Version
 
-      Executable.new(entrypoint, commit, digest, crystal_version)
+      Model::Executable.new(entrypoint, commit, digest, crystal_version)
     end
 
     protected def install_shards(repository_path : String) : Nil
@@ -163,7 +162,7 @@ module PlaceOS::Build
     end
 
     protected def build_driver(
-      executable : Executable,
+      executable : Model::Executable,
       working_directory : String
     ) : Compilation::Success | Compilation::Failure
       wait_for_compilation(executable) do
@@ -333,7 +332,7 @@ module PlaceOS::Build
     # Compilation helpers
     ###############################################################################################
 
-    private def wait_for_compilation(executable : Executable)
+    private def wait_for_compilation(executable : Model::Executable)
       block_compilation(executable)
       yield
     ensure
@@ -341,7 +340,7 @@ module PlaceOS::Build
     end
 
     # Blocks if compilation for the executable is in progress
-    private def block_compilation(executable : Executable)
+    private def block_compilation(executable : Model::Executable)
       channel = nil
       compile_lock.synchronize do
         if compiling.has_key? executable
@@ -358,7 +357,7 @@ module PlaceOS::Build
       end
     end
 
-    private def unblock_compilation(executable : Executable)
+    private def unblock_compilation(executable : Model::Executable)
       compile_lock.synchronize do
         if waiting = compiling.delete(executable)
           waiting.each &.send(nil)

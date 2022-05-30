@@ -53,7 +53,7 @@ module PlaceOS::Build
       commit : String? = nil,
       digest : String? = nil,
       crystal_version : SemanticVersion | String? = nil
-    ) : Enumerable(Executable)
+    ) : Enumerable(Model::Executable)
       ::Log.with_context(
         entrypoint: entrypoint,
         digest: digest,
@@ -61,7 +61,7 @@ module PlaceOS::Build
         crystal_version: crystal_version.to_s
       ) do
         if entrypoint && digest && commit && crystal_version
-          exact = Executable.new(entrypoint, digest, commit, crystal_version)
+          exact = Model::Executable.new(entrypoint, digest, commit, crystal_version)
         end
 
         # Query for an exact match on the filesystem
@@ -75,7 +75,7 @@ module PlaceOS::Build
 
         # Strip everything after the first '*'.
         # S3 only supports prefix matching.
-        prefix = Executable.glob(entrypoint, digest, commit, crystal_version).split('*').first
+        prefix = Model::Executable.glob(entrypoint, digest, commit, crystal_version).split('*').first
 
         query_binary(prefix).to_a.tap do |results|
           Log.trace { {message: "s3 query", prefix: prefix, results: results.map(&.to_s)} }
@@ -83,16 +83,16 @@ module PlaceOS::Build
       end
     end
 
-    def exists?(executable : Executable) : Bool
+    def exists?(executable : Model::Executable) : Bool
       filesystem.exists?(executable) || !query_binary(executable.filename).empty?
     end
 
-    def link(source : Executable, destination : Executable) : Nil
+    def link(source : Model::Executable, destination : Model::Executable) : Nil
       filesystem.link(source, destination)
       client.copy(source.filename, destination.filename)
     end
 
-    def info(driver : Executable) : Executable::Info
+    def info(driver : Model::Executable) : Model::Executable::Info
       # Check filesystem for info first
       return filesystem.info(driver) if File.exists?(info_path(driver)) || File.exists?(filesystem.path(driver))
 
@@ -112,11 +112,11 @@ module PlaceOS::Build
       end
     end
 
-    def info_path(driver : Executable) : String
+    def info_path(driver : Model::Executable) : String
       filesystem.info_path(driver)
     end
 
-    def path(driver : Executable) : String
+    def path(driver : Model::Executable) : String
       local_path = filesystem.path(driver)
       unless File.exists?(local_path)
         read(driver.filename) do |s3_io|
@@ -155,7 +155,7 @@ module PlaceOS::Build
     protected def query_binary(key)
       client
         .list(key)
-        .map { |object| Executable.new(Path[object.key].basename) }
+        .map { |object| Model::Executable.new(Path[object.key].basename) }
     end
 
     # Helpers

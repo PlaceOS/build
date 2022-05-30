@@ -2,6 +2,7 @@ require "http"
 require "json"
 require "mutex"
 require "placeos-models/version"
+require "placeos-models/executable"
 require "git-repository"
 require "responsible"
 require "retriable"
@@ -11,7 +12,6 @@ require "uuid"
 require "../constants"
 require "./compilation"
 require "./error"
-require "./executable"
 
 module PlaceOS::Build
   class Client
@@ -180,7 +180,7 @@ module PlaceOS::Build
       commit : String? = nil,
       crystal_version : String? = nil,
       request_id : String? = nil
-    ) : Array(Executable)
+    ) : Array(Model::Executable)
       params = Hash(String, String?){
         "file"            => file,
         "digest"          => digest,
@@ -232,7 +232,7 @@ module PlaceOS::Build
       end
     end
 
-    # Returns `Executable::Info` extracted from the built artefact
+    # Returns `Model::Executable::Info` extracted from the built artefact
     def metadata(
       file : String,
       url : String,
@@ -240,7 +240,7 @@ module PlaceOS::Build
       username : String? = nil,
       password : String? = nil,
       request_id : String? = nil
-    ) : Executable::Info
+    ) : Model::Executable::Info
       params = HTTP::Params{
         "url"    => url,
         "commit" => commit,

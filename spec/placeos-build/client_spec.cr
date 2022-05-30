@@ -22,7 +22,7 @@ module PlaceOS::Build
         path = "drivers/test.cr"
         url = "https://github.com/placeos/drivers"
         commit = "abcdef"
-        executable = Executable.new(path, commit, "d1g3s7", "1.1.1")
+        executable = Model::Executable.new(path, commit, "d1g3s7", "1.1.1")
         expected = Compilation::Success.new(executable.filename, 0)
 
         WebMock

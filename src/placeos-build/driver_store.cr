@@ -1,4 +1,4 @@
-require "./executable"
+require "placeos-models/executable"
 
 module PlaceOS::Build
   abstract class DriverStore
@@ -18,46 +18,46 @@ module PlaceOS::Build
       commit : String? = nil,
       digest : String? = nil,
       crystal_version : SemanticVersion | String? = nil
-    ) : Enumerable(Executable)
+    ) : Enumerable(Model::Executable)
 
-    def exists?(executable : Executable) : Bool
+    def exists?(executable : Model::Executable) : Bool
       File.exists?(path(executable))
     end
 
     # If the driver already exists
-    abstract def link(source : Executable, destination : Executable) : Nil
+    abstract def link(source : Model::Executable, destination : Model::Executable) : Nil
 
     abstract def write(filename : String, io : IO) : Nil
 
     abstract def read(filename : String, & : IO ->)
 
     # Allow looser guarantees for metadata lookups
-    def info?(entrypoint : String, commit : String) : Executable::Info?
+    def info?(entrypoint : String, commit : String) : Model::Executable::Info?
       query(entrypoint, commit: commit).first?.try do |executable|
         info(executable)
       end
     end
 
-    abstract def path(executable : Executable) : String
-    abstract def info_path(executable : Executable) : String
+    abstract def path(executable : Model::Executable) : String
+    abstract def info_path(executable : Model::Executable) : String
 
     # Query for metadata for an exact driver executable
-    abstract def info(driver : Executable) : Executable::Info
+    abstract def info(driver : Model::Executable) : Model::Executable::Info
 
-    # Fetch a `Executable::Info` from the cache
-    def fetch_info(driver : Executable) : Executable::Info?
+    # Fetch a `Model::Executable::Info` from the cache
+    def fetch_info(driver : Model::Executable) : Model::Executable::Info?
       read(driver.info_filename) do |io|
         json = io.gets_to_end
         raise File::NotFoundError.new("info not present", file: driver.info_filename) unless json.presence
-        Executable::Info.from_json(json)
+        Model::Executable::Info.from_json(json)
       end
     rescue File::NotFoundError
       Log.debug { "info not in store for #{driver}" }
       nil
     end
 
-    # Write the `Executable::Info` to the cache
-    def cache_info(driver : Executable, info : Executable::Info)
+    # Write the `Model::Executable::Info` to the cache
+    def cache_info(driver : Model::Executable, info : Model::Executable::Info)
       Log.trace { "caching info for #{driver.entrypoint}" }
       write(driver.info_filename, IO::Memory.new(info.to_json))
     end

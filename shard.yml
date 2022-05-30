@@ -33,9 +33,6 @@ dependencies:
   git-repository:
     github: place-labs/git-repository
 
-  placeos-compiler:
-    github: placeos/compiler
-
   http-params-serializable:
     github: place-labs/http-params-serializable
     version: ~> 0.5

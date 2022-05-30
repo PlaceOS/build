@@ -8,11 +8,11 @@ module PlaceOS::Build
       Dir.mkdir_p binary_store
     end
 
-    def info_path(executable : Executable) : String
+    def info_path(executable : Model::Executable) : String
       File.join(binary_store, executable.info_filename)
     end
 
-    def path(executable : Executable) : String
+    def path(executable : Model::Executable) : String
       File.join(binary_store, executable.filename)
     end
 
@@ -21,7 +21,7 @@ module PlaceOS::Build
       digest : String? = nil,
       commit : String? = nil,
       crystal_version : SemanticVersion | String? = nil
-    ) : Enumerable(Executable)
+    ) : Enumerable(Model::Executable)
       Log.trace { {
         message:         "query",
         entrypoint:      entrypoint,
@@ -30,14 +30,14 @@ module PlaceOS::Build
         crystal_version: crystal_version,
       } }
 
-      glob = File.join(binary_store, Executable.glob(entrypoint, digest, commit, crystal_version))
+      glob = File.join(binary_store, Model::Executable.glob(entrypoint, digest, commit, crystal_version))
       Dir.glob(glob, follow_symlinks: true)
-        .reject(&.ends_with?(Executable::INFO_EXT))
-        .map(&->Executable.new(String))
+        .reject(&.ends_with?(Model::Executable::INFO_EXT))
+        .map(&->Model::Executable.new(String))
     end
 
     # Query for metadata for an exact driver executable
-    def info(driver : Executable) : Executable::Info
+    def info(driver : Model::Executable) : Model::Executable::Info
       Log.debug { "extracting info for #{driver}" }
 
       # Check the cache
@@ -51,7 +51,7 @@ module PlaceOS::Build
       end
     end
 
-    def link(source : Executable, destination : Executable) : Nil
+    def link(source : Model::Executable, destination : Model::Executable) : Nil
       File.symlink(path(source), path(destination))
       File.symlink(info_path(source), info_path(destination))
     end
