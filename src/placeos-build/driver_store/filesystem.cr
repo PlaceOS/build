@@ -30,10 +30,27 @@ module PlaceOS::Build
         crystal_version: crystal_version,
       } }
 
-      glob = File.join(binary_store, Model::Executable.glob(entrypoint, digest, commit, crystal_version))
-      Dir.glob(glob, follow_symlinks: true)
+      # FIXME: commit should be normalized in `Model::Executable.glob`
+      commit = commit[0, 7] if commit
+
+      glob = Model::Executable.glob(entrypoint: entrypoint, digest: digest, commit: commit, crystal_version: crystal_version)
+      glob_prefix = "#{glob.split('*').first}*"
+      glob_query = File.join(binary_store, glob_prefix)
+
+      Dir.glob(glob_query, follow_symlinks: true)
         .reject(&.ends_with?(Model::Executable::INFO_EXT))
         .map(&->Model::Executable.new(String))
+        .select do |executable|
+          {
+            {executable.entrypoint, entrypoint},
+            {executable.digest, digest},
+            {executable.commit, commit},
+            {executable.crystal_version, crystal_version},
+          }.reduce(true) do |match, (executable_attribute, attribute)|
+            match = match | (executable_attribute == attribute) if attribute
+            match
+          end
+        end
     end
 
     # Query for metadata for an exact driver executable
