@@ -1,4 +1,8 @@
-## Unreleased
+## v1.0.3 (2022-06-01)
+
+### Fix
+
+- **driver_store/filesystem**: more effectively search for drivers
 
 ## v1.0.2 (2022-05-25)
 
