@@ -143,7 +143,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 8.9.1
+    version: 8.9.2
 
   protobuf:
     git: https://github.com/jeromegn/protobuf.cr.git
