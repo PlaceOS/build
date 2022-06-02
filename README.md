@@ -31,8 +31,6 @@ Options:
   --username TEXT                 Username for git repository
   --binary-store-path TEXT        Where the binaries are mounted
                                   [default: BINARY_STORE_PATH]
-  --repository-store-path TEXT    Where the git repositories are mounted
-                                  [default: REPOSITORY_STORE_PATH]
   --crystal-version TEXT          Varying this is currently unsupported
                                   [default: CRYSTAL_VERSION]
   --repository-path TEXT          Path to existing repository

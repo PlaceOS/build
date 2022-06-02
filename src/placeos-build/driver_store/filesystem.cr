@@ -2,6 +2,8 @@ require "../driver_store"
 
 module PlaceOS::Build
   class Filesystem < DriverStore
+    BINARY_STORE_PATH = ENV["PLACEOS_DRIVER_BINARIES"]?.presence || Path["./bin/drivers"].expand.to_s
+
     protected getter binary_store : String
 
     def initialize(@binary_store : String = BINARY_STORE_PATH)

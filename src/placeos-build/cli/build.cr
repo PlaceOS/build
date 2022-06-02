@@ -14,11 +14,8 @@ module PlaceOS::Build
       @[Clip::Doc("Varying this is currently unsupported")]
       getter crystal_version : String = CRYSTAL_VERSION
 
-      @[Clip::Doc("Where the git repositories are mounted")]
-      getter repository_store_path : String = REPOSITORY_STORE_PATH
-
       @[Clip::Doc("Where the binaries are mounted")]
-      getter binary_store_path : String = BINARY_STORE_PATH
+      getter binary_store_path : String = Filesystem::BINARY_STORE_PATH
 
       @[Clip::Doc("Username for git repository")]
       getter username : String? = nil

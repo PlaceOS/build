@@ -35,9 +35,6 @@ module PlaceOS::Build
 
   #############################################################################
 
-  REPOSITORY_STORE_PATH = ENV["PLACEOS_REPOSITORIES"]?.presence || Path["./repositories"].expand.to_s
-  BINARY_STORE_PATH     = ENV["PLACEOS_DRIVER_BINARIES"]?.presence || Path["./bin/drivers"].expand.to_s
-
   class_getter? production : Bool { PRODUCTION }
   class_getter? trace : Bool { TRACE }
 end
