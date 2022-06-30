@@ -48,6 +48,10 @@ dependencies:
     github: place-labs/openapi-generator
     branch: master
 
+  opentelemetry-sdk:
+    github: wyhaines/opentelemetry-sdk.cr
+    version: ~> 0.5
+
   placeos-log-backend:
     github: place-labs/log-backend
     version: ">= 0.8.13"
