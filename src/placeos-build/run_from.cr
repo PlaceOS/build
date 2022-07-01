@@ -1,4 +1,4 @@
-require "opentelemetry-api"
+require "opentelemetry-sdk"
 require "./error"
 
 module RunFrom

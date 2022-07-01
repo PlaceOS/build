@@ -1,6 +1,6 @@
 require "file_utils"
 require "git-repository"
-require "opentelemetry-api"
+require "opentelemetry-sdk"
 
 module PlaceOS::Build
   class RepositoryStore

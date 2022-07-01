@@ -1,5 +1,5 @@
 require "git-repository"
-require "opentelemetry-api"
+require "opentelemetry-sdk"
 require "placeos-models/executable"
 require "uuid"
 
