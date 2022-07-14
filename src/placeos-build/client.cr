@@ -19,10 +19,14 @@ module PlaceOS::Build
 
     BASE_PATH     = "/api/build"
     BUILD_VERSION = "v1"
+
     getter build_version : String
 
-    getter host : String = ENV["PLACEOS_BUILD_HOST"]? || "localhost"
-    getter port : Int32 = (ENV["PLACEOS_BUILD_PORT"]? || 3000).to_i
+    PLACEOS_BUILD_HOST = ENV["PLACEOS_BUILD_HOST"]? || "localhost"
+    PLACEOS_BUILD_PORT = (ENV["PLACEOS_BUILD_PORT"]? || 3000).to_i
+
+    getter host : String = PLACEOS_BUILD_HOST
+    getter port : Int32 = PLACEOS_BUILD_PORT
 
     # Primary use is for local use of build
     property repository_path : String? = nil
@@ -48,9 +52,10 @@ module PlaceOS::Build
     end
 
     def initialize(uri : URI, @build_version : String = BUILD_VERSION)
-      uri_host = uri.host.presence
-      @host = uri_host if uri_host
-      @port = uri.port || 3000
+      uri_host = uri.host.presence || raise ArgumentError.new("Could not parse host from URI")
+      uri_port = uri.port
+      @host = uri_host
+      @port = uri.port if uri_port
     end
 
     def initialize(host : String? = nil, port : Int32? = nil, @build_version : String = BUILD_VERSION)
