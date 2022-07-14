@@ -55,7 +55,7 @@ module PlaceOS::Build
       uri_host = uri.host.presence || raise ArgumentError.new("Could not parse host from URI")
       uri_port = uri.port
       @host = uri_host
-      @port = uri.port if uri_port
+      @port = uri_port if uri_port
     end
 
     def initialize(host : String? = nil, port : Int32? = nil, @build_version : String = BUILD_VERSION)
