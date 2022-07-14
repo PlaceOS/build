@@ -1,4 +1,8 @@
-## Unreleased
+## v1.0.4 (2022-07-14)
+
+### Fix
+
+- **client**: ensure correct forwarding of environment variables
 
 ## v1.0.3 (2022-06-01)
 
