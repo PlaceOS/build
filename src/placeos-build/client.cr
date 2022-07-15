@@ -290,8 +290,13 @@ module PlaceOS::Build
       password : String? = nil,
       request_id : String? = nil
     ) : String?
+      params = HTTP::Params{
+        "url"    => url,
+        "commit" => commit,
+      }
+
       parse_to_return_type do
-        get("/driver/#{URI.encode_www_form(file)}/compiled", request_id: request_id, raises: false, retries: 1)
+        get("/driver/#{URI.encode_www_form(file)}/compiled?#{params}", authorization_header(username, password), request_id: request_id, raises: false, retries: 1)
       end
     end
 
