@@ -1,3 +1,9 @@
+## v1.0.6 (2022-07-15)
+
+### Fix
+
+- **Client#compiled?**: add missing parameters and authorization
+
 ## v1.0.5 (2022-07-14)
 
 ### Fix
