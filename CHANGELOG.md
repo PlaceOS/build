@@ -1,4 +1,8 @@
-## Unreleased
+## v1.0.7 (2022-07-20)
+
+### Fix
+
+- **repository_store**: relative paths for commit listing
 
 ## v1.0.6 (2022-07-15)
 
