@@ -2,7 +2,7 @@ ARG CRYSTAL_VERSION=1.5.0
 ARG PLACE_COMMIT="DEV"
 ARG PLACE_VERSION="DEV"
 
-FROM placeos/crystal:${CRYSTAL_VERSION} as build
+FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
 WORKDIR /app
 
 ARG CRYSTAL_VERSION=1.5.0
@@ -38,7 +38,6 @@ RUN PLACE_COMMIT=${PLACE_COMMIT} \
     build \
     --debug \
     --error-trace \
-    --ignore-crystal-version \
     --production \
     --release
 
