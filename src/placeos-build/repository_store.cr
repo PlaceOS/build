@@ -48,10 +48,12 @@ module PlaceOS::Build
       requires = with_repository(uri, branch, username, password) do |downloaded_repository|
         entrypoint = downloaded_repository.path / file
         shard_lock = downloaded_repository.path / "shard.lock"
+
         Digest
           .requires([entrypoint.to_s])
           .unshift(shard_lock.to_s)
           .select(&.starts_with?(downloaded_repository.path.to_s))
+          .map(&.lchop(downloaded_repository.path.to_s).lchop("/"))
       end
 
       repository.commits(branch, requires, depth: limit)
