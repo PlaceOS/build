@@ -145,7 +145,7 @@ module PlaceOS::Build::Api
       file = route_params["file"]
 
       if filename = Api::Driver.compiled(repository_uri, file, commit, repository_path, username, password)
-        render status_code: :ok, json: filename
+        render status_code: :ok, json: {filename: filename}
       else
         head code: :not_found
       end

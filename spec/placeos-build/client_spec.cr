@@ -65,7 +65,40 @@ module PlaceOS::Build
       end
     end
 
-    pending "#compiled" do
+    describe "#compiled" do
+      it "returns the driver name for a compiled driver" do
+        path = "drivers/test.cr"
+        url = "https://github.com/placeos/drivers"
+        commit = "abcdef"
+        expected_driver_name = "compiled_driver_name"
+
+        WebMock
+          .stub(:get, "http://localhost:3000/api/build/v1/driver/drivers%2Ftest.cr/compiled?url=https%3A%2F%2Fgithub.com%2Fplaceos%2Fdrivers&commit=abcdef")
+          .to_return(status: 200, body: {filename: expected_driver_name}.to_json)
+
+        response = Client.client do |client|
+          client.compiled(path, url, commit)
+        end
+
+        response.should be_a String
+        response.should eq expected_driver_name
+      end
+
+      it "returns nil if the driver doesn't exist" do
+        path = "drivers/test.cr"
+        url = "https://github.com/placeos/drivers"
+        commit = "abcdef"
+
+        WebMock
+          .stub(:get, "http://localhost:3000/api/build/v1/driver/drivers%2Ftest.cr/compiled?url=https%3A%2F%2Fgithub.com%2Fplaceos%2Fdrivers&commit=abcdef")
+          .to_return(status: 404)
+
+        response = Client.client do |client|
+          client.compiled(path, url, commit)
+        end
+
+        response.should be_nil
+      end
     end
 
     pending "#discover_drivers" do

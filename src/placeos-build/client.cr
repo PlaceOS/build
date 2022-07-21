@@ -281,6 +281,10 @@ module PlaceOS::Build
       end
     end
 
+    private record CompiledResponse, filename : String do
+      include JSON::Serializable
+    end
+
     # Returns the compilation status of a built artefact
     def compiled(
       file : String,
@@ -295,8 +299,21 @@ module PlaceOS::Build
         "commit" => commit,
       }
 
-      parse_to_return_type do
-        get("/driver/#{URI.encode_www_form(file)}/compiled?#{params}", authorization_header(username, password), request_id: request_id, raises: false, retries: 1)
+      path = "/driver/#{URI.encode_www_form(file)}/compiled?#{params}"
+
+      response = get(
+        path: path,
+        headers: authorization_header(username, password),
+        request_id: request_id,
+        raises: false,
+        retries: 1
+      )
+
+      case response.status
+      when .ok?        then CompiledResponse.from_json(response.body).filename
+      when .not_found? then nil
+      else
+        raise Build::ClientError.from_response(path, response)
       end
     end
 
