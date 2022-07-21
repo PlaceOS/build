@@ -1,4 +1,8 @@
-## Unreleased
+## v1.0.8 (2022-07-21)
+
+### Refactor
+
+- **client**: return an object from compiled endpoint
 
 ## v1.0.7 (2022-07-20)
 
