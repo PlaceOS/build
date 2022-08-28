@@ -42,8 +42,8 @@ module PlaceOS::Build
     end
 
     # :ditto:
-    def self.client(uri : URI, build_version : String = BUILD_VERSION)
-      client = new(uri, build_version)
+    def self.client(uri : URI, build_version : String = BUILD_VERSION, connection : HTTP::Client? = nil)
+      client = new(uri, build_version, connection)
       begin
         yield client
       ensure
@@ -51,11 +51,12 @@ module PlaceOS::Build
       end
     end
 
-    def initialize(uri : URI, @build_version : String = BUILD_VERSION)
+    def initialize(uri : URI, @build_version : String = BUILD_VERSION, connection : HTTP::Client? = nil)
       uri_host = uri.host.presence || raise ArgumentError.new("Could not parse host from URI")
       uri_port = uri.port
       @host = uri_host
       @port = uri_port if uri_port
+      @connection = connection unless connection.nil?
     end
 
     def initialize(host : String? = nil, port : Int32? = nil, @build_version : String = BUILD_VERSION)

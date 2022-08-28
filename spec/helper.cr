@@ -2,8 +2,8 @@ require "placeos-log-backend"
 require "spec"
 require "webmock"
 
-# Helper methods for testing controllers (curl, with_server, context)
-require "../lib/action-controller/spec/curl_context"
+# Helper methods for testing controllers
+require "action-controller/spec_helper"
 
 Spec.before_suite do
   WebMock.allow_net_connect = true
