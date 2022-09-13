@@ -1,3 +1,9 @@
+## v1.1.0 (2022-09-13)
+
+### Feat
+
+- **Dockerfile**: add support for arm64
+
 ## v1.0.8 (2022-07-21)
 
 ### Refactor
@@ -86,10 +92,6 @@
 
 ## v0.11.0 (2022-02-24)
 
-### Refactor
-
-- use central build image ([#38](https://github.com/PlaceOS/build/pull/38))
-
 ### Feat
 
 - compress drivers on upload ([#37](https://github.com/PlaceOS/build/pull/37))
@@ -98,11 +100,11 @@
 
 - build require based artefacts to bin/drivers of the working directory
 
-## v0.10.0 (2021-09-21)
-
 ### Refactor
 
-- remove padding from base64 strings
+- use central build image ([#38](https://github.com/PlaceOS/build/pull/38))
+
+## v0.10.0 (2021-09-21)
 
 ### Fix
 
@@ -111,6 +113,10 @@
 - **driver-store/s3**: make ELF header read-only
 - **driver-store/s3**: ensure stored drivers are ELF
 - **api**: add s3 backed store flow
+
+### Refactor
+
+- remove padding from base64 strings
 
 ## v0.9.1 (2021-09-16)
 
@@ -127,6 +133,10 @@
 
 ## v0.8.4 (2021-09-16)
 
+### Feat
+
+- **s3**: log query results
+
 ### Fix
 
 - **driver_store**: broken s3 lookup
@@ -134,10 +144,6 @@
 - **drivers**: use short commit
 - **drivers**: prioritise local commit in local_* methods
 - prevent writes on unsigned client
-
-### Feat
-
-- **s3**: log query results
 
 ## v0.8.3 (2021-09-15)
 
@@ -163,18 +169,18 @@
 
 ## v0.8.0 (2021-08-31)
 
-### Refactor
+### Feat
 
-- **executable**: place digest first in filename
+- **logging**: add sentry
 
 ### Fix
 
 - **s3**: encode key before write
 - **cli:build**: abort if not entrypoints to build
 
-### Feat
+### Refactor
 
-- **logging**: add sentry
+- **executable**: place digest first in filename
 
 ## v0.7.0 (2021-08-26)
 
@@ -183,6 +189,10 @@
 - **executable**: construct glob correctly
 
 ## v0.6.0 (2021-08-26)
+
+### Feat
+
+- **cli:build**: add `--discover` to auto-discover drivers
 
 ### Fix
 
@@ -196,10 +206,6 @@
 
 - expand logging
 - **constants**: use constants for store paths
-
-### Feat
-
-- **cli:build**: add `--discover` to auto-discover drivers
 
 ## v0.5.1 (2021-08-14)
 
@@ -225,12 +231,6 @@
 
 ## v0.4.0 (2021-08-11)
 
-### Refactor
-
-- **api/repositories**: namespace commit routes
-- **drivers**: organize local methods, add driver discovery
-- **digest**: use library, avoid binary
-
 ### Feat
 
 - **api**: add discover_drivers
@@ -254,6 +254,12 @@
 - compilation stoppers
 - **api:driver**: manually set https reponse (would be good to support merge)
 
+### Refactor
+
+- **api/repositories**: namespace commit routes
+- **drivers**: organize local methods, add driver discovery
+- **digest**: use library, avoid binary
+
 ### Perf
 
 - use scry's graph traversal
@@ -266,14 +272,14 @@
 
 ## v0.2.1 (2021-07-20)
 
-### Fix
-
-- **client**: forward request_id for branches
-
 ### Feat
 
 - **repository_sore**: get commits for all files referenced by driver
 - **digest_cli**: extract requires
+
+### Fix
+
+- **client**: forward request_id for branches
 
 ## v0.2.0 (2021-07-12)
 
@@ -282,15 +288,6 @@
 - pass driver key on compilation
 
 ## v0.1.1 (2021-07-09)
-
-### Fix
-
-- **client**: encode filename
-- **cli/build**: pass store instead of path
-- **cli**: exit 1 on error
-- update `Git` interfaces
-- **actions**: fixup check for legacy flag
-- **drivers**: correct temporary directory logic
 
 ### Feat
 
@@ -302,12 +299,10 @@
 - **s3**: generate a client depedent on credentials
 - **cli**: build a CLI on top of Clip
 - **driver_store/s3**: implement s3 backed driver store
-- api
 - **api/driver**: implement builder api and header authentication
 - **api/repositories**: implement repository queries
 - **repository_store**: implement a simple git interface
 - openAPI client generation
-- compilation
 - **compilation**: compilation via entrypoint works
 - **drivers**: independent compilation
 - **drivers**: binary store interface
@@ -319,6 +314,15 @@
 - **compiler**: asdf compiler management
 - source and requires ingester
 - initial commit
+
+### Fix
+
+- **client**: encode filename
+- **cli/build**: pass store instead of path
+- **cli**: exit 1 on error
+- update `Git` interfaces
+- **actions**: fixup check for legacy flag
+- **drivers**: correct temporary directory logic
 
 ### Refactor
 
