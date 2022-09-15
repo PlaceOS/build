@@ -25,6 +25,7 @@ RUN apk add \
     libssh2-static \
     lz4-dev \
     lz4-static \
+    bash \
     tzdata
 
 RUN update-ca-certificates
