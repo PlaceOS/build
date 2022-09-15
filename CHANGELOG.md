@@ -1,3 +1,9 @@
+## v1.1.1 (2022-09-15)
+
+### Fix
+
+- **Dockerfile**: add bash to build
+
 ## v1.1.0 (2022-09-13)
 
 ### Feat
