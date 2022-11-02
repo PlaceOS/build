@@ -4,3 +4,6 @@ dependencies:
   opentelemetry-sdk:
     github: wyhaines/opentelemetry-sdk.cr
     branch: main
+  opentelemetry-instrumentation:
+    github: stakach/opentelemetry-instrumentation.cr
+    branch: patch-1
