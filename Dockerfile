@@ -1,13 +1,12 @@
-ARG CRYSTAL_VERSION=1.5.0
-FROM placeos/crystal:latest as build
+ARG CRYSTAL_VERSION=latest
+
+FROM placeos/crystal:$CRYSTAL_VERSION as build
 WORKDIR /app
 
 # Set the commit via a build arg
 ARG PLACE_COMMIT="DEV"
 # Set the platform version via a build arg
 ARG PLACE_VERSION="DEV"
-
-ENV CRYSTAL_VERSION=${CRYSTAL_VERSION}
 
 # Install shards for caching
 COPY shard.* .
