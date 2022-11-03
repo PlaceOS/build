@@ -52,5 +52,6 @@ RUN adduser \
 RUN chown appuser -R /app
 
 EXPOSE 3000
-HEALTHCHECK CMD /app/bin/build server --curl http://localhost:3000/api/build/v1
-CMD /bin/bash /app/scripts/entrypoint.sh server --host 0.0.0.0 --port 3000
+ENTRYPOINT ["/app/bin/build"]
+HEALTHCHECK CMD ["/app/bin/build", "server", "--curl", "http://localhost:3000/api/build/v1"]
+CMD ["/bin/bash", "/app/scripts/entrypoint.sh", "server", "--host", "0.0.0.0", "--port", "3000"]
