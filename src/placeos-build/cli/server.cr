@@ -5,7 +5,7 @@ module PlaceOS::Build
       include Clip::Mapper
 
       @[Clip::Doc("Specifies the server host")]
-      getter host : String = "127.0.0.1"
+      getter host : String = "0.0.0.0"
       @[Clip::Doc("Specifies the server port")]
       getter port : Int32 = 3000
 
