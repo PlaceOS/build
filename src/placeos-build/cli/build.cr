@@ -126,7 +126,7 @@ module PlaceOS::Build
         begin
           ["amd64", "arm64"].each do |arch|
             Log.debug { "Sending #{entrypoint} compilation request for architecture #{arch}" }
-            resp = client.post("/api/build/v1/#{arch}/#{uri}?#{params}")
+            resp = client.post("/api/build/v1/#{arch}/#{uri}?#{params}", headers: headers)
             unless resp.status_code == 202
               Log.warn { "Compilation request for #{arch} returned status code #{resp.status_code}, while 202 expected" }
               Log.debug { "Cloud build service returned with response: #{resp.body}" }
