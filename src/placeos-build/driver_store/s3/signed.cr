@@ -14,8 +14,8 @@ module PlaceOS::Build
       def initialize(@bucket : String, @region : String, @key : String, @secret : String)
       end
 
-      def read(object : String, & : IO ->)
-        s3.get_object(bucket, object, headers: headers) do |stream|
+      def read(key : String, & : IO ->)
+        s3.get_object(bucket, key, headers: headers) do |stream|
           Compress::LZ4::Reader.open(stream.body_io) do |lz4|
             yield lz4
           end

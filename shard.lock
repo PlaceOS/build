@@ -11,11 +11,11 @@ shards:
 
   active-model:
     git: https://github.com/spider-gazelle/active-model.git
-    version: 4.3.1
+    version: 4.3.2
 
   ameba:
     git: https://github.com/crystal-ameba/ameba.git
-    version: 1.4.3
+    version: 1.5.0
 
   any_hash:
     git: https://github.com/sija/any_hash.cr.git
@@ -47,11 +47,11 @@ shards:
 
   csuuid:
     git: https://github.com/wyhaines/csuuid.cr.git
-    version: 1.0.0+git.commit.812ee5e1252b27ee2895ec7897094cde3e4a5dc2
+    version: 1.0.0+git.commit.a4cf9615c6518cf27c68a1755a8c2ac4ae4fe987
 
   db:
     git: https://github.com/crystal-lang/crystal-db.git
-    version: 0.11.0
+    version: 0.12.0
 
   debug:
     git: https://github.com/sija/debug.cr.git
@@ -67,11 +67,11 @@ shards:
 
   eventbus:
     git: https://github.com/spider-gazelle/eventbus.git
-    version: 0.9.9+git.commit.1f0e2524e766b10d9dc72705fa6578858e8e0b1b
+    version: 0.9.9+git.commit.ca8ef0c5e21ee15da079edd5bcea39bee7e07f26
 
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
-    version: 0.3.0
+    version: 0.3.1
 
   exec_from:
     git: https://github.com/place-labs/exec_from.git
@@ -87,11 +87,11 @@ shards:
 
   google:
     git: https://github.com/placeos/google.git
-    version: 3.4.0
+    version: 3.5.0
 
   habitat:
     git: https://github.com/luckyframework/habitat.git
-    version: 0.4.7
+    version: 0.4.8
 
   http-params-serializable:
     git: https://github.com/place-labs/http-params-serializable.git
@@ -115,7 +115,7 @@ shards:
 
   lz4:
     git: https://github.com/naqvis/lz4.cr.git
-    version: 0.1.4
+    version: 1.0.0
 
   molinillo:
     git: https://github.com/crystal-lang/crystal-molinillo.git
@@ -123,7 +123,7 @@ shards:
 
   nbchannel:
     git: https://github.com/wyhaines/nbchannel.cr.git
-    version: 0.1.0+git.commit.ea6517a837270361695244d14c4b03d84660f113
+    version: 0.1.0+git.commit.a8f5be6aa198abfa9f1893e1156640b8ea526094
 
   neuroplastic:
     git: https://github.com/spider-gazelle/neuroplastic.git
@@ -131,7 +131,7 @@ shards:
 
   office365:
     git: https://github.com/placeos/office365.git
-    version: 1.19.0
+    version: 1.23.2
 
   open_api:
     git: https://github.com/elbywan/open_api.cr.git
@@ -143,7 +143,7 @@ shards:
 
   openssl_ext:
     git: https://github.com/spider-gazelle/openssl_ext.git
-    version: 2.3.0
+    version: 2.4.4
 
   opentelemetry-api:
     git: https://github.com/wyhaines/opentelemetry-api.cr.git
@@ -151,7 +151,7 @@ shards:
 
   opentelemetry-instrumentation:
     git: https://github.com/wyhaines/opentelemetry-instrumentation.cr.git
-    version: 0.5.2+git.commit.327d335104d3bafd08426a0afb3755f50bafe13f
+    version: 0.5.3+git.commit.cd3994b22d9f7a0d68752698974d3873a1b2fce2
 
   opentelemetry-sdk: # Overridden
     git: https://github.com/wyhaines/opentelemetry-sdk.cr.git
@@ -171,15 +171,15 @@ shards:
 
   pg:
     git: https://github.com/will/crystal-pg.git
-    version: 0.26.0
+    version: 0.27.0
 
   pg-orm:
     git: https://github.com/spider-gazelle/pg-orm.git
-    version: 1.0.0+git.commit.6bbddb37fc24ce3253937b54f12fe86882b83e14
+    version: 1.0.0+git.commit.e614b076c9f185d0891b505ea74c4b5e7e6307b7
 
   place_calendar:
     git: https://github.com/placeos/calendar.git
-    version: 4.17.0
+    version: 4.19.1
 
   placeos-log-backend:
     git: https://github.com/place-labs/log-backend.git
@@ -187,7 +187,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 9.4.0
+    version: 9.25.2
 
   pool:
     git: https://github.com/ysbaddaden/pool.git
@@ -199,7 +199,7 @@ shards:
 
   raven:
     git: https://github.com/sija/raven.cr.git
-    version: 1.9.3+git.commit.f328bfdafe335f31e476c275fd434ac16049adea
+    version: 1.9.3+git.commit.78ab46f635208faf4a8f48e593de7c5e5490d543
 
   redis:
     git: https://github.com/stefanwille/crystal-redis.git
@@ -211,7 +211,7 @@ shards:
 
   retriable:
     git: https://github.com/sija/retriable.cr.git
-    version: 0.2.4
+    version: 0.2.5
 
   secrets-env:
     git: https://github.com/place-labs/secrets-env.git

@@ -1,5 +1,6 @@
 require "placeos-log-backend"
-
+require "http/client"
+require "http/headers"
 require "../driver_store/s3"
 
 module PlaceOS::Build
@@ -37,6 +38,10 @@ module PlaceOS::Build
       @[Clip::Option]
       getter ref : String
 
+      @[Clip::Doc("Branch to checkout")]
+      @[Clip::Option]
+      getter branch : String
+
       @[Clip::Doc("Driver entrypoints relative to specified repository")]
       @[Clip::Option]
       getter entrypoints : Array(String) = [] of String
@@ -65,6 +70,7 @@ module PlaceOS::Build
                   password: password,
                 )
               end
+              call_cloud_build_service(entrypoint, ref, username: username, password: password)
             rescue e
               Log.warn(exception: e) { "failed to compile #{entrypoint}" }
             end
@@ -99,6 +105,36 @@ module PlaceOS::Build
 
       protected def self.is_driver?(path : Path)
         !path.to_s.ends_with?("_spec.cr") && File.read_lines(path).any? &.includes?("< PlaceOS::Driver")
+      end
+
+      private def call_cloud_build_service(entrypoint, commit, username, password)
+        headers = HTTP::Headers.new
+        if token = BUILD_GIT_TOKEN
+          headers["X-Git-Token"] = token
+        elsif (user = username) && (pwd = password)
+          headers["X-Git-Username"] = user
+          headers["X-Git-Password"] = pwd
+        end
+        uri = URI.encode_www_form(entrypoint)
+        params = HTTP::Params{
+          "url"    => repository_uri,
+          "branch" => branch,
+          "commit" => commit,
+        }
+
+        client = HTTP::Client.new(BUILD_SERVICE_URL)
+        begin
+          ["amd64", "arm64"].each do |arch|
+            Log.debug { "Sending #{entrypoint} compilation request for architecture #{arch}" }
+            resp = client.post("/api/build/v1/#{arch}/#{uri}?#{params}")
+            unless resp.status_code == 202
+              Log.warn { "Compilation request for #{arch} returned status code #{resp.status_code}, while 202 expected" }
+              Log.debug { "Cloud build service returned with response: #{resp.body}" }
+            end
+          end
+        rescue e
+          Log.warn(exception: e) { "failed to invoke cloud build service #{entrypoint}" }
+        end
       end
     end
   end
