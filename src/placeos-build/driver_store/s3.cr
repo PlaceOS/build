@@ -112,15 +112,15 @@ module PlaceOS::Build
       end
     end
 
-    def info_path(driver : Model::Executable) : String
-      filesystem.info_path(driver)
+    def info_path(executable : Model::Executable) : String
+      filesystem.info_path(executable)
     end
 
-    def path(driver : Model::Executable) : String
-      local_path = filesystem.path(driver)
+    def path(executable : Model::Executable) : String
+      local_path = filesystem.path(executable)
       unless File.exists?(local_path)
-        read(driver.filename) do |s3_io|
-          filesystem.write(driver.filename, s3_io)
+        read(executable.filename) do |s3_io|
+          filesystem.write(executable.filename, s3_io)
         end
       end
       local_path
