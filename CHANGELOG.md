@@ -1,3 +1,9 @@
+## v1.2.0 (2023-11-03)
+
+### Feat
+
+- Cloud build service integration & crystal compatibility fixes ([#53](https://github.com/PlaceOS/build/pull/53))
+
 ## v1.1.1 (2022-09-15)
 
 ### Fix
