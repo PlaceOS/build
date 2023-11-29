@@ -1,3 +1,9 @@
+## v1.2.1 (2023-11-29)
+
+### Fix
+
+- **build**: properly parse cloud build service URL ([#54](https://github.com/PlaceOS/build/pull/54))
+
 ## v1.2.0 (2023-11-03)
 
 ### Feat
