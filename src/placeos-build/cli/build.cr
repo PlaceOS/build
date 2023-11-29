@@ -1,5 +1,6 @@
 require "placeos-log-backend"
 require "http/client"
+require "uri"
 require "http/headers"
 require "../driver_store/s3"
 
@@ -122,7 +123,7 @@ module PlaceOS::Build
           "commit" => commit,
         }
 
-        client = HTTP::Client.new(BUILD_SERVICE_URL)
+        client = HTTP::Client.new(URI.parse(BUILD_SERVICE_URL))
         begin
           ["amd64", "arm64"].each do |arch|
             Log.debug { "Sending #{entrypoint} compilation request for architecture #{arch}" }
