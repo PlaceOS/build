@@ -1,3 +1,9 @@
+## v1.2.2 (2023-11-30)
+
+### Refactor
+
+- Cloud build service invocation ([#55](https://github.com/PlaceOS/build/pull/55))
+
 ## v1.2.1 (2023-11-29)
 
 ### Fix
