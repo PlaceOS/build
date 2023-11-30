@@ -60,6 +60,7 @@ module PlaceOS::Build::Api
       in Build::Compilation::NotFound
         head code: :not_found
       in Build::Compilation::Success
+        PlaceOS::Build.call_cloud_build_service(repository_uri, branch || "HEAD", file, commit, username: username, password: password)
         path = builder.binary_store.path(result.executable)
 
         response.content_type = "application/octet-stream"
