@@ -1,3 +1,9 @@
+## v1.3.0 (2023-12-18)
+
+### Feat
+
+- Build to retrieve individual entry point commit and forward to cloud build service
+
 ## v1.2.2 (2023-11-30)
 
 ### Refactor
