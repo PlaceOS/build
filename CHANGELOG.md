@@ -1,3 +1,9 @@
+## v1.3.1 (2024-04-17)
+
+### Fix
+
+- **build**: change code to use git-repo shard instead of old repository store
+
 ## v1.3.0 (2023-12-18)
 
 ### Feat
