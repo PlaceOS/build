@@ -68,8 +68,7 @@ module PlaceOS::Build
                   password: password,
                 )
               end
-              commit = repository_store.file_commits?(entrypoint, repository_uri, 1, branch, username, password).try &.first.commit || ref
-              PlaceOS::Build.call_cloud_build_service(repository_uri, branch, entrypoint, commit, username: username, password: password)
+              PlaceOS::Build.call_cloud_build_service(repository_uri, branch, entrypoint, ref, username: username, password: password)
             rescue e
               Log.warn(exception: e) { "failed to compile #{entrypoint}" }
             end
