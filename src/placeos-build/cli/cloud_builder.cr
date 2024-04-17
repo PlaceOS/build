@@ -1,9 +1,13 @@
 require "http/client"
 require "uri"
 require "http/headers"
+require "git-repository"
 
 module PlaceOS::Build
-  def self.call_cloud_build_service(repository_uri : String, branch : String, entrypoint : String, commit : String, username : String?, password : String?)
+  def self.call_cloud_build_service(repository_uri : String, branch : String, entrypoint : String, ref : String, username : String?, password : String?)
+    repo = GitRepository.new(repository_uri, username: username, password: password)
+    commit = repo.commits(branch, entrypoint, depth: 1).try &.first.commit || ref
+
     headers = HTTP::Headers.new
     if token = BUILD_GIT_TOKEN
       headers["X-Git-Token"] = token
