@@ -1,3 +1,9 @@
+## v1.4.0 (2024-04-23)
+
+### Feat
+
+- add env var to disable build service
+
 ## v1.3.1 (2024-04-17)
 
 ### Fix
