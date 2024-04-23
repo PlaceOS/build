@@ -38,6 +38,7 @@ module PlaceOS::Build
   # Build Service
   BUILD_SERVICE_URL = ENV["CLOUD_BUILD_SERVER"]?.presence || "https://build.placeos.run"
   BUILD_GIT_TOKEN   = ENV["GIT_TOKEN"]?.presence
+  BUILD_SERVICE_DISABLED = ENV["BUILD_SERVICE_DISABLED"]? == "true"
 
   class_getter? production : Bool { PRODUCTION }
   class_getter? trace : Bool { TRACE }

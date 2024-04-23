@@ -68,7 +68,10 @@ module PlaceOS::Build
                   password: password,
                 )
               end
-              PlaceOS::Build.call_cloud_build_service(repository_uri, branch, entrypoint, ref, username: username, password: password)
+
+              if !BUILD_SERVICE_DISABLED
+                PlaceOS::Build.call_cloud_build_service(repository_uri, branch, entrypoint, ref, username: username, password: password)
+              end
             rescue e
               Log.warn(exception: e) { "failed to compile #{entrypoint}" }
             end
