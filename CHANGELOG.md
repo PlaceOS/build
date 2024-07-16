@@ -1,3 +1,9 @@
+## v1.5.0 (2024-07-16)
+
+### Feat
+
+- migrate to latest action controller for crystal 1.13 support
+
 ## v1.4.0 (2024-04-23)
 
 ### Feat
