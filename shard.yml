@@ -44,10 +44,6 @@ dependencies:
     github: spider-gazelle/log_helper
     version: ~> 1
 
-  openapi-generator:
-    github: place-labs/openapi-generator
-    branch: master
-
   opentelemetry-sdk:
     github: wyhaines/opentelemetry-sdk.cr
     version: ~> 0.5

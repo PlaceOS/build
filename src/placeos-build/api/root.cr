@@ -7,23 +7,17 @@ require "placeos-models/version"
 module PlaceOS::Build::Api
   # Routes trigger builds and query the resulting artefacts.
   class Root < Application
-    include ::OpenAPI::Generator::Controller
-    include ::OpenAPI::Generator::Helpers::ActionController
-
     base "/api/build/v1"
 
-    get("/", :root, annotations: @[OpenAPI(<<-YAML
-        summary: Service healthcheck
-      YAML
-    )]) do
-      head code: :ok
+    # Service healthcheck
+    @[AC::Route::GET("/")]
+    def root : Nil
     end
 
-    get("/version", :version, annotations: @[OpenAPI(<<-YAML
-        summary: Service version
-      YAML
-    )]) do
-      render status_code: :ok, json: Root.version
+    # Service version
+    @[AC::Route::GET("/version")]
+    def version : PlaceOS::Model::Version
+      Root.version
     end
 
     class_getter version : PlaceOS::Model::Version do

@@ -1,7 +1,4 @@
 require "action-controller"
-require "openapi-generator"
-require "openapi-generator/providers/action-controller"
-require "openapi-generator/helpers/action-controller"
 require "uuid"
 
 module PlaceOS::Build::Api
@@ -15,25 +12,6 @@ module PlaceOS::Build::Api
 
     getter username : String? { request.headers["X-Git-Username"]?.presence }
     getter password : String? { request.headers["X-Git-Password"]?.presence }
-
-    # Parameters
-    ###########################################################################
-
-    getter repository_uri : String do
-      param url : String, "URL for a git repository"
-    end
-
-    getter branch : String? do
-      param branch : String? = nil, "Branch to return commits for"
-    end
-
-    getter commit : String do
-      param commit : String = "HEAD", "Commit to checkout"
-    end
-
-    getter repository_path : String? do
-      param repository_path : String? = nil, "Local path to a repository if `build` is configured to support builds referencing a path"
-    end
 
     # Filters
     ###########################################################################
@@ -49,6 +27,42 @@ module PlaceOS::Build::Api
         request_id: request_id
       )
       response.headers["X-Request-ID"] = request_id
+    end
+
+    # Error Handlers
+    ###########################################################################
+
+    struct CommonError
+      include JSON::Serializable
+
+      getter error : String?
+      getter backtrace : Array(String)?
+
+      def initialize(error, backtrace = true)
+        @error = error.message
+        @backtrace = backtrace ? error.backtrace : nil
+      end
+    end
+
+    class ::ActionController::Error < Exception
+      class NotFound < ActionController::Error
+      end
+
+      class Failure < ActionController::Error
+      end
+    end
+
+    # 404 if resource not present
+    @[AC::Route::Exception(AC::Error::NotFound, status_code: HTTP::Status::NOT_FOUND)]
+    def resource_not_found(error) : CommonError
+      Log.debug(exception: error) { error.message }
+      CommonError.new(error, false)
+    end
+
+    @[AC::Route::Exception(AC::Error::Failure, status_code: HTTP::Status::UNPROCESSABLE_ENTITY)]
+    def unprocessable(error) : CommonError
+      Log.debug(exception: error) { error.message }
+      CommonError.new(error, false)
     end
   end
 end
