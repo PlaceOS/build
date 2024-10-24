@@ -7,7 +7,7 @@ shards:
 
   action-controller:
     git: https://github.com/spider-gazelle/action-controller.git
-    version: 7.4.2
+    version: 7.4.3
 
   active-model:
     git: https://github.com/spider-gazelle/active-model.git
@@ -15,7 +15,7 @@ shards:
 
   ameba:
     git: https://github.com/crystal-ameba/ameba.git
-    version: 1.6.1
+    version: 1.6.3
 
   any_hash:
     git: https://github.com/sija/any_hash.cr.git
@@ -35,7 +35,7 @@ shards:
 
   bindata:
     git: https://github.com/spider-gazelle/bindata.git
-    version: 2.0.0
+    version: 2.1.0
 
   clip:
     git: https://github.com/erdnaxeli/clip.git
@@ -43,7 +43,7 @@ shards:
 
   connect-proxy:
     git: https://github.com/spider-gazelle/connect-proxy.git
-    version: 2.0.1
+    version: 2.0.2
 
   cron_parser:
     git: https://github.com/kostya/cron_parser.git
@@ -51,7 +51,7 @@ shards:
 
   csuuid:
     git: https://github.com/wyhaines/csuuid.cr.git
-    version: 1.0.1+git.commit.b71cf5c899dd5cde6aff8e922bdabd5e2dfab585
+    version: 1.0.2
 
   db:
     git: https://github.com/crystal-lang/crystal-db.git
@@ -75,7 +75,7 @@ shards:
 
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
-    version: 0.4.1
+    version: 0.5.0
 
   exec_from:
     git: https://github.com/place-labs/exec_from.git
@@ -87,7 +87,7 @@ shards:
 
   git-repository:
     git: https://github.com/place-labs/git-repository.git
-    version: 1.4.0
+    version: 1.4.1
 
   google:
     git: https://github.com/placeos/google.git
@@ -123,7 +123,7 @@ shards:
 
   lucky_router:
     git: https://github.com/luckyframework/lucky_router.git
-    version: 0.5.2
+    version: 0.6.0
 
   lz4:
     git: https://github.com/naqvis/lz4.cr.git
@@ -135,7 +135,7 @@ shards:
 
   nbchannel:
     git: https://github.com/wyhaines/nbchannel.cr.git
-    version: 0.1.0+git.commit.a8f5be6aa198abfa9f1893e1156640b8ea526094
+    version: 0.1.0
 
   neuroplastic:
     git: https://github.com/spider-gazelle/neuroplastic.git
@@ -143,15 +143,7 @@ shards:
 
   office365:
     git: https://github.com/placeos/office365.git
-    version: 1.25.3
-
-  open_api:
-    git: https://github.com/elbywan/open_api.cr.git
-    version: 1.3.0
-
-  openapi-generator:
-    git: https://github.com/place-labs/openapi-generator.git
-    version: 2.1.0+git.commit.a65ffc2f7dcc6a393e7d1f9229650b520d9525be
+    version: 1.25.4
 
   openssl_ext:
     git: https://github.com/spider-gazelle/openssl_ext.git
@@ -159,7 +151,7 @@ shards:
 
   opentelemetry-api:
     git: https://github.com/wyhaines/opentelemetry-api.cr.git
-    version: 0.5.0
+    version: 0.5.1
 
   opentelemetry-instrumentation:
     git: https://github.com/wyhaines/opentelemetry-instrumentation.cr.git
@@ -167,7 +159,7 @@ shards:
 
   opentelemetry-sdk: # Overridden
     git: https://github.com/wyhaines/opentelemetry-sdk.cr.git
-    version: 0.6.1+git.commit.addc3c740d5ea8e61ffd9500fe32ebf21210d66c
+    version: 0.6.3+git.commit.470e34105727b039aee2bb3650e907bf6eefc971
 
   pars: # Overridden
     git: https://github.com/spider-gazelle/pars.git
@@ -187,7 +179,7 @@ shards:
 
   pg-orm:
     git: https://github.com/spider-gazelle/pg-orm.git
-    version: 1.1.1+git.commit.282c353b676806eef73786645f8cd852cdb60bc3
+    version: 1.1.2+git.commit.a4110821aa18c3971a1f06b0598192ac90145693
 
   place_calendar:
     git: https://github.com/placeos/calendar.git
@@ -199,7 +191,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 9.53.3
+    version: 9.60.0
 
   pool:
     git: https://github.com/ysbaddaden/pool.git
@@ -211,7 +203,7 @@ shards:
 
   raven:
     git: https://github.com/sija/raven.cr.git
-    version: 1.9.3+git.commit.990a7650fb027cbe65705fc6dad228cddc76c503
+    version: 1.9.4+git.commit.4c3e13760f830a2cc5ab80b24eb02bd9342e5411
 
   redis:
     git: https://github.com/stefanwille/crystal-redis.git
@@ -235,19 +227,19 @@ shards:
 
   splay_tree_map:
     git: https://github.com/wyhaines/splay_tree_map.cr.git
-    version: 0.2.2
+    version: 0.3.0
 
   time-ext:
     git: https://github.com/wyhaines/time-ext.cr.git
-    version: 0.1.0+git.commit.175f658235fb6cdc9c804cb96da510fec27f4cd6
+    version: 1.0.1
 
   tracer:
     git: https://github.com/wyhaines/tracer.cr.git
-    version: 0.3.1
+    version: 0.3.2
 
   ulid:
     git: https://github.com/place-labs/ulid.git
-    version: 0.1.3+git.commit.0bb8d5d4bee4168acfac2630ce51ce4706253688
+    version: 0.1.2
 
   webmock:
     git: https://github.com/manastech/webmock.cr.git
