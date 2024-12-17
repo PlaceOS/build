@@ -207,6 +207,7 @@ module PlaceOS::Build
       username : String? = nil,
       password : String? = nil,
       request_id : String? = nil,
+      repository_path : String? = nil,
       & : String, IO ->
     ) : Compilation::Result
       params = HTTP::Params{
