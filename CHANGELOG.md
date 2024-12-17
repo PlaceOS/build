@@ -1,3 +1,9 @@
+## v1.5.1 (2024-12-17)
+
+### Refactor
+
+- minor refactor to client.compile:
+
 ## v1.5.0 (2024-07-16)
 
 ### Feat
