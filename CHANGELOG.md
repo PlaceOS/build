@@ -1,3 +1,9 @@
+## v1.6.0 (2026-02-23)
+
+### Feat
+
+- remove open telemetary
+
 ## v1.5.1 (2024-12-17)
 
 ### Refactor
