@@ -17,10 +17,6 @@ shards:
     git: https://github.com/crystal-ameba/ameba.git
     version: 1.6.4
 
-  any_hash:
-    git: https://github.com/sija/any_hash.cr.git
-    version: 0.2.5
-
   awscr-s3:
     git: https://github.com/taylorfinnell/awscr-s3.git
     version: 0.10.0
@@ -53,17 +49,9 @@ shards:
     git: https://github.com/kostya/cron_parser.git
     version: 0.4.0
 
-  csuuid:
-    git: https://github.com/wyhaines/csuuid.cr.git
-    version: 1.0.2
-
   db:
     git: https://github.com/crystal-lang/crystal-db.git
     version: 0.13.1
-
-  debug:
-    git: https://github.com/sija/debug.cr.git
-    version: 2.0.4
 
   ed25519:
     git: https://github.com/spider-gazelle/ed25519.git
@@ -137,10 +125,6 @@ shards:
     git: https://github.com/crystal-lang/crystal-molinillo.git
     version: 0.2.2
 
-  nbchannel:
-    git: https://github.com/wyhaines/nbchannel.cr.git
-    version: 0.1.0
-
   neuroplastic:
     git: https://github.com/spider-gazelle/neuroplastic.git
     version: 1.13.1
@@ -151,23 +135,11 @@ shards:
 
   openssl_ext:
     git: https://github.com/spider-gazelle/openssl_ext.git
-    version: 2.8.3
-
-  opentelemetry-api:
-    git: https://github.com/wyhaines/opentelemetry-api.cr.git
-    version: 0.5.2+git.commit.77c9232ca6ff7de52529f309a0cb20b8459f7b20
-
-  opentelemetry-sdk: # Overridden
-    git: https://github.com/wyhaines/opentelemetry-sdk.cr.git
-    version: 0.6.4+git.commit.c7237732135f6d0cab84abc6bb6d438c9f8f9d66
+    version: 2.8.4
 
   pars: # Overridden
     git: https://github.com/spider-gazelle/pars.git
     version: 1.2.0
-
-  parse_date:
-    git: https://github.com/wyhaines/parsedate.cr.git
-    version: 0.1.2
 
   pegmatite:
     git: https://github.com/jemc/crystal-pegmatite.git
@@ -193,14 +165,6 @@ shards:
     git: https://github.com/placeos/models.git
     version: 9.82.2
 
-  protobuf:
-    git: https://github.com/jeromegn/protobuf.cr.git
-    version: 2.3.1
-
-  raven:
-    git: https://github.com/sija/raven.cr.git
-    version: 1.9.5+git.commit.46653d81d8f079e643199530d20ae5555f44ed99
-
   responsible:
     git: https://github.com/place-labs/responsible.git
     version: 1.2.3
@@ -217,17 +181,9 @@ shards:
     git: https://github.com/crystal-lang/shards.git
     version: 0.20.0
 
-  splay_tree_map:
-    git: https://github.com/wyhaines/splay_tree_map.cr.git
-    version: 0.3.0
-
   tasker:
     git: https://github.com/spider-gazelle/tasker.git
     version: 2.1.4
-
-  time-ext:
-    git: https://github.com/wyhaines/time-ext.cr.git
-    version: 1.0.1
 
   ulid:
     git: https://github.com/place-labs/ulid.git

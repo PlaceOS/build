@@ -1,5 +1,4 @@
 require "awscr-s3"
-require "retriable"
 
 module PlaceOS::Build
   class S3 < DriverStore

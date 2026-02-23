@@ -32,7 +32,7 @@ module PlaceOS::Build
     property repository_path : String? = nil
 
     # A one-shot `PlaceOS::Build::Client`
-    def self.client
+    def self.client(&)
       client = new
       begin
         yield client
@@ -42,7 +42,7 @@ module PlaceOS::Build
     end
 
     # :ditto:
-    def self.client(uri : URI, build_version : String = BUILD_VERSION)
+    def self.client(uri : URI, build_version : String = BUILD_VERSION, &)
       client = new(uri, build_version)
       begin
         yield client
@@ -90,7 +90,7 @@ module PlaceOS::Build
       count : Int32 = 50,
       username : String? = nil,
       password : String? = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
     ) : Array(Commit)
       params = HTTP::Params{
         "url"    => url,
@@ -115,7 +115,7 @@ module PlaceOS::Build
       count : Int32 = 50,
       username : String? = nil,
       password : String? = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
     ) : Array(Commit)
       params = HTTP::Params{
         "url"    => url,
@@ -137,7 +137,7 @@ module PlaceOS::Build
       url : String,
       username : String? = nil,
       password : String? = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
     ) : Array(String)
       params = HTTP::Params{
         "url" => url,
@@ -157,7 +157,7 @@ module PlaceOS::Build
       ref : String? = nil,
       username : String? = nil,
       password : String? = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
     ) : Array(String)
       params = HTTP::Params{
         "url" => url,
@@ -184,7 +184,7 @@ module PlaceOS::Build
       digest : String? = nil,
       commit : String? = nil,
       crystal_version : String? = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
     ) : Array(Model::Executable)
       params = Hash(String, String?){
         "file"            => file,
@@ -245,7 +245,7 @@ module PlaceOS::Build
       commit : String,
       username : String? = nil,
       password : String? = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
     ) : Model::Executable::Info
       params = HTTP::Params{
         "url"    => url,
@@ -266,7 +266,7 @@ module PlaceOS::Build
       commit : String,
       username : String? = nil,
       password : String? = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
     ) : String
       params = HTTP::Params{
         "url"    => url,
@@ -293,7 +293,7 @@ module PlaceOS::Build
       commit : String,
       username : String? = nil,
       password : String? = nil,
-      request_id : String? = nil
+      request_id : String? = nil,
     ) : String?
       params = HTTP::Params{
         "url"    => url,

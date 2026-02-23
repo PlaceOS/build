@@ -1,5 +1,4 @@
 require "git-repository"
-require "opentelemetry-sdk"
 require "placeos-models/executable"
 require "uuid"
 
@@ -30,7 +29,7 @@ module PlaceOS::Build
     def initialize(
       @binary_store = Filesystem.new,
       @repository_store = RepositoryStore.new,
-      @strict_driver_info = ENV["STRICT_DRIVER_INFO"]?.try(&.downcase) == "true"
+      @strict_driver_info = ENV["STRICT_DRIVER_INFO"]?.try(&.downcase) == "true",
     )
     end
 
@@ -38,7 +37,7 @@ module PlaceOS::Build
       repository_uri : String,
       ref : String?,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
     ) : Array(String)?
       # Default to the default branch's HEAD if no ref passed
       if ref.nil?
@@ -63,7 +62,7 @@ module PlaceOS::Build
       ref : String,
       crystal_version : String? = nil,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
     ) : String?
       repository_store.with_repository(
         repository_uri,
@@ -81,7 +80,7 @@ module PlaceOS::Build
       commit : String,
       crystal_version : String? = nil,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
     )
       repository_store.with_repository(
         repository_uri,
@@ -100,7 +99,7 @@ module PlaceOS::Build
       force_recompile : Bool = false,
       crystal_version : String? = nil,
       username : String? = nil,
-      password : String? = nil
+      password : String? = nil,
     ) : Compilation::Result
       repository_store.with_repository(
         repository_uri,
@@ -163,7 +162,7 @@ module PlaceOS::Build
 
     protected def build_driver(
       executable : Model::Executable,
-      working_directory : String
+      working_directory : String,
     ) : Compilation::Success | Compilation::Failure
       wait_for_compilation(executable) do
         ::Log.with_context(
@@ -265,7 +264,7 @@ module PlaceOS::Build
       repository_path : Path,
       entrypoint : String,
       ref : String,
-      crystal_version : String? = nil
+      crystal_version : String? = nil,
     )
       executable = extract_executable(repository_path, entrypoint, ref, crystal_version)
       executable.filename if binary_store.exists?(executable)
@@ -283,7 +282,7 @@ module PlaceOS::Build
       repository_path : Path,
       entrypoint : String,
       commit : String,
-      crystal_version : String? = nil
+      crystal_version : String? = nil,
     )
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
       binary_store.info(executable)
@@ -302,7 +301,7 @@ module PlaceOS::Build
       entrypoint : String,
       commit : String?,
       force_recompile : Bool = false,
-      crystal_version : String? = nil
+      crystal_version : String? = nil,
     )
       executable = extract_executable(repository_path, entrypoint, commit, crystal_version)
 
@@ -332,7 +331,7 @@ module PlaceOS::Build
     # Compilation helpers
     ###############################################################################################
 
-    private def wait_for_compilation(executable : Model::Executable)
+    private def wait_for_compilation(executable : Model::Executable, &)
       block_compilation(executable)
       yield
     ensure

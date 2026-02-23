@@ -17,7 +17,7 @@ module PlaceOS::Build
       entrypoint : String? = nil,
       commit : String? = nil,
       digest : String? = nil,
-      crystal_version : SemanticVersion | String? = nil
+      crystal_version : SemanticVersion | String? = nil,
     ) : Enumerable(Model::Executable)
 
     def exists?(executable : Model::Executable) : Bool

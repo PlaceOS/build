@@ -15,6 +15,9 @@ dependencies:
     github: spider-gazelle/action-controller
     version: ">= 4.4"
 
+  retriable:
+    github: Sija/retriable.cr
+
   awscr-s3:
     github: taylorfinnell/awscr-s3
     version: ~> 0.8
@@ -44,10 +47,6 @@ dependencies:
     github: spider-gazelle/log_helper
     version: ~> 1
 
-  opentelemetry-sdk:
-    github: wyhaines/opentelemetry-sdk.cr
-    version: ~> 0.5
-
   placeos-log-backend:
     github: place-labs/log-backend
     version: ">= 0.11.0"
@@ -55,10 +54,6 @@ dependencies:
   placeos-models:
     github: placeos/models
     version: ">= 7.0"
-
-  raven:
-    github: Sija/raven.cr
-    branch: master
 
   responsible:
     github: place-labs/responsible

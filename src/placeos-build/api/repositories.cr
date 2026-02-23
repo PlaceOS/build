@@ -17,7 +17,7 @@ module PlaceOS::Build::Api
       @[AC::Param::Info(description: "Limit on commits returned")]
       count : Int32 = 50,
       @[AC::Param::Info(description: "Branch to return commits for")]
-      branch : String? = nil
+      branch : String? = nil,
     ) : Array(GitRepository::Commit)
       query_store &.repository_commits?(url, count, branch, username: username, password: password)
     end
@@ -32,7 +32,7 @@ module PlaceOS::Build::Api
       @[AC::Param::Info(description: "Limit on commits returned")]
       count : Int32 = 50,
       @[AC::Param::Info(description: "Branch to return commits for")]
-      branch : String? = nil
+      branch : String? = nil,
     ) : Array(GitRepository::Commit)
       query_store &.file_commits?(file, url, count, branch, username: username, password: password)
     end
@@ -41,7 +41,7 @@ module PlaceOS::Build::Api
     @[AC::Route::GET("/branches")]
     def repository_branches(
       @[AC::Param::Info(description: "URL for a git repository")]
-      url : String
+      url : String,
     ) : Array(String)
       query_store &.branches?(url, username: username, password: password)
     end
@@ -54,7 +54,7 @@ module PlaceOS::Build::Api
       @[AC::Param::Info(description: "Local path to a repository if 'build' is configured to support builds referencing a path")]
       repository_path : String? = nil,
       @[AC::Param::Info(description: "Ref on remote to discover drivers from. Defaults to default branch HEAD")]
-      ref : String? = nil
+      ref : String? = nil,
     ) : Array(String)
       drivers = Api::Repositories.discover_drivers?(url, ref, repository_path, username, password)
       raise AC::Error::NotFound.new("no drivers found") unless drivers
@@ -74,7 +74,7 @@ module PlaceOS::Build::Api
       end
     end
 
-    protected def query_store
+    protected def query_store(&)
       result = yield repository_store
       raise AC::Error::NotFound.new("not found") unless result
       result

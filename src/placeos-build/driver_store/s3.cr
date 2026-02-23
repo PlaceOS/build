@@ -17,7 +17,7 @@ module PlaceOS::Build
       aws_s3_bucket : String?,
       aws_region : String?,
       aws_key : String?,
-      aws_secret : String?
+      aws_secret : String?,
     ) : Credentials?
       case {aws_s3_bucket, aws_region, aws_key, aws_secret}
       when {String, String, String, String}
@@ -52,7 +52,7 @@ module PlaceOS::Build
       entrypoint : String? = nil,
       commit : String? = nil,
       digest : String? = nil,
-      crystal_version : SemanticVersion | String? = nil
+      crystal_version : SemanticVersion | String? = nil,
     ) : Enumerable(Model::Executable)
       ::Log.with_context(
         entrypoint: entrypoint,

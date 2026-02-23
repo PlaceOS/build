@@ -45,7 +45,7 @@ module PlaceOS::Build::Api
       @[AC::Param::Info(description: "Local path to a repository if 'build' is configured to support builds referencing a path")]
       repository_path : String? = nil,
       @[AC::Param::Info(description: "Whether to force a build in case of existing binary")]
-      force_recompile : Bool = false
+      force_recompile : Bool = false,
     ) : Nil
       args = {entrypoint: file, commit: commit, crystal_version: CRYSTAL_VERSION, force_recompile: force_recompile}
       Log.context.set(**args)
@@ -93,7 +93,7 @@ module PlaceOS::Build::Api
       @[AC::Param::Info(description: "Commit of the driver", example: "HEAD")]
       commit : String = "HEAD",
       @[AC::Param::Info(description: "Local path to a repository if 'build' is configured to support builds referencing a path")]
-      repository_path : String? = nil
+      repository_path : String? = nil,
     ) : PlaceOS::Model::Executable::Info
       metadata = Api::Driver.metadata(url, file, commit, repository_path, username, password)
       raise AC::Error::NotFound.new("no metadata found") unless metadata
@@ -112,7 +112,7 @@ module PlaceOS::Build::Api
       @[AC::Param::Info(description: "Commit of the driver", example: "HEAD")]
       commit : String = "HEAD",
       @[AC::Param::Info(description: "Local path to a repository if 'build' is configured to support builds referencing a path")]
-      repository_path : String? = nil
+      repository_path : String? = nil,
     ) : String
       metadata = Api::Driver.metadata(url, file, commit, username, password, repository_path)
       raise AC::Error::NotFound.new("no metadata found") unless metadata
@@ -147,7 +147,7 @@ module PlaceOS::Build::Api
       @[AC::Param::Info(description: "Commit of the driver", example: "HEAD")]
       commit : String = "HEAD",
       @[AC::Param::Info(description: "Local path to a repository if 'build' is configured to support builds referencing a path")]
-      repository_path : String? = nil
+      repository_path : String? = nil,
     ) : NamedTuple(filename: String)
       filename = Api::Driver.compiled(url, file, commit, repository_path, username, password)
       raise AC::Error::NotFound.new("file not found") unless filename

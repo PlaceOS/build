@@ -22,7 +22,7 @@ module PlaceOS::Build
       entrypoint : String? = nil,
       commit : String? = nil,
       digest : String? = nil,
-      crystal_version : SemanticVersion | String? = nil
+      crystal_version : SemanticVersion | String? = nil,
     ) : Enumerable(Model::Executable)
       Log.trace { {
         message:         "query",

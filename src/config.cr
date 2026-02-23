@@ -16,7 +16,6 @@ module PlaceOS::Build
   # Add handlers that should run before your application
   ActionController::Server.before(
     ActionController::ErrorHandler.new(production?, ["X-Request-ID"]),
-    Raven::ActionController::ErrorHandler.new,
     ActionController::LogHandler.new(filters, ms: true)
   )
 end
