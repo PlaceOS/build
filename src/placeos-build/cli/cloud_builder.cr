@@ -23,6 +23,12 @@ module PlaceOS::Build
     }
 
     client = HTTP::Client.new(URI.parse(BUILD_SERVICE_URL))
+    # This POST is synchronous inside `trigger_build`, and it reaches us back
+    # through `build.placeos.run` — so anything that slows that round-trip (LB,
+    # the sibling arch instance, outbound network) would otherwise pin every
+    # handler indefinitely. Bound it.
+    client.connect_timeout = 10.seconds
+    client.read_timeout = 30.seconds
     begin
       ["amd64", "arm64"].each do |arch|
         Log.debug { "Sending #{entrypoint} compilation request for architecture #{arch}" }

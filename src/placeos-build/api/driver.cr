@@ -75,8 +75,32 @@ module PlaceOS::Build::Api
         response.status_code = 200
         @__render_called__ = true
 
+        # A firewall-blocked or stalled client can leave the response socket
+        # unwritable indefinitely; without a write timeout `IO.copy` parks the
+        # fiber and the open file + socket descriptors are held until the
+        # kernel's TCP retransmits give up. A watchdog fiber closes the output
+        # if the copy hasn't completed in time, which unblocks `IO.copy` and
+        # releases the descriptors.
         File.open(path) do |file_io|
-          IO.copy(file_io, response)
+          stream_timeout = 60.seconds
+          done = Channel(Nil).new(1)
+
+          spawn(same_thread: true) do
+            select
+            when done.receive
+              # copy finished (success or error) — nothing to do
+            when timeout(stream_timeout)
+              Log.warn { "aborting stalled response stream after #{stream_timeout.total_seconds}s" }
+              response.output.close rescue nil
+            end
+            done.close
+          end
+
+          begin
+            IO.copy(file_io, response)
+          ensure
+            done.send(nil) rescue nil
+          end
         end
       in Build::Compilation::Failure
         raise AC::Error::Failure.new(result.error)
