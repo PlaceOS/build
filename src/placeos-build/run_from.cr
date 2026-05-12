@@ -11,7 +11,7 @@ module RunFrom
     output = IO::Memory.new
     process = nil
 
-    fiber = spawn(same_thread: true) do
+    spawn(same_thread: true) do
       begin
         process = Process.new(
           command,
@@ -32,11 +32,10 @@ module RunFrom
       end
     end
 
-    Fiber.yield
-    fiber.resume if fiber.running?
-
     select
     when result = channel.receive
+      channel.close
+
       case result
       in Process::Status
         Result.new(result, output)
