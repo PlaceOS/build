@@ -93,6 +93,7 @@ module PlaceOS::Build::Api
               Log.warn { "aborting stalled response stream after #{stream_timeout.total_seconds}s" }
               response.output.close rescue nil
             end
+            done.close
           end
 
           begin
