@@ -1,3 +1,9 @@
+## v1.6.2 (2026-05-12)
+
+### Fix
+
+- prevent handler wedge from stalled clients and spawn failures ([#58](https://github.com/PlaceOS/build/pull/58))
+
 ## v1.6.1 (2026-02-23)
 
 ### Fix
