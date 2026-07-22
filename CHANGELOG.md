@@ -1,3 +1,9 @@
+## v1.6.3 (2026-07-22)
+
+### Fix
+
+- drop spawn(same_thread: true) unsupported by Crystal 1.21 ([#59](https://github.com/PlaceOS/build/pull/59))
+
 ## v1.6.2 (2026-05-12)
 
 ### Fix
