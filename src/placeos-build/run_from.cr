@@ -11,7 +11,10 @@ module RunFrom
     output = IO::Memory.new
     process = nil
 
-    spawn(same_thread: true) do
+    # NOTE: must be a plain `spawn` (not `same_thread: true`). Since Crystal
+    # 1.21 the default runtime is the `Fiber::ExecutionContext::Parallel`
+    # scheduler, whose `#spawn` raises on `same_thread: true`.
+    spawn do
       begin
         process = Process.new(
           command,
