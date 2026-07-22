@@ -85,7 +85,9 @@ module PlaceOS::Build::Api
           stream_timeout = 60.seconds
           done = Channel(Nil).new(1)
 
-          spawn(same_thread: true) do
+          # NOTE: plain `spawn` — Crystal 1.21's default parallel execution
+          # context rejects `same_thread: true`.
+          spawn do
             select
             when done.receive
               # copy finished (success or error) — nothing to do
