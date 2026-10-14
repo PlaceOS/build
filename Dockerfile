@@ -16,6 +16,8 @@ RUN shards install --production --ignore-crystal-version --skip-postinstall --sk
 COPY src /app/src
 
 # Build the required target
+# -Devloop=libevent: the native epoll event loop corrupts its timers under load
+# (crystal-lang/crystal#17058)
 RUN PLACE_COMMIT=${PLACE_COMMIT} \
     PLACE_VERSION=${PLACE_VERSION} \
     UNAME_AT_COMPILE_TIME=true \
@@ -25,7 +27,8 @@ RUN PLACE_COMMIT=${PLACE_COMMIT} \
     --debug \
     --error-trace \
     --production \
-    --release
+    --release \
+    -Devloop=libevent
 
 RUN rm -r lib src
 
