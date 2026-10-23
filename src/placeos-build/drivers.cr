@@ -206,7 +206,6 @@ module PlaceOS::Build
       executable_path = File.join(compile_directory, UUID.random.to_s)
 
       # -no-pie: backtraces of a static PIE binary print `from ???`
-      # -Devloop=libevent: the epoll event loop corrupts its timers (crystal-lang/crystal#17058)
       result = RunFrom.run_from(
         working_directory,
         "crystal",
@@ -216,7 +215,6 @@ module PlaceOS::Build
           "--no-color",
           "--static",
           "--link-flags", "-no-pie",
-          "-Devloop=libevent",
           "--threads", self.class.build_threads.to_s,
           "-o", executable_path,
           executable.entrypoint,
