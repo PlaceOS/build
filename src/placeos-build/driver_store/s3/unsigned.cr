@@ -64,7 +64,10 @@ module PlaceOS::Build
 
         private def next_response
           query_string = params.join('&') { |k, v| "#{k}=#{URI.encode_path(v)}" }
-          response = client.get("/?#{query_string}", headers: HTTP::Headers{"Accept" => "application/xml"})
+          path = "/?#{query_string}"
+          response = client.get(path, headers: HTTP::Headers{"Accept" => "application/xml"})
+          # i.e. a 403 AccessDenied error document is not a listing
+          raise ClientError.from_response(path, response) unless response.success?
           ListObjectsV2.from_response(response)
         end
       end

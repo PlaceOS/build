@@ -18,7 +18,7 @@ module PlaceOS::Build
     describe "#read" do
       it "returns an object" do
         WebMock
-          .stub(:get, "http://placeos-drivers.s3.ap-southeast-2.amazonaws.com/test.html")
+          .stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com/test.html")
           .to_return(body_io: IO::Memory.new)
 
         client.read("test.html") do |io|
@@ -30,10 +30,21 @@ module PlaceOS::Build
     describe "#list" do
       it "lists objects in the bucket" do
         WebMock
-          .stub(:get, "http://placeos-drivers.s3.ap-southeast-2.amazonaws.com")
+          .stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com")
           .to_return(body: LIST_XML)
 
         client.list.should_not be_empty
+      end
+
+      it "raises when the bucket denies access" do
+        WebMock.reset
+        WebMock
+          .stub(:get, "https://placeos-drivers.s3.ap-southeast-2.amazonaws.com")
+          .to_return(status: 403, body: ACCESS_DENIED_XML)
+
+        error = expect_raises(ClientError) { client.list }
+        error.status_code.should eq 403
+        error.body.should contain "AccessDenied"
       end
     end
 

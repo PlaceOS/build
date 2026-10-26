@@ -152,10 +152,15 @@ module PlaceOS::Build
       end
     end
 
-    protected def query_binary(key)
+    # S3 is a cache, so an unavailable bucket is treated as a cache miss
+    protected def query_binary(key) : Array(Model::Executable)
       client
         .list(key)
         .map { |object| Model::Executable.new(Path[object.key].basename) }
+        .to_a
+    rescue error
+      Log.warn(exception: error) { "failed to query S3 for #{key}, treating as a cache miss" }
+      [] of Model::Executable
     end
 
     # Helpers
