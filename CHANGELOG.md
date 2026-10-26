@@ -1,4 +1,8 @@
-## Unreleased
+## v1.6.4 (2026-10-26)
+
+### Fix
+
+- **driver_store/s3**: treat a failed bucket listing as a cache miss
 
 ## v1.6.3 (2026-07-22)
 
